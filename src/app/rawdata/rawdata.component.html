@@ -1,0 +1,147 @@
+<div class="container-fluid main-scroll">
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="row page-titles">
+      <div class="align-self-center">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active">View Raw Capture Data</li>
+        </ol>
+      </div>
+    </div>
+    <div class="row">
+        <select [(ngModel)]='status'  class="form form-control selectDrop" (change)="onchangestatus()" (ngModelChange)="onModelChange($event)"  style="width:auto;margin-left: auto;">
+          <option value=null>All</option>
+          <option value=0>Exported</option>
+          <option value=1>Not Exported</option>
+          
+        </select>&nbsp;&nbsp;
+        <button  id="button" class="btn btn-primary float-right">
+          <i class="fas fa-file-export" ></i>
+          Export to Staging
+        </button>
+
+        <div class="col-md-12">&nbsp;</div>
+        <div class="col-md-12">
+          <div class="col-xl-12 col-md-12">
+              <table id="projectView" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
+            class="display select nowrap table table-striped table-bordered" cellspacing="0" style="width:auto;">
+              <thead>
+                <tr>
+                  <th><input name="select_all" value="1" type="checkbox"></th>
+                  <th> Device </th>
+                  <th> Subdevice </th>
+                  <th> Brand </th>
+                  <th> Targetmodel</th>
+                  <th> TargetRegion</th>
+                  <th> TargetCountry </th>
+                  <th> Remotemodel </th>
+                  <th> Regionofcapture </th>
+                  <th> Countryofcapture </th>
+                  <th> Year </th>
+                  <th> CECDevice </th>
+                  <th> Cecpresent </th>
+                  <th> Cecenabled </th>
+                  <th> Vendoridhex </th>
+                  <th> Vendoridstring </th>
+                  <th> Osdhex </th>
+                  <th> Osdstring </th>
+                  <th> Edid </th>
+                  <th> Sourcetype </th>
+                  <th> Sourcename </th>
+                  <th> Region Country Model </th>
+                  <th> Remarks </th>
+                  <th> Status </th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- <tr *ngFor="let client of clientDetails;let i=index;"> -->
+                  <!-- <td class="align-center">{{i+1}}</td> -->
+                  
+                <tr  *ngFor="let client of rawdatacapture;let i=index;">
+                  <td><input value={{client.Detectionid}} type="checkbox"></td>
+                    <td> {{client.Device}}</td>
+                    <td> {{client.Subdevice }}</td>
+                    <td> {{client.Brand }}</td>
+                    <td> {{client.Targetmodel}}</td>
+                    <td> {{client.TargetRegion}}</td>
+                    <td> {{client.TargetCountry }}</td>
+                    <td> {{client.Remotemodel }}</td>
+                    <td> {{client.Regionofcapture }}</td>
+                    <td> {{client.Countryofcapture }}</td>
+                    <td> {{client.Year }}</td>
+                    <td> {{client.CECDevice }}</td>
+                    <td> {{client.Cecpresent }}</td>
+                    <td> {{client.Cecenabled }}</td>
+                    <td> {{client.Vendoridhex }}</td>
+                    <td> {{client.Vendoridstring }}</td>
+                    <td> {{client.Osdhex }}</td>
+                    <td> {{client.Osdstring }}</td>
+                    <td><button type="button" data-toggle="modal" data-target="#edidDataModal" class="btn btn-primary btn-edid" value= {{client.Edid}}><i class="fa fa-eye" aria-hidden="true"></i></button></td>
+                    <td> {{client.Sourcetype }}</td>
+                    <td> {{client.Sourcename }}</td>
+                    <td><button type="button" data-toggle="modal" data-target="#edidDataModal" class="btn btn-primary btn-supportedregions" value= {{client.Supportedregions}}><i class="fa fa-eye" aria-hidden="true"></i></button></td>
+                    <td><button type="button" data-toggle="modal" data-target="#edidDataModal" class="btn btn-primary btn-remarks" value= {{client.Remarks}}><i class="fa fa-eye" aria-hidden="true"></i></button></td>
+                    <td> {{client.Status }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+    </div>
+    </div>
+    
+    
+
+    <div class="modal fade" id="edidDataModal" tabindex="-1" role="dialog" aria-labelledby="edidDataModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title h5-color" id="edidDataModalLabel"  *ngIf="edidDataView">Edid View</h5>
+            <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="RemarksView">Remarks View</h5>
+            <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="SupportedregionsView">Supported Regions View</h5>
+            <button type="button" class="close" data-dismiss="modal"  aria-label="Close">&times;</button>  
+          </div>
+          <div class="modal-body">
+            <div class="col-sm-12">
+              <table class="table table-bordered" cellspacing="0">
+                <tbody *ngIf="edidDataView">
+                  <tr>
+                    <th>EDID</th>
+                    <td>{{EdidData}}</td>
+                  </tr>
+                </tbody>
+                <tbody *ngIf="RemarksView">
+                  <tr>
+                    <th>MetaData</th>
+                    <td>{{Metadata}}</td>
+                  </tr>
+                  <tr>
+                    <th>CEC</th>
+                    <td>{{CEC}}</td>
+                  </tr>
+                  <tr>
+                    <th>EDID</th>
+                    <td>{{EDID}}</td>
+                  </tr>
+                  <tr>
+                    <th>Scan Device</th>
+                    <td>{{Scandevice}}</td>
+                  </tr>
+                </tbody>
+                <tbody *ngIf="SupportedregionsView">
+                  <tr>
+                    <th>Supported Regions</th>
+                    <td>{{Supportedregions}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  

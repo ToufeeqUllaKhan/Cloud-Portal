@@ -371,14 +371,14 @@
                 <th style="text-align:center;width:80px;">
                   <span><i class="fa fa-star blue" aria-hidden="true"></i></span>
                 </th>
-                <th class="blueHeader" style="width: 218px;">Unzipped Files</th>
+                <th class="blueHeader" style="width: 250px;">Unzipped Files</th>
                 <th class="blueHeader">Status</th>
               </tr>
             </thead>
             <tbody class="form-scroll">
               <tr *ngFor="let data of Listitems;let i=index;" class="addDataAttr">
                 <td class="checkGreen" style="text-align:center;width:80px;"><i class="fa fa-check-circle-o green" aria-hidden="true"></i></td>
-                <td class="purple" style="width: 218px;">{{data}}</td>
+                <td class="purple" style="width: 250px;">{{data}}</td>
                 <td class="red" attr.data-val="data-{{data}}">pending</td>
               </tr>
             </tbody>

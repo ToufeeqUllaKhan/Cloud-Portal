@@ -25,15 +25,35 @@
     </div>
   </div>
   <br />
-  <div class="row">
+  <div class="tab tabView" role="tabpanel">
+    <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+      <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}" class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab" aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
+    </div>
+    <div class="tab-content">
+      <div class="col-md-12">&nbsp;</div>
+      <div class="row" id="Tickets">
+        <div class="col-xs-12 col-sm-3" *ngFor="let list of dataTickets; let i = index">
+          <div class="dashboard-stats__item dashboard-stats__item_light-blue" (click)="selectedApiModule(list.name)">
+            <!--<i class="fa fa-eur"></i>-->
+            <i class="fa fa-cogs" aria-hidden="true"></i>
+            <h3 class="dashboard-stats__title">
+              <span class="data-title">{{list.name}}</span>
+            </h3>
+          </div>
+        </div>
+      </div>
+      </div>
+  </div>
+  <br />
+  <!-- <div class="row" id="Tickets">
     <div class="col-xs-12 col-sm-3" *ngFor="let list of dataTickets; let i = index">
-      <div class="dashboard-stats__item dashboard-stats__item_light-blue" (click)="selectedApiModule(list.name)">
+      <div class="dashboard-stats__item dashboard-stats__item_light-blue" (click)="selectedApiModule(list.name)"> -->
         <!--<i class="fa fa-eur"></i>-->
-        <i class="fa fa-cogs" aria-hidden="true"></i>
+        <!-- <i class="fa fa-cogs" aria-hidden="true"></i>
         <h3 class="dashboard-stats__title">
           <span class="data-title">{{list.name}}</span>
         </h3>
       </div>
     </div>
-  </div>
+  </div> -->
 </div>

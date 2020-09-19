@@ -241,17 +241,26 @@ export class GenericLogsComponent implements OnInit {
       await this.mainService.getSearchDetails(dbname, projectname, StartDate, EndDate, datatype)
         .then(value => {
           if (value.data.length != 0) {
-            for (var j = 0; j < value.data.length; j++) {
-              if (value.data[j]['createdDate'] != undefined) {
-                var d = new Date(value.data[j]['createdDate']);
-                var getT = (d.getUTCMonth() + 1) + '/' + d.getDate() + '/' + d.getUTCFullYear() + ' ' +
-                  d.getUTCHours() + ':' + d.getUTCMinutes();
-                value.data[j]['createdDate'] = getT;
-              }
+            const newArray =[];
+          for (var j = 0; j < value.data.length; j++) {
+            const keys =Object.keys(value.data[j])
+            const newObject={};
+            keys.forEach(key=>{ 
+              const newKey = key.charAt(0).toUpperCase() + key.slice(1);
+              newObject[newKey] = value.data[j][key];
+            })
+           newArray.push(newObject);
+            if (value.data[j]['createdDate'] != undefined) {
+              var d = new Date(value.data[j]['createdDate']);
+              var getT = (d.getUTCMonth() + 1) + '/' + d.getDate() + '/' + d.getUTCFullYear() + ' ' +
+                d.getUTCHours() + ':' + d.getUTCMinutes();
+              value.data[j]['createdDate'] = getT;
             }
-            pushData.push(value.data);
+          }
+          pushData.push(newArray);
           }
         });
+        console.log(pushData)
       if (pushData.length != 0) {
         this.arrayJsonData = pushData;
         this.excelDownload();

@@ -26,19 +26,32 @@
       </div>
     </div>
     <div class="col-xl-3 col-md-6">
-      <div class="card-counter bg-purple info hover-cursor" (click)="searchHistory()">
+      <div class="card-counter bg-purple info hover-cursor" (click)="changeHistory()">
         <i class="fa fa-history" aria-hidden="true"></i>
-        <span class="count-name">Search History</span>
-        <!--<span class="count-numbers">2000</span>-->
+        <span class="count-name">Change History</span>
+        <!-- <span class="count-numbers">2000</span> -->
       </div>
     </div>
     <div class="col-xl-3 col-md-6">
       <div class="card-counter bg-dark-blue info hover-cursor" (click)="addApi()">
         <i class="fa fa-plus" aria-hidden="true"></i>
-        <span class="count-name">Add API</span>
+        <span class="count-name">Add/Edit API</span>
         <!--<span class="count-numbers">2000</span>-->
       </div>
     </div>
-
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter bg-red info hover-cursor" (click)="viewrawcapture()">
+        <!-- <i class="fa fa-plus" aria-hidden="true"></i> -->
+        <span class="count-name">Raw capture Data</span>
+        <!--<span class="count-numbers">2000</span>-->
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter bg-yellow info hover-cursor" (click)="stagingdata()">
+        <!-- <i class="fa fa-plus" aria-hidden="true"></i> -->
+        <span class="count-name">Staging Data</span>
+        <!--<span class="count-numbers">2000</span>-->
+      </div>
+    </div>
   </div>
 </div>

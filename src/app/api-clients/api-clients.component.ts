@@ -503,10 +503,94 @@ export class ApiClientsComponent implements OnInit {
 
   nextBtn() {
     console.log(this.mainProjects);
-    if (this.mainProjects.length > 0) {
+    localStorage.removeItem('choosenProjects');
+    localStorage.removeItem('BrandLibraryProjects');
+    localStorage.setItem('choosenProjects', JSON.stringify(this.mainProjects));
+    if (this.mainProjects.length == 0) {
+      this.toastr.warning('Please Select the Client to Proceed Further..', '');
+    }
+    if (this.mainProjects.length == 1) {
+      let dataType = 1;
+    this.mainService.getProjectNames(null, null, null, null, null, dataType)
+      .subscribe(value => {
+        let resultFetchArr: any = value.data.filter(u =>
+          u.projectname == this.mainProjects[0]);
+        let Dbname = resultFetchArr[0]['dbPath'];
+        let arr=[];let Project=this.mainProjects[0];let sessionToken=null;let apis=[]
+        console.log(sessionToken, Dbname, Project);
+     this.mainService.getAPIListData(sessionToken, Dbname, Project)
+          .then(value => {
+            if (value.data.length != 0) {
+              value.data = value.data.filter(function (obj) {
+                return obj.statusFlag !== 0;
+              });
+              apis = value.data;
+              if (apis.length == 0) {
+                // this.toastr.warning(value.message);
+              console.log('No Api is assigned for this '+Project)
+              }
+              for(let i=0;i<apis.length;i++){
+                arr.push(apis[i]['name'])
+              }
+            }
+          if(this.apiMenuList != null && this.apiMenuList != undefined){
+            if (this.apiMenuList == 'Auto Search') {
+              this.apiMenuList = 'AUTOSEARCH';
+            }
+            if (this.apiMenuList == 'BIN Download') {
+              this.apiMenuList = 'DOWNLOAD BIN';
+            }
+            if (this.apiMenuList == 'Delta Search') {
+              this.apiMenuList = 'DELTASEARCH';
+            }
+            if (this.apiMenuList == 'Model Search') {
+              this.apiMenuList = 'MODELSEARCH';
+            }
+            if (this.apiMenuList == 'ZIP Download') {
+              this.apiMenuList = 'DOWNLOAD ZIP';
+            }
+            if (this.apiMenuList == 'Download DB Updates') {
+              this.apiMenuList = 'DOWNLOADDBUPDATES';
+            }
+            if (this.apiMenuList == 'FeedBack') {
+              this.apiMenuList = 'FEEDBACK';
+            }
+            if (this.apiMenuList == 'Latest DB Version') {
+              this.apiMenuList = 'LATESTDBVERSION';
+            }
+            if (this.apiMenuList == 'Current DB Version') {
+              this.apiMenuList = 'CURRENTDBVERSION';
+            }
+            if (this.apiMenuList == 'Login') {
+              this.apiMenuList = 'LOGIN';
+            }
+            if (this.apiMenuList == 'Register') {
+              this.apiMenuList = 'REGISTRATION';
+            }
+            if (this.apiMenuList == 'Generic Log') {
+              this.apiMenuList = 'GENERICLOG';
+            }
+            if(arr.includes(this.apiMenuList)){
+              localStorage.setItem('CloudApiProjects', JSON.stringify(this.mainProjects));
+              localStorage.setItem('CloudApi', this.apiMenuList);
+              this.router.navigate(['/api-db-test']);
+            }
+            else{
+              this.toastr.warning(this.apiMenuList+' Module is not assigned for Project '+Project, '');
+            }
+
+          }
+          else{
+            this.router.navigate(['/cloud-api-modules']);
+          }
+          });
+          });
+    } 
+    if (this.mainProjects.length > 1) {
       localStorage.removeItem('choosenProjects');
       localStorage.removeItem('BrandLibraryProjects');
       localStorage.setItem('choosenProjects', JSON.stringify(this.mainProjects));
+      this.apiMenuList = localStorage.getItem('ApiMenuItem');
       if (this.apiMenuList != null && this.apiMenuList != undefined) {
         if (this.apiMenuList == 'Auto Search') {
           this.apiMenuList = 'AUTOSEARCH';
@@ -547,18 +631,18 @@ export class ApiClientsComponent implements OnInit {
         localStorage.setItem('CloudApi', this.apiMenuList);
         localStorage.setItem('CloudApiProjects', JSON.stringify(this.selectedClients));
         this.router.navigate(['/api-db-test']);
+
       } else {
         this.router.navigate(['/cloud-api-modules']);
       }
-    } else {
-      this.toastr.warning('Please Select the Client to Proceed Further..', '');
-    }
+    } 
   }
 
 /** single client selection routing */
 
   selectSingleClient(clientName, regionName) {
     localStorage.removeItem('choosenProjects');
+    this.apiMenuList = localStorage.getItem('ApiMenuItem');
     let dataType = 3;
     let clientArr = [];
     this.mainService.getProjectNames(clientName, regionName, null, null, null, dataType)
@@ -566,8 +650,26 @@ export class ApiClientsComponent implements OnInit {
       .subscribe(value => {
         clientArr.push(value.data[0]['projectname']);
         localStorage.setItem('choosenProjects', JSON.stringify(clientArr));
-        if (clientArr.length != 0) {
-          if (this.apiMenuList != null && this.apiMenuList != undefined) {
+        let resultFetchArr: any = value.data.filter(u =>
+          u.projectname == clientArr[0]);
+        let Dbname = resultFetchArr[0]['dbPath'];let arr=[];let Project=clientArr[0];let sessionToken=null;let apis=[]
+     this.mainService.getAPIListData(sessionToken, Dbname, Project)
+          .then(value => {
+            if (value.data.length != 0) {
+              value.data = value.data.filter(function (obj) {
+                return obj.statusFlag !== 0;
+              });
+              apis = value.data;
+              if (apis.length == 0) {
+                // this.toastr.warning(value.message);
+              console.log('No Api is assigned for this '+Project)
+              }
+              for(let i=0;i<apis.length;i++){
+                arr.push(apis[i]['name'])
+              }
+            }
+        if(clientArr.length != 0){
+          if(this.apiMenuList != null && this.apiMenuList != undefined){
             if (this.apiMenuList == 'Auto Search') {
               this.apiMenuList = 'AUTOSEARCH';
             }
@@ -604,13 +706,23 @@ export class ApiClientsComponent implements OnInit {
             if (this.apiMenuList == 'Generic Log') {
               this.apiMenuList = 'GENERICLOG';
             }
-            localStorage.setItem('CloudApiProjects', JSON.stringify(clientArr));
-            localStorage.setItem('CloudApi', this.apiMenuList);
-            this.router.navigate(['/api-db-test']);
-          } else {
+            if(arr.includes(this.apiMenuList)){
+              localStorage.setItem('CloudApiProjects', JSON.stringify(clientArr));
+              localStorage.setItem('CloudApi', this.apiMenuList);
+              this.router.navigate(['/api-db-test']);
+            }
+            else{
+              console.log("2")
+              this.toastr.warning(this.apiMenuList+' Module is not assigned for '+Project, '');
+              console.log(this.apiMenuList+' Module is not assigned for '+Project)
+            }
+
+          }
+          else{
             this.router.navigate(['/cloud-api-modules']);
           }
         }
+          });
       });
   }
 

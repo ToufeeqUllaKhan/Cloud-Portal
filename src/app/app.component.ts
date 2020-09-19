@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MainService } from './services/main-service';
 import { User } from '../app/model/user';
 import { environment } from '../environments/environment';
+import { contains } from 'jquery';
 
 @Component({
   selector: 'app-root',
@@ -54,99 +55,45 @@ export class AppComponent {
                 mainModules.push(resultFetchArr[i]['mainModule']);
               }
               this.mainService.sidebarLists()
-                .subscribe(value => {
-                  if (value.data.length > 0) {
-                    this.mainMenu1 = value.data[0]['mainmenu'];
-                    this.datas = value.data[0]['submenu'];
-                    this.mainMenu2 = value.data[1]['mainmenu'];
-                    this.searchApi = value.data[1]['submenu'];
-                    this.mainMenu3 = value.data[2]['mainmenu'];
-                    this.searchReports = value.data[2]['submenu'];
+              .subscribe(value => {
+                if (value.data.length > 0) {
+                  this.mainMenu1 = value.data[0]['mainmenu'];
+                  this.datas = value.data[0]['submenu'];
+                  this.mainMenu2 = value.data[1]['mainmenu'];
+                  this.searchApi = value.data[1]['submenu'];
+                  this.mainMenu3 = value.data[2]['mainmenu'];
+                  this.searchReports = value.data[2]['submenu'];
 
-                    if (this.mainMenu1.indexOf('Cloud') > -1) {
-                      this.isCloudApi1 = true;
-                      this.isDataUpload1 = false;
-                      this.isReports1 = false;
-                    } else {
-                      this.isCloudApi1 = false;
-                    }
-                    if (this.mainMenu1.indexOf('Data') > -1) {
-                      this.isDataUpload1 = true;
-                      this.isCloudApi1 = false;
-                      this.isReports1 = false;
-                    } else {
-                      this.isDataUpload1 = false;
-                    }
-                    if (this.mainMenu1.indexOf('Reports') > -1) {
-                      this.isReports1 = true;
-                      this.isDataUpload1 = false;
-                      this.isCloudApi1 = false;
-                    } else {
-                      this.isReports1 = false;
-                    }
-                    if (this.mainMenu2.indexOf('Cloud') > -1) {
-                      this.isCloudApi2 = true;
-                      this.isDataUpload2 = false;
-                      this.isReports2 = false;
-                    } else {
-                      this.isCloudApi2 = false;
-                    }
-                    if (this.mainMenu2.indexOf('Data') > -1) {
-                      this.isDataUpload2 = true;
-                      this.isCloudApi2 = false;
-                      this.isReports2 = false;
-                    } else {
-                      this.isDataUpload2 = false;
-                    }
-                    if (this.mainMenu2.indexOf('Reports') > -1) {
-                      this.isReports2 = true;
-                      this.isDataUpload2 = false;
-                      this.isCloudApi2 = false;
-                    } else {
-                      this.isReports2 = false;
-                    }
-                   if (this.mainMenu3.indexOf('Cloud') > -1) {
-                      this.isCloudApi3 = true;
-                      this.isDataUpload3 = false;
-                      this.isReports3 = false;
-                    } else {
-                     this.isCloudApi3 = false;
-                    }
-                    if (this.mainMenu3.indexOf('Data') > -1) {
-                      this.isDataUpload3 = true;
-                      this.isCloudApi3 = false;
-                      this.isReports3 = false;
-                    } else {
-                      this.isDataUpload3 = false;
-                    }
-                    if (this.mainMenu3.indexOf('Reports') > -1) {
-                      this.isReports3 = true;
-                      this.isDataUpload3 = false;
-                      this.isCloudApi3 = false;
-                    } else {
-                      this.isReports3 = false;
-                    }
-                    if (this.role != 'Admin') {
-                      if (this.mainMenu1.indexOf('Data') > -1 || this.mainMenu1.indexOf('Cloud') > -1 || this.mainMenu1.indexOf('Reports') > -1) {
-                        $('.menu1Data').css('display', 'block');
-                      } else {
-                        $('.menu1Data').css('display', 'none');
-                      }
-                      
-                      if (this.mainMenu2.indexOf('Data') > -1 || this.mainMenu2.indexOf('Cloud') > -1 || this.mainMenu2.indexOf('Reports') > -1) {
-                        $('.menu2Data').css('display', 'block');
-                      } else {
-                        $('.menu2Data').css('display', 'none');
-                      }
-                     
-                      if (this.mainMenu3.indexOf('Data') > -1 || this.mainMenu3.indexOf('Cloud') > -1 || this.mainMenu3.indexOf('Reports') > -1) {
-                        $('.menu3Data').css('display', 'block');
-                      } else {
-                        $('.menu3Data').css('display', 'none');
-                      }
-                    }
+                  console.log(mainModules.indexOf('Data Management Tool'),mainModules.indexOf('Cloud API Search Tester'),
+                  mainModules.indexOf('Analytics Report'));
+                  if (mainModules.indexOf('Cloud API Search Tester') > -1) {
+                    this.isCloudApi2 = true;
+                    this.isDataUpload2 = false;
+                    this.isReports2 = false;
+                    $('.menu2Data').css('display', 'block');
                   }
-                });
+                  else{
+                    $('.menu2Data').css('display', 'none');
+                  }
+                  if (mainModules.indexOf('Data Management Tool') > -1) {
+                    this.isDataUpload1 = true;
+                    this.isCloudApi1 = false;
+                    this.isReports1 = false;
+                    $('.menu1Data').css('display', 'block');
+                  }else{
+                    $('.menu1Data').css('display', 'none');
+                  }
+                  if (mainModules.indexOf('Analytics Report') > -1) {
+                    this.isReports3 = true;
+                    this.isDataUpload3 = false;
+                    this.isCloudApi3 = false;
+                    $('.menu3Data').css('display', 'block');
+                  }
+                  else{
+                    $('.menu3Data').css('display', 'none');
+                  }
+                }
+              });
             });
         }
       });

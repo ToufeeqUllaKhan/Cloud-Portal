@@ -23,7 +23,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ToastrModule } from 'ngx-toastr';
 import { ProfileComponent } from './profile/profile.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
-import { DataUploadComponent } from './data-upload/data-upload.component';
+// import { DataUploadComponent } from './data-upload/data-upload.component';
 import { AddProjectVersionComponent } from './add-project-version/add-project-version.component';
 import { Ng4LoadingSpinnerModule } from 'ng4-loading-spinner';
 import { DataConfigurationListComponent } from './data-configuration-list/data-configuration-list.component';
@@ -56,6 +56,12 @@ import { EditApiComponent } from './edit-api/edit-api.component';
 import { AngularResizedEventModule } from 'angular-resize-event';
 import { LogViewComponent } from './log-view/log-view.component';
 import { GenericLogsComponent } from './generic-logs/generic-logs.component';
+import { ReportConfigurationListComponent } from './report-configuration-list/report-configuration-list.component';
+import { ReportComponent } from './report/report.component';
+import { ChangehistoryComponent } from './changehistory/changehistory.component';
+import { ReportsClientComponent } from './reports-client/reports-client.component';
+import { RawdataComponent } from './rawdata/rawdata.component';
+import { StagingdataComponent } from './stagingdata/stagingdata.component';
 
 
 /**
@@ -113,7 +119,7 @@ const customNotifierOptions: NotifierOptions = {
     LoginComponent,
     ProfileComponent,
     ChangePasswordComponent,
-    DataUploadComponent,
+    // DataUploadComponent,
     AddProjectVersionComponent,
     DataConfigurationListComponent,
     BrandLibraryComponent,
@@ -135,7 +141,13 @@ const customNotifierOptions: NotifierOptions = {
     ApiCongigurationComponent,
     EditApiComponent,
     LogViewComponent,
-    GenericLogsComponent
+    GenericLogsComponent,
+    ReportConfigurationListComponent,
+    ReportComponent,
+    ChangehistoryComponent,
+    ReportsClientComponent,
+    RawdataComponent,
+    StagingdataComponent
   ],
   imports: [
     BrowserModule,

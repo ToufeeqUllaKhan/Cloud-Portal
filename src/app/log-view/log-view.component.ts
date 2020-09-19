@@ -18,8 +18,8 @@ export class LogViewComponent implements OnInit {
  * */
   searchlogView() {
     localStorage.setItem('logSelected', 'SearchLog');
-    this.router.navigate(['/admin-clients']).then(() => {
-      location.reload();
+    this.router.navigate(['/report-clients']).then(() => {
+      // location.reload();
     });
   }
 /** setting logselected storage value since admin clients page should route based on click operation here
@@ -27,8 +27,8 @@ export class LogViewComponent implements OnInit {
  * */
   genericView() {
     localStorage.setItem('logSelected', 'GenericLog');
-    this.router.navigate(['/admin-clients']).then(() => {
-      location.reload();
+    this.router.navigate(['/report-clients']).then(() => {
+      // location.reload();
     });
   }
 

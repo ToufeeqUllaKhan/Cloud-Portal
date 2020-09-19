@@ -53,20 +53,17 @@ export class DashboardComponent implements OnInit {
         }
         this.modules = mainModules;
       /** for accessing roles based on user assigned modules  **/
-        if (this.modules[0].indexOf('Data') > -1 || this.modules[1].indexOf('Data') > -1 || this.modules[2].indexOf('Data') > -1) {
+        if (this.modules.includes('Data Management Tool')) {
           this.isDataMgmt = true;
-        } else {
-          this.isDataMgmt = false;
         }
-        if (this.modules[0].indexOf('Cloud') > -1 || this.modules[1].indexOf('Cloud') > -1 || this.modules[2].indexOf('Cloud') > -1) {
+        if (this.modules.includes('Cloud API Search Tester')) {
           this.isCloudApi = true;
-        } else {
-          this.isCloudApi = false;
         }
-        if (this.modules[0].indexOf('Report') > -1 || this.modules[1].indexOf('Report') > -1 || this.modules[2].indexOf('Report') > -1) {
+        if (this.modules.includes('Analytics Report')) {
           this.isAnalytics = true;
-        } else {
-          this.isAnalytics = false;
+        }
+        if (this.modules.includes('TestModule')) {
+          this.isTestModule = true;
         }
       });
       });
@@ -83,6 +80,7 @@ export class DashboardComponent implements OnInit {
     localStorage.removeItem('CloudApiProjects');
     localStorage.removeItem('CloudApi');
     this.spinnerService.hide();
+    
   }
 
 /** for routing to clients when data management is clicked  **/
@@ -96,6 +94,13 @@ export class DashboardComponent implements OnInit {
 /** for routing to api-clients when cloud api module is clicked  **/
   cloudTest() {
     this.router.navigate(['/api-clients'])
+      .then(() => {
+        location.reload();
+      });
+  }
+  /** for routing to log-view when client is clicked  **/
+  logview() {
+    this.router.navigate(['/log-view'])
       .then(() => {
         location.reload();
       });

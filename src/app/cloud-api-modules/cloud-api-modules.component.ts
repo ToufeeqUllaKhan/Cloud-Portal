@@ -3,6 +3,8 @@ import { MainService } from '../services/main-service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ResizedEvent } from 'angular-resize-event';
+import { UUID } from 'angular2-uuid';
+import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
 
 @Component({
   selector: 'app-cloud-api-modules',
@@ -12,16 +14,21 @@ import { ResizedEvent } from 'angular-resize-event';
 export class CloudApiModulesComponent implements OnInit {
 
   projectNames: any;
-  projects: Array<any> = [];
+  projects: Array<any> = [];project: any = [];
   selectedItems: Array<any> = [];
   finalArray = []; limitSelection = false;
   dropdownSettings: any = {}; ShowFilter = false;
   versionArr = []; versions = [];
-  dataTickets = []; mainArr = []; ProjectList: Array<any> = [];
+  dataTickets = []; mainArr = []; ProjectList: Array<any> = [];Tickets: Boolean = true;
   width: number;
   height: number;
+  tabslist: any[];
+  uuidValue: string;
+  urlData: any;
+  version_list: any;
+  guidValue: any;
 
-  constructor(private mainService: MainService, private router: Router, private toastr: ToastrService) { }
+  constructor(private mainService: MainService, private router: Router, private toastr: ToastrService, private spinnerService: Ng4LoadingSpinnerService) { }
 
   ngOnInit() {
     /** projects selected in client page */
@@ -33,6 +40,7 @@ export class CloudApiModulesComponent implements OnInit {
     if (getBrandProjects != null) {
       this.projectNames = getBrandProjects;
     }
+    this.tabslist = this.projectNames;
     var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
     if (browserZoomLevel != 100) {
       this.zoomFunction();
@@ -90,22 +98,91 @@ export class CloudApiModulesComponent implements OnInit {
         } else {
           ProjectName = this.projectNames[0]
         }
-      /** List of Api Modules available for selected Project start default initial selection of project has been considered to view the modules */
-          let resultFetchArr: any = value.data.filter(u =>
-            u.projectname == ProjectName);
-        let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = ProjectName;
-          this.mainService.getAPIList(sessionToken, Dbname, Project)
-            .subscribe(value => {
-              console.log(value.data);
-              value.data = value.data.filter(function (obj) {
-                return obj.statusFlag !== 0;
-              });
-              this.dataTickets = value.data;
-              if (value.data.length == 0) {
-                this.toastr.warning(value.message);
-              }
+        /** List of Api Modules available for selected Project start default initial selection of project has been considered to view the modules */
+        let resultFetchArr: any = value.data.filter(u =>
+          u.projectname == ProjectName);
+      let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = ProjectName;
+        this.mainService.getAPIList(sessionToken, Dbname, Project)
+          .subscribe(value => {
+            console.log(value.data);
+            value.data = value.data.filter(function (obj) {
+              return obj.statusFlag !== 0;
             });
-        
+            this.dataTickets = value.data;
+            if (value.data.length == 0) {
+              this.toastr.warning(value.message);
+            }
+          });
+for(let i=0;i<ProjectName.length;i++){
+  this.getRegisterLogin(this.ProjectList[i]['item_text']);
+}
+
+        // let ProjectName;let arr=[];
+        // for(var k=0;k<this.projectNames.length;k++){
+        //   if (this.projectNames[k]['item_text'] != undefined) {
+        //     ProjectName = this.projectNames[k]['item_text'];
+        //   } else {
+        //     ProjectName = this.projectNames[k]
+        //   }
+        //   let resultFetchArr: any = this.mainArr.filter(u =>
+        //     u.projectname == ProjectName);
+        // let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = ProjectName//this.projectNames[k]['item_text'];
+        //   this.mainService.getAPIList(sessionToken, Dbname, Project)
+        //     .subscribe(value => {
+        //       let filterapi = value.data.filter(function (obj) {
+        //         return obj.statusFlag !== 0;
+        //       });
+        //       for(let i=0;i<filterapi.length;i++){
+        //         arr.push(filterapi[i])
+        //       }
+        //       // Declare a new array 
+        //       let newArray = [];let uniqueObject = {}; 
+        //       // Loop for the array elements 
+        //       for (let i in arr) { 
+        //          let objTitle = arr[i]['name']; 
+        //          uniqueObject[objTitle] = arr[i]; 
+        //       } 
+        //        // Loop to push unique object into array 
+        //        for (let i in uniqueObject) { 
+        //         newArray.push(uniqueObject[i]); 
+        //     } 
+        //     // Display the unique objects 
+        //     console.log(newArray);
+        //       this.dataTickets = newArray
+        //     });
+        //   }
+        // this.mainService.getAPIList(null, Dbname, Project)
+        //   .subscribe(value => {
+        //     if (value.data.length > 0) {
+        //       let searchUrl: any = value.data.filter(u => u.name == 'REGISTRATION');
+        //       this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
+        //       let eventUrl = this.urlData; let deviceId = this.uuidValue;
+        //       // let dbVersion = resultFetchArr[0]['embeddedDbVersion'];
+        //       let dbVersion;
+        //       if (this.version_list != undefined || this.version_list != null) {
+        //         dbVersion = this.version_list;
+        //       } else {
+        //         dbVersion = resultFetchArr[0]['embeddedDbVersion'];
+        //       }
+        //       let signatureKey = resultFetchArr[0]['signatureKey']; let countryCode = null;
+        //       this.mainService.getTestApiRegister(eventUrl, deviceId, dbVersion, signatureKey, countryCode)
+        //         .subscribe(e => {
+        //           let searchUrl: any = value.data.filter(u => u.name == 'LOGIN');
+        //           this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
+        //           if (Object(e)["data"] != '' && Object(e)["data"] != undefined) {
+        //             let guid = Object(e)["data"]["guid"];
+        //             this.mainService.getTestApiLogin(this.urlData, guid)
+        //               .subscribe(dataResult => {
+        //                 this.guidValue = Object(dataResult)["data"]["jwttoken"];
+        //                 localStorage.setItem('token', JSON.stringify(this.guidValue));
+        //                 this.spinnerService.show();
+        //               });
+        //           }
+                  
+        //         });
+        //     }
+            
+        //   });
       /** List of Api Modules available for selected Project start */
       });
   /** Project list in multiselect dropdown end */
@@ -161,6 +238,7 @@ export class CloudApiModulesComponent implements OnInit {
       });
     });
   }
+
 
   onResized(event: ResizedEvent) {
     this.width = event.newWidth;
@@ -301,21 +379,87 @@ export class CloudApiModulesComponent implements OnInit {
 /** based on project selection to get the list of api modules available for the selected project start */
 
   changeProject() {
-    if (this.projectNames.length > 0) {
-      let resultFetchArr: any = this.mainArr.filter(u =>
-        u.projectname == this.projectNames[0]['item_text']);
-      let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = this.projectNames[0]['item_text'];
-      this.mainService.getAPIList(sessionToken, Dbname, Project)
-        .subscribe(value => {
-          console.log(value.data);
-          this.dataTickets = value.data;
-          if (value.data.length == 0) {
-            this.toastr.warning(value.message);
-          }
-        });
-    } 
+    // if (this.projectNames.length > 0) {
+    //   let ProjectName;let arr=[];
+    //     for(var k=0;k<this.projectNames.length;k++){
+    //       if (this.projectNames[k]['item_text'] != undefined) {
+    //         ProjectName = this.projectNames[k]['item_text'];
+    //       } else {
+    //         ProjectName = this.projectNames[k]
+    //       }
+    //       let resultFetchArr: any = this.mainArr.filter(u =>
+    //         u.projectname == ProjectName);
+    //     let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = ProjectName//this.projectNames[k]['item_text'];
+    //       this.mainService.getAPIList(sessionToken, Dbname, Project)
+    //         .subscribe(value => {
+    //           let filterapi = value.data.filter(function (obj) {
+    //             return obj.statusFlag !== 0;
+    //           });
+    //           for(let i=0;i<filterapi.length;i++){
+    //             arr.push(filterapi[i])
+    //           }
+    //           // Declare a new array 
+    //           let newArray = [];let uniqueObject = {}; 
+    //           // Loop for the array elements 
+    //           for (let i in arr) { 
+    //              let objTitle = arr[i]['name']; 
+    //              uniqueObject[objTitle] = arr[i]; 
+    //           } 
+    //            // Loop to push unique object into array 
+    //            for (let i in uniqueObject) { 
+    //             newArray.push(uniqueObject[i]); 
+    //         } 
+    //         // Display the unique objects 
+    //         console.log(newArray);
+    //           this.dataTickets = newArray
+    //         });
+    //       }
+    //   $('#Tickets').show();
+    // } else{
+    //     $('#Tickets').hide();
+    //     this.toastr.warning('', 'Please select a Project');
+    //   }  
+    let pushArr = [];
+    this.projectNames.forEach(function (value) {
+      pushArr.push(value['item_text'])
+    });
+    this.tabslist = pushArr;
+    for(let i=0;i<pushArr.length;i++){
+      this.getRegisterLogin(this.tabslist[i]);
+    }
+    if (this.projectNames.length === 0) {
+      $('#Tickets').hide();
+      $('.hideData').css('display', 'none');
+      $('.tabView').css('display', 'none');
+        this.toastr.warning('', 'Please select a Project');
+     
+    } else {
+      $('.hideData').css('display', 'block');
+      $('.tabView').css('display', 'block');
+      $('.nav-item').removeClass('active');
+      $('a#nav-home-tab0').addClass('active');
+      this.getTabName(this.projectNames[0]['item_text']);
+      $('#Tickets').show();
+    }
   }
 
+  getTabName(name) {
+    let resultFetchArr: any = this.mainArr.filter(u =>
+      u.projectname == name);
+    let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = name;
+    this.mainService.getAPIList(sessionToken, Dbname, Project)
+      .subscribe(value => {
+        value.data = value.data.filter(function (obj) {
+        return obj.statusFlag !== 0;
+      });
+        console.log(value.data);
+        this.dataTickets = value.data;
+        if (value.data.length == 0) {
+          this.toastr.warning(value.message);
+        }
+      });
+      this.getRegisterLogin(name);
+  }
 /** based on project selection to get the list of api modules available for the selected project start */
 
   apiClients() {
@@ -340,8 +484,82 @@ export class CloudApiModulesComponent implements OnInit {
       localStorage.setItem('CloudApi', selectedApi);
       localStorage.setItem('CloudApiProjects', JSON.stringify(this.projectNames));
       this.router.navigate(['/api-db-test']);
-    }
+      }
   }
 /** api module selection to traverse the selected module to next page start */
-
+  async getRegisterLogin(Project) {
+    
+   let resultFetchArr: any = this.mainArr.filter(u =>
+          u.projectname == Project);
+        let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath'];
+        let SignatureKey = resultFetchArr[0]['signatureKey'];
+   await this.mainService.getAPIListData(sessionToken, Dbname, Project)
+          .then(value => {
+              let crudType = 2; let BoxId;
+              BoxId = null;
+              this.mainService.getBoxId(crudType, Project, SignatureKey, BoxId)
+                .subscribe(value => {
+                  if (value.data[0]['result'] == "0") {
+                    this.generateUUID();
+                    BoxId = this.uuidValue;
+                    this.mainService.getBoxId(1, Project, SignatureKey, BoxId)
+                      .subscribe(value => {
+                        if (value.data.length != 0) {
+                          this.mainService.getBoxId(2, Project, SignatureKey, null)
+                            .subscribe(value => {
+                              if (value.data.length != 0) {
+                                this.uuidValue = value.data[0]['message'];
+                              }
+                            });
+                        }
+                      });
+                  } else {
+                    if (value.data.length != 0) {
+                      this.uuidValue = value.data[0]['message'];
+                    }
+                  }
+                  let resultFetchArr: any = this.mainArr.filter(u =>
+                    u.projectname == Project);
+                  let Dbname = resultFetchArr[0]['dbPath'];
+                  this.mainService.getAPIList(null, Dbname, Project)
+                    .subscribe(value => {
+                      if (value.data.length > 0) {
+                        let searchUrl: any = value.data.filter(u => u.name == 'REGISTRATION');
+                        this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
+                        let eventUrl = this.urlData; let deviceId = this.uuidValue;
+                        // let dbVersion = resultFetchArr[0]['embeddedDbVersion'];
+                        let dbVersion;
+                        if (this.version_list != undefined || this.version_list != null) {
+                          dbVersion = this.version_list;
+                        } else {
+                          dbVersion = resultFetchArr[0]['embeddedDbVersion'];
+                        }
+                        let signatureKey = resultFetchArr[0]['signatureKey']; let countryCode = null;
+                        this.mainService.getTestApiRegister(eventUrl, deviceId, dbVersion, signatureKey, countryCode)
+                          .subscribe(e => {
+                            let searchUrl: any = value.data.filter(u => u.name == 'LOGIN');
+                            this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
+                            if (Object(e)["data"] != '' && Object(e)["data"] != undefined) {
+                              let guid = Object(e)["data"]["guid"];
+                              this.mainService.getTestApiLogin(this.urlData, guid)
+                                .subscribe(dataResult => {
+                                  this.guidValue = Object(dataResult)["data"]["jwttoken"];
+                                  localStorage.setItem('token', JSON.stringify(this.guidValue));
+                                  this.spinnerService.show();
+                                });
+                            }
+                            
+                          });
+                      }
+                      
+                    });
+            });
+          });
+   
+  }
+  /** unique UUID Generator */
+  generateUUID() {
+    this.uuidValue = UUID.UUID();
+    return this.uuidValue;
+  }
 }

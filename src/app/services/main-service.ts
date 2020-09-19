@@ -12,6 +12,8 @@ import * as alertify from 'alertify.js';
 
 @Injectable({ providedIn: 'root' })
 export class MainService {
+
+  
   unzipFile: any; deleteDir: any;
   listZip: any; memStream: any;
 
@@ -653,7 +655,17 @@ export class MainService {
         catchError(this.handleEventerror)
     ).toPromise();
   }
+  
+  dataUploadLoadCountryCodeData(dbname: any,JsonCountrycodes: any): Promise<any> {
 
+    return this.http.post<any>(`${environment.apiUrl}/api/LoadData/LoadCountryCodeData`,
+      { "Dbname": dbname,"JsonCountrycodes": JsonCountrycodes })
+      .pipe(
+        retry(1),
+        catchError(this.handleEventerror)
+      ).toPromise();
+
+  }
   insertCecEdidData(Dbname: String, Projectname:any, Dbversion:any, JsonCecEdidtype: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/LoadCecEdidData`,
@@ -695,17 +707,19 @@ export class MainService {
       );
   }
 
-  DBUpates(Username: String, Projectname: String, Dbversion: any, Datasection: any, Recordcount: any, Updatedescription: any, Updatestatus:any): Observable<any> {
+  DBUpdates(Username: String, Projectname: String, Dbversion: any, Datasection: any, Recordcount: any, Updatedescription: any,Operation: any,
+    Ipaddress:any, Updatestatus:any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/DataUpdates`,
-      { "Username": Username, "Projectname": Projectname, "Dbversion": Dbversion, "Datasection": Datasection, "Recordcount": Recordcount, "Updatedescription": Updatedescription, "Updatestatus": Updatestatus })
+      { "Username": Username, "Projectname": Projectname, "Dbversion": Dbversion, "Datasection": Datasection, "Recordcount": Recordcount, "Updatedescription": Updatedescription,
+      "Operation": Operation, "Ipaddress": Ipaddress,"Updatestatus": Updatestatus })
       .pipe(
         retry(1),
         catchError(this.handleError)
       );
   }
 
-  DataDBUpates(Username: String, Projectname: String, Dbversion: any, Datasection: any, Totalinsertedrecords: any,
+  DataDBUpdates(Username: String, Projectname: String, Dbversion: any, Datasection: any, Totalinsertedrecords: any,
     Totalfailedrecords: any, Totalupdatedrecords:any, Recordcount: any, Updatedescription: any, Operation: any, Systemuser: any,
     Ipaddress:any,Updatestatus: any): Observable<any> {
 
@@ -757,18 +771,28 @@ export class MainService {
         catchError(this.handleEventerror)
       ).toPromise();
   }
-
-  getPaginatedRecords(Dbname: any, Projectname: any, Dbversion: any, Startrow: any, Endrow: any, Datatype: any): Observable<any> {
+  
+  getPaginatedRecords(Dbname: any, Projectname: any, Dbversion: any, Startrow: any, Endrow: any,search:any ,order:any [], Datatype: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/UI/GetPaginatedData`,
-      { "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Startrow": Startrow, "Endrow": Endrow, "Datatype": Datatype })
+      { "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Start": Startrow, "length": Endrow, "search": search, "order": order, "Datatype": Datatype })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+  
+  GetPaginatedProductionDBStats(dbname: any, Projectname: any, Startdate: any,Enddate: any, Startrow: any, Endrow: any,search:any ,order:any [], Datatype: any): Observable<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/Stats/GetPaginatedProductionDBStats`,
+      { "Dbname": dbname, "Projectname": Projectname, "Startdate": Startdate,"Enddate": Enddate,  "Start": Startrow, "length": Endrow, "search": search, "order": order, "Datatype": Datatype })
       .pipe(
         retry(1),
         catchError(this.handleError)
       );
   }
 
-  getSaveEditCodesetDetailsInfo(Dbname: any, Projectname: any, Dbversion: any, Device: any, Brand: any, Brandcode: any, Model: any, Modelx: any, Codeset: any,
+  getSaveEditBrandDetailsInfo(Dbname: any, Projectname: any, Dbversion: any, Device: any, Brand: any, Brandcode: any, Model: any, Modelx: any, Codeset: any,
     Codesetdata: any, Cschecksum: any, Region: any, Regioncode: any, Country: any, Countrycode: any, Csrank: any, Vendorid: any, Osd: any, Edidbrand: any,
     Datatype: any, Optype: any, recordid:any): Observable<any> {
 
@@ -784,7 +808,24 @@ export class MainService {
         catchError(this.handleError)
       );
   }
+  getSaveEditCECEDIDdataInfo(Dbname: any, Projectname: any, Dbversion: any, Device: any, Brand: any, Brandcode: any, Model: any, Modelx: any, Codeset: any,
+    Codesetdata: any, Cschecksum: any, Region: any, Regioncode: any, Country: any, Countrycode: any, Csrank: any, Vendorid: any, Osd: any,osdstr: any, 
+    Edidraw: any, edid128: any, Edidbrand: any, Datatype: any, Optype: any, recordid:any): Observable<any> {
 
+    return this.http.post<any>(`${environment.apiUrl}/api/LoadData/InsertDelete`,
+      {
+        "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Device": Device, "Brand": Brand, "Brandcode": Brandcode,
+        "Model": Model, "Modelx": Modelx, "Codeset": Codeset, "Codesetdata": Codesetdata, "Cschecksum": Cschecksum, "Region": Region,
+        "Regioncode": Regioncode, "Country": Country, "Countrycode": Countrycode, "Csrank": Csrank, "Vendorid": Vendorid, "Osd": Osd,
+        "osdstring": osdstr,"edidraw": Edidraw, "edid128": edid128,"Edidbrand": Edidbrand, "Datatype": Datatype, "Optype": Optype,
+        "recordid": recordid
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+  
   getSavebrandDetailsInfo(Dbname: any, Projectname: any, Dbversion: any, Device: any, Brand: any, Brandcode: any, Model: any, Modelx: any, Codeset: any,
     Codesetdata: any, Cschecksum: any, Region: any, Regioncode: any, Country: any, Countrycode: any, Csrank: any, Vendorid: any, Osd: any, Edidbrand: any,
     Datatype: any, Optype: any): Observable<any> {
@@ -833,6 +874,15 @@ export class MainService {
    
     return this.http.post<any>(`${environment.apiUrl}/api/Report/SearchHistory`,
       { "Dbname": Dbname, "Apiname": Apiname, "Projectname": Projectname, "Dbversion": Dbversion, "Boxid": Boxid, "Startdate": Startdate, "Enddate": Enddate })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+
+  ChangeHistory(Projectname: any, Username: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/Admin/GetChangeHistory`,
+      { "Projectname": Projectname, "Username": Username })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -968,6 +1018,23 @@ export class MainService {
       );
   }
 
+
+  MigrateRawToStaging(Crudtype: any, Detectionid: any,Device: any, Subdevice: any, Brand: any,Model: any,Regioncountry: any,Year: any,cecpresent:any,
+    cecenabled:any,vendoridhex: any, vendoridstring: any,osdhex: any, osdstring: any, ediddata: any,uid: any,statusflag: any,
+    recordid:any): Observable<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/CecEdid/MigrateRawToStaging`,
+      { 
+          "crudtype": Crudtype, "detectionid":Detectionid,"device":Device, "subdevice":Subdevice, "brand":Brand, "model":Model, 
+          "regioncountry":Regioncountry, "year":Year, "cecpresent":cecpresent, "cecenabled":cecenabled, "vendoridhex":vendoridhex,
+          "vendoridstring":vendoridstring, "osdhex":osdhex, "osdstring":osdstring, "ediddata":ediddata, "uid":uid, "statusflag":statusflag,
+          "recordid":recordid
+     })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
 
   handleError(error) {
     let errorMessage = '';

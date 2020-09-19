@@ -138,6 +138,13 @@
 .bg-purple {
   background-color: #8892d6 !important;
 }
+.bg-red {
+  background-color: rgb(66, 3, 6) !important;
+}
+
+.bg-yellow {
+  background-color: rgba(72, 255, 0, 0.575) !important;
+}
 .bg-green {
   background-color: #64d4bd !important;
 }

@@ -153,7 +153,7 @@ export class EditRoleModuleComponent implements OnInit {
       }
     }
     this.spinnerService.hide();
-   
+    location.reload();
   }
 
   close() {

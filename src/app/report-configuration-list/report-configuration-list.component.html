@@ -1,0 +1,44 @@
+<div class="container-fluid main-scroll">
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="row page-titles">
+      <div class="col-md-12 col-12 align-self-center">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="['/dashboard']">Analytical Reports</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="['/log-view']">Log View</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="" (click)="prev()">Clients</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active">Report configuration List</li>
+        </ol>
+      </div>
+    </div>
+    <br/>
+    <div class="row">
+      <div class="col-lg-12 col-xlg-12 col-md-12">
+        <div class="card">
+          <div class="card-block">
+            <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'" [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)" (onSelect)="onProjectSelect($event)" (click)="changeProject()"></ng-multiselect-dropdown>
+          </div>
+          </div>
+        </div>
+        </div>
+    <br/>
+    <div class="row scroll-x">
+      <div class="col-xs-12 col-sm-3" *ngFor="let list of dataTickets; let i = index">
+        <div class="dashboard-stats__item dashboard-stats__item_light-blue" [ngClass]="{'disableCard' : list.ticketName == 'WDB Bin' }" (click)="selectedBrand(list.ticketName)">
+          <!--<i class="fa fa-eur"></i>-->
+          <i class="fa fa-cogs" aria-hidden="true"></i>
+          <h3 class="dashboard-stats__title">
+            <span class="data-title">{{list.ticketName}}</span><br />
+            <small>{{list.ticketDescription}}</small>
+          </h3>
+        </div>
+      </div>
+    </div>
+  
+    </div>
+  

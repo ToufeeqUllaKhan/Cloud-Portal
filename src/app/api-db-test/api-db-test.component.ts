@@ -29,7 +29,7 @@ export class ApiDbTestComponent implements OnInit {
   deltasubmitted: Boolean = false; fbsubmitted: Boolean = false;
   currentdbsubmitted: Boolean = false; latestdbsubmitted: Boolean = false;
   isDownloadStats: Boolean = false;
-  projectNames: any;projects: Array<any> = [];selectedItems: Array<any> = [];
+  projectNames: any; projects: Array<any> = []; selectedItems: Array<any> = [];
   finalArray = []; limitSelection = false;
   dropdownSettings: any = {}; ShowFilter = false;
   api_list: any = null; apis = [];
@@ -67,6 +67,8 @@ export class ApiDbTestComponent implements OnInit {
   binFilename: any; zipFilename: any; edidError: Boolean = false; mainArr = []; down_status: any;
   isDownlStatsTab: Boolean = false; downstats: any; ProjectList = [];
   user: User = new User();
+  noData: boolean;
+  selected_tab: any;responsetime: any;
 
   constructor(private mainService: MainService, private router: Router, private fb: FormBuilder, private toastr: ToastrService,
     private spinnerService: Ng4LoadingSpinnerService) {
@@ -74,7 +76,7 @@ export class ApiDbTestComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.spinnerService.show();
+    this.spinnerService.hide();
     let dataSelected = JSON.parse(localStorage.getItem('CloudApiProjects'));
     let cloudApi = localStorage.getItem('CloudApi');
     var clientsProjects = JSON.parse(localStorage.getItem('choosenProjects'));
@@ -99,6 +101,7 @@ export class ApiDbTestComponent implements OnInit {
         this.mainService.getAPIList(sessionToken, Dbname, Project)
           .subscribe(value => {
             this.apis = value.data;
+            this.tabVersions();
             this.getRegisterLogin();
             this.checkApiForm();
           });
@@ -167,6 +170,7 @@ export class ApiDbTestComponent implements OnInit {
               this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[i] });
             }
             this.projectNames = this.selectedItems;
+            console.log(this.projectNames)
             let filterProject: any = this.mainArr.filter(u =>
               u.projectname == Project);
 
@@ -178,20 +182,20 @@ export class ApiDbTestComponent implements OnInit {
             this.version_list = this.dbVersion[0];
           }
         }
-        
-        
+
+
       });
     /** Multiselect dropdown settings */
-        this.dropdownSettings = {
-          singleSelection: false,
-          idField: 'item_id',
-          textField: 'item_text',
-          selectAllText: 'Select All',
-          unSelectAllText: 'UnSelect All',
-          itemsShowLimit: 3,
-          allowSearchFilter: this.ShowFilter
+    this.dropdownSettings = {
+      singleSelection: false,
+      idField: 'item_id',
+      textField: 'item_text',
+      selectAllText: 'Select All',
+      unSelectAllText: 'UnSelect All',
+      itemsShowLimit: 3,
+      allowSearchFilter: this.ShowFilter
     };
-  /** Validations for forms */
+    /** Validations for forms */
     this.apiModelsearchForm = this.fb.group({
       Device: ['', Validators.required],
       Brand: ['', Validators.required],
@@ -250,7 +254,7 @@ export class ApiDbTestComponent implements OnInit {
       Result: ['', null]
     });
   }
-/** List of devices based on project selection */
+  /** List of devices based on project selection */
   getDevices() {
     let projectname;
     if (this.tabName == undefined) {
@@ -275,18 +279,18 @@ export class ApiDbTestComponent implements OnInit {
       });
   }
 
-/** unique UUID Generator */
+  /** unique UUID Generator */
   generateUUID() {
     this.uuidValue = UUID.UUID();
     return this.uuidValue;
   }
 
-/** show and hide the forms based on api selection for example if apiname is selected as Registration ,
-  Registration form will be shown rest of the form will be hidden */
+  /** show and hide the forms based on api selection for example if apiname is selected as Registration ,
+    Registration form will be shown rest of the form will be hidden */
 
   async checkApiForm() {
     this.spinnerService.show();
-    let sessionToken = null; 
+    let sessionToken = null;
     let Project;
     if (this.tabName == undefined) {
       if (this.projectNames[0]['item_text'] != undefined) {
@@ -297,212 +301,227 @@ export class ApiDbTestComponent implements OnInit {
     } else {
       Project = this.tabName;
     }
-        let resultFetchArr: any = this.mainArr.filter(u =>
-          u.projectname == Project);
-        let Dbname = resultFetchArr[0]['dbPath'];
+    this.tabName = Project;
+    let resultFetchArr: any = this.mainArr.filter(u =>
+      u.projectname == Project);
+    let Dbname = resultFetchArr[0]['dbPath']; let arr = [];
     await this.mainService.getAPIListData(sessionToken, Dbname, Project)
-          .then(value => {
-            if (value.data.length != 0) {
-              this.apis = value.data;
-              if (this.api_list != "null") {
-                let searchUrl: any = value.data.filter(u => u.name == this.api_list);
-                this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
-                if (this.api_list == 'REGISTRATION' || this.api_list == 'LOGIN') {
-                  this.isVersionDataVisible = false;
-                } else {
-                  this.isVersionDataVisible = true;
-                }
-                $('.noDataExists').show();
+      .then(value => {
+        if (value.data.length != 0) {
+          value.data = value.data.filter(function (obj) {
+            return obj.statusFlag !== 0;
+          });
+          this.apis = value.data;
+          for (let i = 0; i < this.apis.length; i++) {
+            arr.push(this.apis[i]['name'])
+          }
+          if (this.api_list != "null") {
+            if (arr.includes(this.api_list)) {
+              let searchUrl: any = value.data.filter(u => u.name == this.api_list);
+              this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
+              if (this.api_list == 'REGISTRATION' || this.api_list == 'LOGIN') {
+                this.isVersionDataVisible = false;
               } else {
-                $('.noDataExists').hide();
+                this.isVersionDataVisible = true;
               }
+              this.noData = false;
+              $('.noDataExists').show();
             } else {
-              this.apis = [];
-              this.toastr.warning('', 'No API Exists for this projects');
+              this.noData = true;
               $('.noDataExists').hide();
             }
-            
-    if (this.api_list == 'REGISTRATION') {
-      this.isRegister = true;
-      this.isLogin = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-      this.isDownloadStats = false;
-      this.isGenericSearch = false;
-    }
-    if (this.api_list == 'LOGIN') {
-      this.isLogin = true;
-      this.isRegister = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-      this.isDownloadStats = false;
-      this.isGenericSearch = false;
-     }
-     if (this.api_list == 'CURRENTDBVERSION') {
-      this.isCurrentDb = true;
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-       this.isFeedbackSearch = false;
-       this.isLatestDb = false;
-       this.current_datatype = 1;
-       this.isDownloadStats = false;
-       this.isGenericSearch = false;
-    }
-    if (this.api_list == 'LATESTDBVERSION') {
-      this.isLatestDb = true;
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.latest_datatype = 2;
-      this.isDownloadStats = false;
-      this.isGenericSearch = false;
-    }
-    if (this.api_list == 'DOWNLOAD BIN') {
-      this.isDownloadBin = true;
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-      this.data_type = 1;
-      this.isDownloadStats = false;
-      this.isGenericSearch = false;
-    }
-    if (this.api_list == 'DOWNLOAD ZIP') {
-      this.isDownloadZip = true;
-      this.isDownloadBin = false;
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-      this.zip_datatype = 2;
-      this.isDownloadStats = false;
-      this.isGenericSearch = false;
-    }
-    if (this.api_list == 'AUTOSEARCH') {
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = true;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-      this.isDownloadStats = false;
-      this.isGenericSearch = false;
-    }
-    if (this.api_list == 'MODELSEARCH') {
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = true;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-      this.isDownloadStats = false;
-      this.isGenericSearch = false;
-    }
-    if (this.api_list == 'DELTASEARCH') {
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = true;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-      this.isDownloadStats = false;
-      this.isGenericSearch = false;
-    }
-    if (this.api_list == 'FEEDBACK') {
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = true;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-      this.isDownloadStats = false;
-      this.isGenericSearch = false;
-    }
-    if (this.api_list == 'DOWNLOADDBUPDATES') {
-      this.isDownloadStats = true;
-      this.down_status = 0;
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-      this.isGenericSearch = false;
-     }
-   if (this.api_list == 'GENERICLOG') {
-      this.isGenericSearch = true;
-      this.isDownloadStats = false;
-      this.isLogin = false;
-      this.isRegister = false;
-      this.isDownloadBin = false;
-      this.isDownloadZip = false;
-      this.isAutoSearch = false;
-      this.isModelSearch = false;
-      this.isDeltaSearch = false;
-      this.isFeedbackSearch = false;
-      this.isCurrentDb = false;
-      this.isLatestDb = false;
-     }
-    });
-    
+          } else {
+            this.apis = value.data;
+            this.toastr.warning('', 'No API Exists for this projects');
+            $('.noDataExists').hide();
+          }
+
+          if (this.api_list == 'REGISTRATION') {
+            this.isRegister = true;
+            this.isLogin = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'LOGIN') {
+            this.isLogin = true;
+            this.isRegister = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'CURRENTDBVERSION') {
+            this.isCurrentDb = true;
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isLatestDb = false;
+            this.current_datatype = 1;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'LATESTDBVERSION') {
+            this.isLatestDb = true;
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.latest_datatype = 2;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'DOWNLOAD BIN') {
+            this.isDownloadBin = true;
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+            this.data_type = 1;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'DOWNLOAD ZIP') {
+            this.isDownloadZip = true;
+            this.isDownloadBin = false;
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+            this.zip_datatype = 2;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'AUTOSEARCH') {
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = true;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'MODELSEARCH') {
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = true;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'DELTASEARCH') {
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = true;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'FEEDBACK') {
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = true;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+            this.isDownloadStats = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'DOWNLOADDBUPDATES') {
+            this.isDownloadStats = true;
+            this.down_status = 0;
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+            this.isGenericSearch = false;
+          }
+          if (this.api_list == 'GENERICLOG') {
+            this.isGenericSearch = true;
+            this.isDownloadStats = false;
+            this.isLogin = false;
+            this.isRegister = false;
+            this.isDownloadBin = false;
+            this.isDownloadZip = false;
+            this.isAutoSearch = false;
+            this.isModelSearch = false;
+            this.isDeltaSearch = false;
+            this.isFeedbackSearch = false;
+            this.isCurrentDb = false;
+            this.isLatestDb = false;
+          }
+        } else {
+          this.toastr.warning('', 'No Modules assigned for this Project ' + Project);
+          this.apis = [];
+          this.noData = false;
+          $('.noDataExists').hide();
+        }
+      });
   }
 
-/** default Register and Login will happened if user opted any other api models other than register and login to continue testing further  */
+  /** default Register and Login will happened if user opted any other api models other than register and login to continue testing further  */
 
   async getRegisterLogin() {
-    
+
     let Project;
     if (this.tabName == undefined || this.tabName == null) {
       if (this.projectNames[0]['item_text'] != undefined || this.projectNames[0]['item_text'] != null) {
@@ -512,80 +531,80 @@ export class ApiDbTestComponent implements OnInit {
       }
     } else {
       Project = this.tabName;
-   }
-   let resultFetchArr: any = this.mainArr.filter(u =>
-          u.projectname == Project);
-        let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath'];
-        let SignatureKey = resultFetchArr[0]['signatureKey'];
-   await this.mainService.getAPIListData(sessionToken, Dbname, Project)
-          .then(value => {
-            if (this.api_list != 'REGISTRATION' && this.api_list != 'LOGIN') {
-              let crudType = 2; let BoxId;
-              BoxId = null;
-              this.mainService.getBoxId(crudType, Project, SignatureKey, BoxId)
+    }
+    let resultFetchArr: any = this.mainArr.filter(u =>
+      u.projectname == Project);
+    let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath'];
+    let SignatureKey = resultFetchArr[0]['signatureKey'];
+    await this.mainService.getAPIListData(sessionToken, Dbname, Project)
+      .then(value => {
+        if (this.api_list != 'REGISTRATION' && this.api_list != 'LOGIN') {
+          let crudType = 2; let BoxId;
+          BoxId = null;
+          this.mainService.getBoxId(crudType, Project, SignatureKey, BoxId)
+            .subscribe(value => {
+              if (value.data[0]['result'] == "0") {
+                this.generateUUID();
+                BoxId = this.uuidValue;
+                this.mainService.getBoxId(1, Project, SignatureKey, BoxId)
+                  .subscribe(value => {
+                    if (value.data.length != 0) {
+                      this.mainService.getBoxId(2, Project, SignatureKey, null)
+                        .subscribe(value => {
+                          if (value.data.length != 0) {
+                            this.uuidValue = value.data[0]['message'];
+                          }
+                        });
+                    }
+                  });
+              } else {
+                if (value.data.length != 0) {
+                  this.uuidValue = value.data[0]['message'];
+                }
+              }
+              let resultFetchArr: any = this.mainArr.filter(u =>
+                u.projectname == Project);
+              let Dbname = resultFetchArr[0]['dbPath'];
+              this.mainService.getAPIList(null, Dbname, Project)
                 .subscribe(value => {
-                  if (value.data[0]['result'] == "0") {
-                    this.generateUUID();
-                    BoxId = this.uuidValue;
-                    this.mainService.getBoxId(1, Project, SignatureKey, BoxId)
-                      .subscribe(value => {
-                        if (value.data.length != 0) {
-                          this.mainService.getBoxId(2, Project, SignatureKey, null)
-                            .subscribe(value => {
-                              if (value.data.length != 0) {
-                                this.uuidValue = value.data[0]['message'];
-                              }
+                  if (value.data.length > 0) {
+                    let searchUrl: any = value.data.filter(u => u.name == 'REGISTRATION');
+                    this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
+                    let eventUrl = this.urlData; let deviceId = this.uuidValue;
+                    // let dbVersion = resultFetchArr[0]['embeddedDbVersion'];
+                    let dbVersion;
+                    if (this.version_list != undefined || this.version_list != null) {
+                      dbVersion = this.version_list;
+                    } else {
+                      dbVersion = resultFetchArr[0]['embeddedDbVersion'];
+                    }
+                    let signatureKey = resultFetchArr[0]['signatureKey']; let countryCode = null;
+                    this.mainService.getTestApiRegister(eventUrl, deviceId, dbVersion, signatureKey, countryCode)
+                      .subscribe(e => {
+                        let searchUrl: any = value.data.filter(u => u.name == 'LOGIN');
+                        this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
+                        if (Object(e)["data"] != '' && Object(e)["data"] != undefined) {
+                          let guid = Object(e)["data"]["guid"];
+                          this.mainService.getTestApiLogin(this.urlData, guid)
+                            .subscribe(dataResult => {
+                              this.guidValue = Object(dataResult)["data"]["jwttoken"];
+                              localStorage.setItem('token', JSON.stringify(this.guidValue));
+                              this.checkApiForm();
+                              this.spinnerService.show();
                             });
                         }
+
                       });
-                  } else {
-                    if (value.data.length != 0) {
-                      this.uuidValue = value.data[0]['message'];
-                    }
                   }
-                  let resultFetchArr: any = this.mainArr.filter(u =>
-                    u.projectname == Project);
-                  let Dbname = resultFetchArr[0]['dbPath'];
-                  this.mainService.getAPIList(null, Dbname, Project)
-                    .subscribe(value => {
-                      if (value.data.length > 0) {
-                        let searchUrl: any = value.data.filter(u => u.name == 'REGISTRATION');
-                        this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
-                        let eventUrl = this.urlData; let deviceId = this.uuidValue;
-                        // let dbVersion = resultFetchArr[0]['embeddedDbVersion'];
-                        let dbVersion;
-                        if (this.version_list != undefined || this.version_list != null) {
-                          dbVersion = this.version_list;
-                        } else {
-                          dbVersion = resultFetchArr[0]['embeddedDbVersion'];
-                        }
-                        let signatureKey = resultFetchArr[0]['signatureKey']; let countryCode = null;
-                        this.mainService.getTestApiRegister(eventUrl, deviceId, dbVersion, signatureKey, countryCode)
-                          .subscribe(e => {
-                            let searchUrl: any = value.data.filter(u => u.name == 'LOGIN');
-                            this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
-                            if (Object(e)["data"] != '' && Object(e)["data"] != undefined) {
-                              let guid = Object(e)["data"]["guid"];
-                              this.mainService.getTestApiLogin(this.urlData, guid)
-                                .subscribe(dataResult => {
-                                  this.guidValue = Object(dataResult)["data"]["jwttoken"];
-                                  localStorage.setItem('token', JSON.stringify(this.guidValue));
-                                  this.checkApiForm();
-                                  this.spinnerService.hide();
-                                });
-                            }
-                            
-                          });
-                      }
-                      
-                    });
+
+                });
             });
-            }
-          });
-   
+        }
+      });
+
   }
 
-/** Multiselect dropdown options start */
+  /** Multiselect dropdown options start */
 
   onInstanceSelect(item: any) {
   }
@@ -606,9 +625,9 @@ export class ApiDbTestComponent implements OnInit {
       this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: null });
     }
   }
-/** Multiselect dropdown options start */
+  /** Multiselect dropdown options start */
 
-/** On Project selection in multiselect dropdown to update the api list and and version list based on selection */
+  /** On Project selection in multiselect dropdown to update the api list and and version list based on selection */
 
   async onProjectSelect(e) {
     let projectSelectedList = [];
@@ -646,39 +665,52 @@ export class ApiDbTestComponent implements OnInit {
       });
   }
 
-/** Change of Api in Multiselect Dropdown */
+  /** Change of Api in Multiselect Dropdown */
 
   changeApi() {
     this.ApiForm = this.api_list;
+    this.responsetime=' '
+    this.tabVersions();
     this.checkApiForm();
     this.resetFiles();
     if (JSON.parse(localStorage.getItem('token')) == null) {
       this.getRegisterLogin();
     }
+    this.spinnerService.show()
   }
 
-/** If Project are deselected and empty in Multiselect Dropdown to hide the entire section until project selects */
+  /** If Project are deselected and empty in Multiselect Dropdown to hide the entire section until project selects */
   changeProject() {
+    let pushArr = [];
+    this.projectNames.forEach(function (value) {
+      pushArr.push(value['item_text'])
+    });
+    this.tabslist = pushArr;
     if (this.projectNames.length === 0) {
+      this.noData = true;
       $('.noDataExists').hide();
       $('.noneProjects').hide();
-      this.toastr.warning('', 'Please select a Project');
+      $('.hideData').css('display', 'none');
+      $('.tabView').css('display', 'none');
+      // this.toastr.warning('', 'Please select a Project');
     } else {
+      this.noData = false;
       $('.noDataExists').show();
       $('.noneProjects').show();
-      let pushArr = [];
-      this.projectNames.forEach(function (value) {
-        pushArr.push(value['item_text'])
-      });
-      this.tabslist = pushArr;
-      this.checkApiForm();
+      $('.hideData').css('display', 'block');
+      $('.tabView').css('display', 'block');
+      $('.nav-item').removeClass('active');
+      $('a#nav-home-tab0').addClass('active');
       this.getTabName(this.projectNames[0]['item_text']);
       this.onProjectSelect(this.tabslist[0]);
       this.getDevices();
+      this.tabVersions();
+      this.checkApiForm();
     }
+
   }
 
-/** If previous route was selected in breadcrumbs to maintain the selection of projects to be updated in previous route as well */
+  /** If previous route was selected in breadcrumbs to maintain the selection of projects to be updated in previous route as well */
 
   cloudMod() {
     let projSelectedData = [];
@@ -690,7 +722,7 @@ export class ApiDbTestComponent implements OnInit {
     this.router.navigate(['/cloud-api-modules']);
   }
 
-/** If Api Clients was clicked in Braedcrumbs to route to client page */
+  /** If Api Clients was clicked in Braedcrumbs to route to client page */
 
   apiClients() {
     this.router.navigate(['/api-clients'])
@@ -699,19 +731,33 @@ export class ApiDbTestComponent implements OnInit {
       });
   }
 
-/** None of the version selected in dropdown */
+  /** None of the version selected in dropdown */
 
   changeVersion() {
     if (this.version_list == "null") {
       $('.noDataExists').hide();
     } else {
-      $('.noDataExists').show();
-      this.changeApi();
-      this.getRegisterLogin();
+      let projectName = '';
+      if (this.tabName == undefined) {
+        projectName = this.projectNames[0]['item_text'];
+      } else {
+        projectName = this.tabName
+      }
+      let filterVersion: any = this.mainArr.filter(u =>
+        u.projectname == projectName && u.embeddedDbVersion == this.version_list);
+      if (filterVersion.length != 0) {
+        this.changeApi();
+        this.tabVersions();
+        this.getRegisterLogin();
+        $('.noDataExists').show();
+      } else {
+        this.noData = true;
+      }
+      this.spinnerService.show();
     }
   }
 
-/** For Resetting entire Forms */
+  /** For Resetting entire Forms */
 
   resetFiles() {
     this.isRegisterTab = false;
@@ -757,7 +803,7 @@ export class ApiDbTestComponent implements OnInit {
     this.apiGenericLogForm.reset();
   }
 
-/** For Resetting entire Forms, since we are handling multiple forms in single page by using hide show method */
+  /** For Resetting entire Forms, since we are handling multiple forms in single page by using hide show method */
 
   resetSubmission() {
     this.isRegisterTab = false;
@@ -791,25 +837,50 @@ export class ApiDbTestComponent implements OnInit {
     this.apiGenericsubmitted = false;
   }
 
-/** Getting data result based on tab switching */
+  /** Getting data result based on tab switching */
 
   getTabName(tabs) {
     this.resetSubmission();
     this.tabName = tabs;
+    this.selected_tab = this.tabName;
     this.getDevices();
     if (this.api_list == 'LOGIN') {
       this.api_list = 'REGISTRATION';
     }
     this.ApiForm = this.api_list;
+    this.responsetime=' ';
     if (tabs != undefined && tabs != '') {
       let versionArray: any = this.mainArr.filter(u =>
         u.projectname == tabs);
+      console.log(this.version_list)
       this.version_list = versionArray[0]['embeddedDbVersion'];
+      this.tabVersions();
       this.checkApiForm();
       if (this.api_list != 'REGISTRATION' && this.api_list != 'LOGIN') {
         this.getRegisterLogin();
       }
     }
+    this.spinnerService.show();
+  }
+
+  tabVersions() {
+    let projectName;
+    if (this.tabName == undefined) {
+      projectName = this.projectNames[0]['item_text'];
+    } else {
+      projectName = this.tabName;
+    }
+    let filterProject: any = this.mainArr.filter(u =>
+      u.projectname == projectName);
+    this.dbVersion = [];
+    if (this.dbVersion.length == 0) {
+      this.versionArr = [];
+      for (var j = 0; j < filterProject.length; j++) {
+        this.versionArr.push(filterProject[j]['embeddedDbVersion']);
+      }
+    }
+    var uniqueVersions = this.versionArr.filter((v, i, a) => a.indexOf(v) === i);
+    this.dbVersion = uniqueVersions;
   }
 
   dbVersionChange() {
@@ -818,7 +889,7 @@ export class ApiDbTestComponent implements OnInit {
     }
   }
 
-/** Validation Trigger for each forms when user submits the form without filling data */
+  /** Validation Trigger for each forms when user submits the form without filling data */
 
   get h() { return this.apiModelsearchForm.controls; }
   get g() { return this.apiregisterForm.controls; }
@@ -833,10 +904,11 @@ export class ApiDbTestComponent implements OnInit {
   get v() { return this.apiDownloadStatsForm.controls; }
   get s() { return this.apiGenericLogForm.controls; }
 
-/** Registration Form Submit Operation */
+  /** Registration Form Submit Operation */
 
   onRegisterSearchSubmit() {
     this.spinnerService.show();
+    var time1 = (new Date()).getTime();
     this.regsubmitted = true;
     if (this.apiregisterForm.invalid) {
       return;
@@ -846,6 +918,8 @@ export class ApiDbTestComponent implements OnInit {
     this.mainService.getTestApiRegister(eventUrl, deviceId, dbVersion, signatureKey, countryCode)
       .subscribe(value => {
         this.spinnerService.hide();
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
         if (Object(value)["message"] != '' && Object(value)["message"] != undefined) {
           this.isTabDataVisible = true;
           this.isRegisterTab = true;
@@ -874,16 +948,17 @@ export class ApiDbTestComponent implements OnInit {
 
                 });
             });
-        } 
-        
-       
+        }
+
+
       });
   }
 
-/** Login Form Submit Operation */
+  /** Login Form Submit Operation */
 
   onLoginSearchSubmit() {
     this.spinnerService.show();
+    var time1 = (new Date()).getTime();
     this.logsubmitted = true;
     if (this.apiloginForm.invalid) {
       return;
@@ -892,6 +967,8 @@ export class ApiDbTestComponent implements OnInit {
     let eventUrl = this.urlData; let guid = this.guid_data;
     this.mainService.getTestApiLogin(eventUrl, guid)
       .subscribe(value => {
+    var time2 = (new Date()).getTime();
+    this.responsetime = time2 - time1 + ' ms';
         this.spinnerService.hide();
         if (Object(value)["message"] != '' && Object(value)["message"] != undefined) {
           this.isTabDataVisible = true;
@@ -902,46 +979,54 @@ export class ApiDbTestComponent implements OnInit {
       });
   }
 
-/** Current Db Version Submit Operation */
+  /** Current Db Version Submit Operation */
 
   onCurrentDbSearchSubmit() {
     this.spinnerService.show();
+    var time1 = (new Date()).getTime();
     this.currentdbsubmitted = true;
     if (this.apiCurrentDbForm.invalid) {
       return;
     }
-      let eventUrl = this.urlData; let datatype = this.current_datatype;
-      this.mainService.getTestApiCurrentDbVersion(eventUrl, datatype)
-        .subscribe(value => {
-          if (value.data != '' && value.data != undefined) {
-            this.isTabDataVisible = true;
-            this.isCurrentDBTab = true;
-            this.currentDBVersion = value.data.dbversion;
-          }
-          this.spinnerService.hide();
-        });
+    let eventUrl = this.urlData; let datatype = this.current_datatype;
+    this.mainService.getTestApiCurrentDbVersion(eventUrl, datatype)
+      .subscribe(value => {
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
+        if (value.data != '' && value.data != undefined) {
+          this.isTabDataVisible = true;
+          this.isCurrentDBTab = true;
+          this.currentDBVersion = value.data.dbversion;
+        }
+        this.spinnerService.hide();
+      });
   }
 
-/** Download Stats Submit Operation */
+  /** Download Stats Submit Operation */
 
   onDownloadStatsSubmit() {
+    var time1 = (new Date()).getTime();
     this.downStatsubmitted = true;
     if (this.apiDownloadStatsForm.invalid) {
       return;
     }
     let eventUrl = this.urlData; let donwloadStatus = this.down_status;
     let dbVersion = this.version_list;
-    this.mainService.getTestApiDownloadStats(eventUrl, donwloadStatus,dbVersion)
+    this.mainService.getTestApiDownloadStats(eventUrl, donwloadStatus, dbVersion)
       .subscribe(value => {
-          this.isTabDataVisible = true;
-          this.isDownlStatsTab = true;
-          this.downstats = value.message;
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
+        this.isTabDataVisible = true;
+        this.isDownlStatsTab = true;
+        this.downstats = value.message;
       });
+    this.spinnerService.show();
   }
 
-/** Latest Db Version Submit Operation */
+  /** Latest Db Version Submit Operation */
 
   onLatestDbSearchSubmit() {
+    var time1 = (new Date()).getTime();
     this.latestdbsubmitted = true;
     if (this.apiLatestDbForm.invalid) {
       return;
@@ -949,17 +1034,21 @@ export class ApiDbTestComponent implements OnInit {
     let eventUrl = this.urlData; let datatype = this.latest_datatype;
     this.mainService.getTestApiLatestDbVersion(eventUrl, datatype)
       .subscribe(value => {
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';    
         if (value.data != '' && value.data != undefined) {
           this.isTabDataVisible = true;
           this.isLatestDBTab = true;
           this.latestDBVersion = value.data.dbversion;
         }
       });
+    this.spinnerService.show();
   }
 
-/** Generic Log Submit Operation */
+  /** Generic Log Submit Operation */
 
   onApiGenericSearchSubmit() {
+    var time1 = (new Date()).getTime();
     this.apiGenericsubmitted = true;
     if (this.apiGenericLogForm.invalid) {
       return;
@@ -970,16 +1059,19 @@ export class ApiDbTestComponent implements OnInit {
     this.spinnerService.show();
     this.mainService.getUpdateGenericLog(eventUrl, apiName, input, output, result)
       .subscribe(value => {
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
         this.isTabDataVisible = true;
         this.isGenericLogTab = true;
         this.genericlog = value.message;
       });
-    this.spinnerService.hide();
+    this.spinnerService.show();
   }
 
-/** Download Bin Submit Operation */
+  /** Download Bin Submit Operation */
 
   onDownloadBinSearchSubmit() {
+    var time1 = (new Date()).getTime();
     this.binsubmitted = true;
     if (this.apiDownloadBinForm.invalid) {
       return;
@@ -987,6 +1079,8 @@ export class ApiDbTestComponent implements OnInit {
     let eventUrl = this.urlData; let datatype = this.data_type;
     this.mainService.getDownloadStatus(eventUrl, datatype)
       .subscribe(value => {
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
         this.isTabDataVisible = true;
         if (value.data.filecontent == null || value.data.filecontent == "null") {
           this.isBinVisible = false;
@@ -1003,9 +1097,10 @@ export class ApiDbTestComponent implements OnInit {
           }
         }
       });
+    this.spinnerService.show();
   }
 
-/** Bin File Download format to download in .bin file extension and the binFile data to save in local folders */
+  /** Bin File Download format to download in .bin file extension and the binFile data to save in local folders */
 
   downloadBin() {
     var fileText = this.getBinData;
@@ -1013,16 +1108,17 @@ export class ApiDbTestComponent implements OnInit {
     this.saveTextAsFile(fileText, fileName);
   }
 
-/** Zip File Download format to download in .zip file extension and the ZipFile data to save in local folders */
+  /** Zip File Download format to download in .zip file extension and the ZipFile data to save in local folders */
 
   downloadZip() {
     var fileText = this.getZipData;
-    var fileName = this.zipFilename+ '.zip';
+    var fileName = this.zipFilename + '.zip';
     this.saveTextAsFile(fileText, fileName);
   }
 
-/** Download Bin Submit Operation */
+  /** Download Bin Submit Operation */
   onDownloadZipSearchSubmit() {
+    var time1 = (new Date()).getTime();
     this.zipsubmitted = true;
     if (this.apiDownloadZipForm.invalid) {
       return;
@@ -1030,6 +1126,8 @@ export class ApiDbTestComponent implements OnInit {
     let eventUrl = this.urlData; let datatype = this.zip_datatype;
     this.mainService.getDownloadStatus(eventUrl, datatype)
       .subscribe(value => {
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
         this.isTabDataVisible = true;
         if (value.data.filecontent == null) {
           this.isBinVisible = false;
@@ -1047,16 +1145,18 @@ export class ApiDbTestComponent implements OnInit {
           }
         }
       });
+    this.spinnerService.show();
   }
 
-/** Auto Search Submit Operation */
+  /** Auto Search Submit Operation */
   onApiAutoSearchSubmit() {
+    var time1 = (new Date()).getTime();
     this.autosubmitted = true;
     if (this.apiAutosearchForm.invalid) {
       return;
     }
     if (this.auto_edid != undefined || this.auto_osd != undefined || this.auto_vendorId != undefined) {
-      
+
       if (this.auto_edid == undefined) {
         this.auto_edid = "";
       } if (this.auto_osd == undefined) {
@@ -1069,6 +1169,8 @@ export class ApiDbTestComponent implements OnInit {
       let Edid = this.auto_edid; let Vendorid = this.auto_vendorId; let Osd = this.auto_osd;
       this.mainService.getTestAutoSearch(eventUrl, Device, Edid, Vendorid, Osd)
         .subscribe(value => {
+          var time2 = (new Date()).getTime();
+          this.responsetime = time2 - time1 + ' ms';
           this.isTabDataVisible = true;
           if (value.data != '') {
             this.isAutoSearchTab = true;
@@ -1078,30 +1180,36 @@ export class ApiDbTestComponent implements OnInit {
     } else {
       this.toastr.warning('', 'Please Enter Edid or Vendor Id or OSD to proceed further');
     }
+    this.spinnerService.show();
   }
 
-/** Model Search Submit Operation */
+  /** Model Search Submit Operation */
   onApiModelSearchSubmit() {
+    var time1 = (new Date()).getTime();
     this.submitted = true;
     if (this.apiModelsearchForm.invalid) {
       return;
     }
     this.modelHeadersResult = ['Codeset Number', 'Codeset Binary', 'Checksum', 'Brand Id', 'Brand Name', 'Search Result'];
     let eventUrl = this.urlData; let Device = this.device_list; let brand = this.brand_data;
-    let Model = this.model_data; 
-    this.mainService.getTestModelSearch(eventUrl, Device, brand,Model)
+    let Model = this.model_data;
+    this.mainService.getTestModelSearch(eventUrl, Device, brand, Model)
       .subscribe(value => {
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
         this.isTabDataVisible = true;
         if (value.data != '') {
           this.isModelSearchTab = true;
           this.modelResult = value.data;
         }
       });
+    this.spinnerService.show();
   }
 
-/** Delta Search Submit Operation */
+  /** Delta Search Submit Operation */
 
   onApiDeltaSearchSubmit() {
+    var time1 = (new Date()).getTime();
     this.deltasubmitted = true;
     this.downstats = '';
     this.isDeltaSearchTab = false;
@@ -1112,6 +1220,8 @@ export class ApiDbTestComponent implements OnInit {
     let dbVersion = this.version_list;
     this.mainService.getTestDeltaSearch(eventUrl, Device, brand, dbVersion)
       .subscribe(value => {
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
         this.isTabDataVisible = true;
         if (value.data.length == 0 || value.data == "null") {
           this.isDownlStatsTab = true;
@@ -1130,18 +1240,20 @@ export class ApiDbTestComponent implements OnInit {
           });
         }
       });
+    this.spinnerService.show();
   }
 
-/** Feedback Submit Operation */
+  /** Feedback Submit Operation */
 
   onApiFeedbackSearchSubmit() {
+    var time1 = (new Date()).getTime();
     this.fbsubmitted = true;
     if (this.apiFeedbacksearchForm.invalid) {
       return;
     }
     if (this.fb_model == undefined) {
       this.fb_model = "";
-    }if (this.feedback_device == undefined) {
+    } if (this.feedback_device == undefined) {
       this.feedback_device = "";
     } if (this.fb_brand == undefined) {
       this.fb_brand = "";
@@ -1165,6 +1277,8 @@ export class ApiDbTestComponent implements OnInit {
     this.mainService.getTestFeedbackSearch(eventUrl, Device, brand, model, vendorId, Osd, Edid, codeset, searchType,
       message, statusFlag)
       .subscribe(value => {
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
         this.fbsubmitted = false;
         this.apiFeedbacksearchForm.reset();
         this.toastr.success('', value.message);
@@ -1176,9 +1290,10 @@ export class ApiDbTestComponent implements OnInit {
         //  this.toastr.warning('', value.message);
         //}
       });
+    this.spinnerService.show();
   }
 
-/** Saving File Operations */
+  /** Saving File Operations */
 
   saveTextAsFile(data, filename) {
 

@@ -56,11 +56,21 @@
     </div>
   </div>
   <br />
+  <div>
+    <p *ngIf="noData">
+      <b>{{ApiForm}}</b> API is not assigned for project <b>{{tabName}}</b>
+    </p>
+  </div>
+  <br/>
   <div class="row noDataExists">
     <div class="col-xl-12 col-md-12">
       <div class="card card-pd">
         <div class="card-block">
-          <h5 class="h5-color">{{ApiForm}}</h5>
+          <h5 class="h5-color">{{ApiForm}}
+            <label style="float:right;color: black;font-size: 14px;">
+              Response Time: {{responsetime}}
+            </label>
+          </h5>
           <form [formGroup]="apiregisterForm" class="form-material" (ngSubmit)="onRegisterSearchSubmit()" *ngIf="isRegister">
             <br />
             <div class="row">

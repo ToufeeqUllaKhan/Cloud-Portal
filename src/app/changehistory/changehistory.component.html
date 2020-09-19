@@ -1,0 +1,84 @@
+<div class="container-fluid main-scroll">
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="row page-titles">
+      <div class="align-self-center">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Change History</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="" (click)="AdminClients()">Clients</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active">History_View</li>
+        </ol>
+      </div>
+    </div>
+  <div class="row">
+    <div class="col-lg-10 col-xlg-10 col-md-10">
+      <div class="card">
+        <div class="card-block">
+          <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'" [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)" (click)="changeProject()" (onSelect)="onProjectSelect($event)"></ng-multiselect-dropdown>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-1 col-md-1 hideData">
+      <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+    </div>
+    </div>
+    <br />
+    <div class="tab tabView" role="tabpanel">
+      <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+        <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}" class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab" aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
+      </div>
+      <div class="tab-content">
+        <div class="col-md-12">&nbsp;</div>
+            <div class="col-md-12">
+              <div class="col-xl-12 col-md-12">&nbsp;</div>
+              <div class="col-xl-12 col-md-12">
+                <table id="projectView" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
+                class="display nowrap table table-striped table-bordered" cellspacing="0" style="width:auto;">
+                  <thead>
+                    <tr>
+                       <!-- <th>SL No.</th> -->
+                      <th> DataHistoryId </th>
+                      <th> Project Name </th>
+                      <th> Data Section </th>
+                      <th> Operation</th>
+                      <th> Total Failed Record </th>
+                      <th> Total Inserted Record </th>
+                      <th> Total Updated Record </th>
+                      <th> Update Description </th>
+                      <th> Record Count </th>
+                      <th> IPaddress </th>
+                      <th> Remarks </th>
+                      <th> TimeStamp </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let client of clientDetails;let i=index;">
+                      <!-- <td class="align-center">{{i+1}}</td> -->
+                      <!-- <td class="align-width">{{client.projectName}} -->
+                      <td >{{client.dataHistoryId}}</td>
+                      <td >{{client.projectName}}</td>
+                      <td >{{client.dataSection}}</td>
+                      <td >{{client.operation}}</td>
+                      <td >{{client.totalFailedRecord}}</td>
+                      <td >{{client.totalInsertedRecord}}</td>
+                      <td >{{client.totalUpdatedRecord}}</td>
+                      <td >{{client.updateDescription}}</td>
+                      <td >{{client.recordCount}}</td>
+                      <td >{{client.iPaddress}}</td>
+                      <td >{{client.remarks}}</td>
+                      <td >{{client.createdDate}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+      </div>
+        </div>
+    </div>
+    </div>
+  

@@ -56,3 +56,28 @@ small {
   background: linear-gradient(87deg,#bdcbce 0,#bdc2c7 100%) !important;
   pointer-events: none;
 }
+#tabs .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+  color: #ffffff;
+  /*background-color: #337ab7;
+  border-color: transparent transparent #f3f3f3;*/
+  border-bottom: 4px solid !important;
+  font-weight: bold;
+  background: linear-gradient(60deg,#66bb6a,#43a047) !important;
+}
+
+.nav-tabs .nav-link {
+background: #e4e4e4a1;
+border: 1px solid #adafb1;
+}
+
+.nav-fill .nav-item {
+flex: none;
+text-align: center;
+color: #14af4b;
+width: 100px;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+max-width: 133px;
+min-width: 130px;
+}

@@ -39,11 +39,19 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   addApi() {
-    this.router.navigate(['/api-configuration']);
+    this.router.navigate(['/edit-api']);
   }
 
-  searchHistory() {
-    this.router.navigate(['/log-view']);
+  viewrawcapture() {
+    this.router.navigate(['/view_raw_capture']);
+  }
+
+  stagingdata() {
+    this.router.navigate(['/view_staging_data']);
+  }
+
+  changeHistory() {
+    this.router.navigate(['/admin-clients']);
   }
 
 }

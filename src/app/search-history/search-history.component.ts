@@ -236,7 +236,7 @@ export class SearchHistoryComponent implements OnInit {
       let dbname = searchDbname[0]['dbPath'];
       let projectname = this.projectNames[0]['item_text'];
       let datatype;
-      let arr = [1, 3, 4, 6, 7, 8, 9];
+      let arr = [1, 3, 4, 5, 7, 8, 9];
       let pushData = [];
       this.excelFromDate = StartDate;
       this.excelToDate = EndDate;
@@ -245,20 +245,26 @@ export class SearchHistoryComponent implements OnInit {
         datatype = arr[i];
        await this.mainService.getSearchDetails(dbname, projectname, StartDate, EndDate, datatype)
          .then(value => {
-           console.log(value.data);
-           // if (value.data.length != 0) {
-              for (var j = 0; j < value.data.length; j++) {
-                if (value.data[j]['createdDate'] != undefined) {
-                  var d = new Date(value.data[j]['createdDate']);
-                  var getT = (d.getUTCMonth() + 1) + '/' + d.getDate() + '/' + d.getUTCFullYear() + ' ' +
-                    d.getUTCHours() + ':' + d.getUTCMinutes();
-                  value.data[j]['createdDate'] = getT;
-                }
-              }
-              pushData.push(value.data);
-            //}
+          const newArray =[];
+          for (var j = 0; j < value.data.length; j++) {
+            const keys =Object.keys(value.data[j])
+            const newObject={};
+            keys.forEach(key=>{ 
+              const newKey = key.charAt(0).toUpperCase() + key.slice(1);
+              newObject[newKey] = value.data[j][key];
+            })
+           newArray.push(newObject);
+            if (value.data[j]['createdDate'] != undefined) {
+              var d = new Date(value.data[j]['createdDate']);
+              var getT = (d.getUTCMonth() + 1) + '/' + d.getDate() + '/' + d.getUTCFullYear() + ' ' +
+                d.getUTCHours() + ':' + d.getUTCMinutes();
+              value.data[j]['createdDate'] = getT;
+            }
+          }
+          pushData.push(newArray);
           });
       }
+      console.log(pushData)
       if (pushData.length != 0) {
         this.arrayJsonData = pushData;
         this.excelDownload();

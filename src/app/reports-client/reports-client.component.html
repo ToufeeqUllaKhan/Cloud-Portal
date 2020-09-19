@@ -1,0 +1,51 @@
+<div class="container-fluid main-scroll">
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="row page-titles">
+      <div class="col-md-12 col-12 align-self-center">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="['/dashboard']">Analytical Reports</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="['/log-view']">Log View</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active">Clients</li>
+        </ol>
+      </div>
+    </div>
+  
+    <div class="row" *ngFor="let lists of activeRegions;">
+      <div class="row-full col-sm-12">
+        <h2 class="font-bold"><i class="fa fa-globe" aria-hidden="true"></i> {{lists}}</h2>
+      </div>
+  
+      <div class="container-fluid scroll-x">
+        <div class="row flex-nowrap">
+          <ng-container *ngFor="let list of arrClients;let i=index;">
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" *ngIf="list.clientRegion==lists">
+  
+              <div class="box-part text-center cursor" [style.background-color]="list.background" (click)="selectSingleClient(list.clientName,list.clientRegion)">
+                <i class="fa fa-th-large fa-3x cursor" aria-hidden="true" (click)="selectSingleClient(list.clientName,list.clientRegion)"></i>
+                <div class="title cursor" (click)="selectSingleClient(list.clientName,list.clientRegion)">
+                  <h4>&nbsp;</h4>
+                </div>
+                <h4 class="cursor h4-title" (click)="selectSingleClient(list.clientName,list.clientRegion)">{{list.clientName}}</h4>
+              </div>
+            </div>
+            
+          </ng-container>
+        </div>
+      </div>
+    </div>
+    <div class="form-group row text-right">
+      <div class="col-sm-12">&nbsp;<br/>
+        </div>
+      </div>
+      <div class="form-group row text-right">
+        <div class="col-sm-12">
+          &nbsp;
+        </div>
+      </div>
+    </div>
+  

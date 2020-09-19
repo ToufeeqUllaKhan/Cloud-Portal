@@ -33,7 +33,7 @@
                     <div class="col-sm-4">
                       <div class="form-group form-inline">
                         <label class="col-md-5">From Date</label>
-                        <input type="text" class="form-control form-control-line col-sm-5" (ngModelChange)="setMinDate($event)" (dateSelect)="onDateSelect($event)" [minDate]="{year: 2010, month: 1, day: 1}" [maxDate]="maxDate" formControlName="fromDate" name="dp" value="{{startdate | date: 'yyyy-MM-dd'}}" [(ngModel)]="from_date" ngbDatepicker #d="ngbDatepicker">
+                        <input type="text" class="form-control form-control-line col-sm-5" (ngModelChange)="setMinDate($event)" (dateSelect)="onDateSelect($event)" [minDate]="{year: 2010, month: 1, day: 1}" [maxDate]="maxDate" formControlName="fromDate" name="dp" value="{{startdate | date: 'MM-dd-yyyy'}}" [(ngModel)]="from_date" ngbDatepicker #d="ngbDatepicker">
                         <span class="btn btn-outline-secondary calendar col-sm-2" (click)="d.toggle()" type="button">
                           <i class="fa fa-calendar" aria-hidden="true"></i>
                         </span>
@@ -42,7 +42,7 @@
                     <div class="col-sm-4">
                       <div class="form-group form-inline">
                         <label class="col-md-5">To Date</label>
-                        <input type="text" class="form-control form-control-line col-sm-5" value="{{valuedate | date: 'yyyy-MM-dd'}}" [minDate]="minDates" [maxDate]="maxDate" formControlName="toDate" name="dp" [(ngModel)]="to_date" ngbDatepicker #d1="ngbDatepicker">
+                        <input type="text" class="form-control form-control-line col-sm-5" value="{{valuedate | date: 'MM-dd-yyyy'}}" [minDate]="minDates" [maxDate]="maxDate" formControlName="toDate" name="dp" [(ngModel)]="to_date" ngbDatepicker #d1="ngbDatepicker">
                         <span class="btn btn-outline-secondary calendar col-sm-2" (click)="d1.toggle()" type="button">
                           <i class="fa fa-calendar" aria-hidden="true"></i>
                         </span>

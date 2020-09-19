@@ -141,59 +141,58 @@ export class ZipUploadComponent implements OnInit {
       /** Latest Version for the selected project  */
         this.latestVersions();
       /** Div Visibility based on version availablity or not */
-        let filterProjects: any = this.finalArray.filter(u =>
-          u.projectname == this.projectNames[0]['item_text']);
+      let filterProjects: any = this.finalArray.filter(u =>
+        u.projectname == this.projectNames[0]['item_text']);
 
-        let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region']; let ProjectName = filterProjects[0]['projectname'];
-        let Dbversion = this.versions[0]; let Dbinstance = filterProjects[0]['dbinstance'];
-
-        this.mainService.filterDataUpload(Client, Region, ProjectName, Dbversion, Dbinstance, 6)
-          .subscribe(value => {
-            this.countDetails = value.data;
-        if (this.versions.length == 1 && this.versions[0] == null) {
-
-          this.VersionAvailability = false;
-          this.versionAvail = false;
-          this.createVersion = true;
-          this.zipUploadDiv = false;
-
-        } else {
-          this.version_list = this.versions[0];
-          if (this.countDetails[0]['codesetCount'] != 0 && this.countDetails[0]['crossReferenceCount'] != 0 &&
-            this.countDetails[0]['brandModelCount'] != 0) {
-            this.versionAvail = true;
-            this.VersionAvailability = true;
-            this.uploadIcon = true;
-            this.versionUpdate = false;
-            this.updateIcon = false;
-          } else {
-            this.uploadIcon = false;
-            this.updateIcon = true;
+      let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region']; let ProjectName = filterProjects[0]['projectname'];
+      let Dbversion = this.versions[0]; let Dbinstance = filterProjects[0]['dbinstance'];
+      this.mainService.filterDataUpload(Client, Region, ProjectName, Dbversion, Dbinstance, 6)
+      .subscribe(value => {
+        this.countDetails = value.data;
+       let  Version=this.versions[0];
+        this.mainService.filterDataUpload(Client, Region, ProjectName, Version, Dbinstance, 6)
+        .subscribe(value => {
+          this.countDetails = value.data;
+          if (uniqueVersions.length == 1 && this.versions[0] == null) {
+            this.VersionAvailability = false;
             this.versionAvail = false;
-            this.versionUpdate = true;
-          }
-          if (this.versions.length > 1 && this.versions[0] != null) {
-            this.UpdateZip = false;
-            this.VersionAvailability = true;
-            this.createVersion = false;
+            this.createVersion = true;
             this.zipUploadDiv = false;
-          }
-          if (this.versions.length == 1 && this.versions[0] != null) {
-            if (this.countDetails[0]['codesetCount'] != 0 && this.countDetails[0]['crossReferenceCount'] != 0 &&
-              this.countDetails[0]['brandModelCount'] != 0) {
-              this.zipUploadDiv = false;
-              this.VersionAvailability = true;
-              this.createVersion = false;
-            } else {
-              this.zipUploadDiv = true;
-              this.VersionAvailability = false;
-              this.createVersion = false;
-              this.embed_version = filterProjects[0]['embeddedDbVersion'];
+          } 
+          else if (uniqueVersions.length == 1 && this.versions[0] != null) {
+              if (this.countDetails[0]['codesetCount'] != 0 && this.countDetails[0]['crossReferenceCount'] != 0 &&
+                this.countDetails[0]['brandModelCount'] != 0) {
+                this.zipUploadDiv = false;
+                this.VersionAvailability = true;
+                this.createVersion = false;
+                this.versionAvail = true;
+                this.uploadIcon = true;
+              } else {
+                this.zipUploadDiv = true;
+                this.VersionAvailability = false;
+                this.createVersion = false;
+                this.embed_version = filterProjects[0]['embeddedDbVersion'];
+                console.log(this.embed_version)
+              }
             }
-          }
-        }
-        
-      }); 
+            if (uniqueVersions.length > 1 && this.versions[0] != null) {
+              if (this.countDetails[0]['codesetCount'] != 0 && this.countDetails[0]['crossReferenceCount'] != 0 &&
+              this.countDetails[0]['brandModelCount'] != 0) {
+              this.versionAvail = true;
+              this.VersionAvailability = true;
+              this.uploadIcon = true;
+              this.versionUpdate = false;
+              this.updateIcon = false;
+            } else {
+              this.uploadIcon = false;
+              this.VersionAvailability = true;
+              this.updateIcon = true;
+              this.versionAvail = false;
+              this.versionUpdate = true;
+            }
+            }
+    });
+    }); 
 
       });
 
@@ -1934,7 +1933,7 @@ Zip Upload button is clicked to select a file and to send selected zip file to s
       let Totalinsertedrecords = this.addedBrandCount; let Totalfailedrecords = this.failedBrandCount;
       let Totalupdatedrecords = this.existsBrandCount; let Recordcount = addedCount;
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress; 
-      this.mainService.DataDBUpates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
+      this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
         Ipaddress, Updatestatus)
         .subscribe(value => {
@@ -2042,7 +2041,7 @@ Zip Upload button is clicked to select a file and to send selected zip file to s
       let Totalinsertedrecords = this.addedCodeCount; let Totalfailedrecords = this.failedCodeCount;
       let Totalupdatedrecords = this.existsCodeCount; let Recordcount = addedCount;
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
-      this.mainService.DataDBUpates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
+      this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
         Ipaddress, Updatestatus)
         .subscribe(value => {
@@ -2151,7 +2150,7 @@ Zip Upload button is clicked to select a file and to send selected zip file to s
       let Totalinsertedrecords = this.addedModelCount; let Totalfailedrecords = this.failedModelCount;
       let Totalupdatedrecords = this.existsModelCount; let Recordcount = addedCount;
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
-      this.mainService.DataDBUpates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
+      this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
         Ipaddress, Updatestatus)
         .subscribe(value => {
@@ -2260,7 +2259,7 @@ Zip Upload button is clicked to select a file and to send selected zip file to s
       let Totalinsertedrecords = this.addedXmlCount; let Totalfailedrecords = this.failedXmlCount;
       let Totalupdatedrecords = this.existsXmlCount; let Recordcount = addedCount;
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
-      this.mainService.DataDBUpates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
+      this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
         Ipaddress, Updatestatus)
         .subscribe(value => {
@@ -2363,7 +2362,7 @@ Zip Upload button is clicked to select a file and to send selected zip file to s
       let Totalinsertedrecords = this.addedCecCount; let Totalfailedrecords = this.failedCecCount;
       let Totalupdatedrecords = this.existsCecCount; let Recordcount = addedCount;
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
-      this.mainService.DataDBUpates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
+      this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
         Ipaddress, Updatestatus)
         .subscribe(value => {
@@ -2464,7 +2463,7 @@ Zip Upload button is clicked to select a file and to send selected zip file to s
       let Totalinsertedrecords = this.addedEdidCount; let Totalfailedrecords = this.failedEdidCount;
       let Totalupdatedrecords = this.existsEdidCount; let Recordcount = addedCount;
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
-      this.mainService.DataDBUpates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
+      this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
         Ipaddress, Updatestatus)
         .subscribe(value => {
@@ -2571,7 +2570,7 @@ Zip Upload button is clicked to select a file and to send selected zip file to s
       let Totalinsertedrecords = this.addedCecEdidCount; let Totalfailedrecords = this.FailedCecEdidCount;
       let Totalupdatedrecords = this.existsCecEdidCount; let Recordcount = addedCount;
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
-      this.mainService.DataDBUpates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
+      this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
         Ipaddress, Updatestatus)
         .subscribe(value => {
@@ -3237,7 +3236,7 @@ Zip Upload button is clicked to select a file and to send selected zip file to s
              let Datasection = 'Delete'; let Totalinsertedrecords = 0; let Totalfailedrecords = 0;
              let Totalupdatedrecords = 0; let Recordcount = "0"; let Updatedescription = this.progressName;
              let Operation = 'Delete'; let Systemuser = ''; let Ipaddress = this.ipAddress; let Updatestatus = 1;
-             this.mainService.DataDBUpates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
+             this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
                Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
                Ipaddress, Updatestatus)
                .subscribe(value => {

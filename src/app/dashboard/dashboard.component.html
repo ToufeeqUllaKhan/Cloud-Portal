@@ -32,7 +32,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-6 col-xl-4" *ngIf="isAnalytics">
+    <div class="col-md-6 col-xl-4" *ngIf="isAnalytics" (click)="logview()">
       <div class="mini-stat clearfix card-red">
         <span class="mini-stat-icon"><i class="fa fa-bar-chart" aria-hidden="true"></i></span>
         <div class="mini-stat-info text-right text-light">
