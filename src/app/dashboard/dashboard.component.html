@@ -1,0 +1,59 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="dashboard.html">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Dashboard</li>
+      </ol>
+    </div>
+    <!--     <div class="col-md-7 col-4 align-self-center">
+            <a href="https://wrappixel.com/templates/materialpro/" class="btn waves-effect waves-light btn-danger pull-right hidden-sm-down"> Upgrade to Pro</a>
+        </div>-->
+  </div>
+  <div class="row">
+    <div class="col-md-6 col-xl-4" *ngIf="isDataMgmt" (click)="dataMgt()">
+      <div class="mini-stat clearfix card-yellow">
+        <span class="mini-stat-icon"><i class="fa fa-cloud-upload" aria-hidden="true"></i></span>
+        <div class="mini-stat-info text-right text-light">
+          <span class="counter text-white">Data Management</span>
+          View & Upload Data
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-4" *ngIf="isCloudApi" (click)="cloudTest()">
+      <div class="mini-stat clearfix card-green">
+        <span class="mini-stat-icon"><i class="fa fa-wrench" aria-hidden="true"></i></span>
+        <div class="mini-stat-info text-right text-light">
+          <span class="counter text-white">Cloud API Test</span>
+          Testing Modules
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-4" *ngIf="isAnalytics">
+      <div class="mini-stat clearfix card-red">
+        <span class="mini-stat-icon"><i class="fa fa-bar-chart" aria-hidden="true"></i></span>
+        <div class="mini-stat-info text-right text-light">
+          <span class="counter text-white">Analytics Report</span>
+          View Reports
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-4" *ngIf="isTestModule">
+      <div class="mini-stat clearfix card-blue">
+        <span class="mini-stat-icon"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+        <div class="mini-stat-info text-right text-light">
+          <span class="counter text-white">Test Module</span>
+          View Test Modules
+        </div>
+      </div>
+    </div>
+    <!--<div class="col-md-12">
+      <iframe width="800" height="600" src="https://app.powerbi.com/view?r=eyJrIjoiOTgzZmYzYjAtNmFiNy00MzMxLTk2YjEtMTFiMjk1YWE4MjE4IiwidCI6IjM1ZDVhYzRkLTc5YmQtNDkwYS1hYjJhLTU5MGZjZDViMzE4ZiIsImMiOjF9" frameborder="0" allowFullScreen="true"></iframe>
+    </div>-->
+    <div class="col-md-12" *ngIf="isNone">Modules are not Available. Please contact Admin to access the Modules.</div>
+  </div>
+    <ng4-loading-spinner [threshold]="2000" [timeout]="5000" [loadingText]="'Please wait...'" [zIndex]="9999"></ng4-loading-spinner>
+  </div>

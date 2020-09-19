@@ -1,0 +1,219 @@
+<div class="container-fluid">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <li class="breadcrumb-item"><a [routerLink]="['/clients']">{{clientSelected}}</a></li>
+        <li class="breadcrumb-item"><a [routerLink]="['/update-project-details']">{{projectSelected}}</a></li>
+        <li class="breadcrumb-item active">Data Upload</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8 col-xlg-7 col-md-9">
+      <div class="card card-scroll">
+        <div class="card-block">
+          <h5 class="h5-color">Data Upload</h5>
+          <form [formGroup]="dataUploadForm" id="form_inputs" class="form-material" #FormGroupDirective="ngForm"  (ngSubmit)="onDataUploadSubmit()">
+            {{progressName}}
+            <div class="progress" *ngIf="isProgreessVisible">
+              <div class="progress-bar progress-bar-striped progress-bar-animated active bg-info" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width.%':progressWidth}">
+                {{progressWidth}}%
+              </div>
+            </div>
+            <!-- You can now use it in app.component.html -->
+            <br />
+            <div class="row">
+              <div class="col-sm-11">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">Master Brand List</label>
+                  <input type="file" [(ngModel)]="master_brand" (change)="handleFileSelect($event)" accept=".csv" formControlName="BrandListFile" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': submitted && f.BrandListFile.errors }" />
+                  <div *ngIf="submitted && f.BrandListFile.errors" class="invalid-feedback">
+                    <div *ngIf="f.BrandListFile.errors.required" class="error-defined">Master Brand List is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-1" *ngIf="isIconVis1"><i class="fa fa-check-circle icons-check"></i></div>
+              <div class="col-sm-11">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">Codesets</label>
+                  <input type="file" [(ngModel)]="codesets" (change)="codesetFolderSelect($event)" formControlName="Codesets" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': submitted && f.Codesets.errors }" webkitdirectory mozdirectory msdirectory odirectory directory multiple />
+
+                  <div *ngIf="submitted && f.Codesets.errors" class="invalid-feedback">
+                    <div *ngIf="f.Codesets.errors.required" class="error-defined">Codesets is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-1" *ngIf="isIconVis2"><i class="fa fa-check-circle icons-check"></i></div>
+              <div class="col-sm-11">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">Brand Model Collection</label>
+                  <input type="file" [(ngModel)]="brand_model_collection" (change)="ComponentDataSelect($event)" accept=".csv" formControlName="BrandModelCollection" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': submitted && f.BrandModelCollection.errors }" />
+
+                  <div *ngIf="submitted && f.BrandModelCollection.errors" class="invalid-feedback">
+                    <div *ngIf="f.BrandModelCollection.errors.required" class="error-defined">Brand Model Collection is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-1" *ngIf="isIconVis3"><i class="fa fa-check-circle icons-check"></i></div>
+              <div class="col-sm-11">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">Cross Reference by Brands</label>
+                  <input type="file" [(ngModel)]="cross_reference_brands" (change)="crossReferenceBrandsSelect($event)" accept='.xml' formControlName="CrossReferenceBrands" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': submitted && f.CrossReferenceBrands.errors }" />
+
+                  <div *ngIf="submitted && f.CrossReferenceBrands.errors" class="invalid-feedback">
+                    <div *ngIf="f.CrossReferenceBrands.errors.required" class="error-defined">Cross Reference by Brands is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-1" *ngIf="isIconVis4"><i class="fa fa-check-circle icons-check"></i></div>
+              <div class="col-sm-11">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">Brand Info CEC</label>
+                  <input type="file" [(ngModel)]="brand_info_cec" (change)="BrandInfoCecSelect($event)" accept=".csv" formControlName="BrandInfoCec" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': submitted && f.BrandInfoCec.errors }" />
+
+                  <div *ngIf="submitted && f.BrandInfoCec.errors" class="invalid-feedback">
+                    <div *ngIf="f.BrandInfoCec.errors.required" class="error-defined">Brand Info CEC is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-1" *ngIf="isIconVis5"><i class="fa fa-check-circle icons-check"></i></div>
+              <div class="col-sm-11">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">Brand Info EDID</label>
+                  <input type="file" [(ngModel)]="brand_info_edid" (change)="BrandInfoEdidSelect($event)" accept=".csv" formControlName="BrandInfoEdid" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': submitted && f.BrandInfoEdid.errors }" />
+
+                  <div *ngIf="submitted && f.BrandInfoEdid.errors" class="invalid-feedback">
+                    <div *ngIf="f.BrandInfoEdid.errors.required" class="error-defined">Brand Info EDID is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-1" *ngIf="isIconVis6"><i class="fa fa-check-circle icons-check"></i></div>
+
+              <div class="col-sm-11">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">Brand Info CEC-EDID</label>
+                  <input type="file" [(ngModel)]="brand_info_cec_edid" (change)="BrandInfoCecEdidSelect($event)" accept=".csv" formControlName="BrandInfoCecEdid" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': submitted && f.BrandInfoCecEdid.errors }" />
+
+                  <div *ngIf="submitted && f.BrandInfoCecEdid.errors" class="invalid-feedback">
+                    <div *ngIf="f.BrandInfoCecEdid.errors.required" class="error-defined">Brand Info CEC-EDID is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-1" *ngIf="isIconVis7"><i class="fa fa-check-circle icons-check"></i></div>
+
+            </div>
+
+            <div class="form-group row text-right">
+              <div class="col-sm-11">
+                <button type="button" (click)="close()" class="btn btn-info">Close</button>&nbsp;
+                <button type="submit" class="btn btn-info">Upload</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-sm-6" *ngIf="isdataUploaded">
+      <div class="card card-scroll">
+        <div class="card-block">
+          <div *ngIf="masterDataVisible">
+            <p class="heading">{{dataName}}</p>
+            <div class="">
+              <p class="colorGreen">{{InsertCount}} - Records Inserted</p>
+            </div>
+            <div class="">
+              <p class="colorOrange">{{ExistsCount}} - Records Exists</p>
+            </div>
+            <div class="">
+              <p class="colorRed">{{FailedCount}} - Records Failed</p>
+            </div>
+            </div>
+
+            <div *ngIf="codeVisible">
+              <p class="heading">{{dataCodeName}}</p>
+              <div class="">
+                <p class="colorGreen">{{InsertCodeCount}} - Records Inserted</p>
+              </div>
+              <div class="">
+                <p class="colorOrange">{{ExistsCodeCount}} - Records Exists</p>
+              </div>
+              <div class="">
+                <p class="colorRed">{{FailedCodeCount}} - Records Failed</p>
+              </div>
+            </div>
+
+            <div *ngIf="brandVisible">
+              <p class="heading">{{dataBrandName}}</p>
+              <div class="">
+                <p class="colorGreen">{{InsertBrandCount}} - Records Inserted</p>
+              </div>
+              <div class="">
+                <p class="colorOrange">{{ExistsBrandCount}} - Records Exists</p>
+              </div>
+              <div class="">
+                <p class="colorRed">{{FailedBrandCount}} - Records Failed</p>
+              </div>
+            </div>
+
+            <div *ngIf="crossDataVisible">
+              <p class="heading">{{dataCrossName}}</p>
+              <div class="">
+                <p class="colorGreen">{{InsertCrossCount}} - Records Inserted</p>
+              </div>
+              <div class="">
+                <p class="colorOrange">{{ExistsCrossCount}} - Records Exists</p>
+              </div>
+              <div class="">
+                <p class="colorRed">{{FailedCrossCount}} - Records Failed</p>
+              </div>
+            </div>
+
+            <div *ngIf="cecDataVisible">
+              <p class="heading">{{dataCecName}}</p>
+              <div class="">
+                <p class="colorGreen">{{InsertCecCount}} - Records Inserted</p>
+              </div>
+              <div class="">
+                <p class="colorOrange">{{ExistsCecCount}} - Records Exists</p>
+              </div>
+              <div class="">
+                <p class="colorRed">{{FailedCecCount}} - Records Failed</p>
+              </div>
+            </div>
+
+            <div *ngIf="edidDataVisible">
+              <p class="heading">{{dataEdidName}}</p>
+              <div class="">
+                <p class="colorGreen">{{InsertEdidCount}} - Records Inserted</p>
+              </div>
+              <div class="">
+                <p class="colorOrange">{{ExistsEdidCount}} - Records Exists</p>
+              </div>
+              <div class="">
+                <p class="colorRed">{{FailedEdidCount}} - Records Failed</p>
+              </div>
+            </div>
+
+            <div *ngIf="cecEdidDataVisible">
+              <p class="heading">{{dataCecEdidName}}</p>
+              <div class="">
+                <p class="colorGreen">{{InsertCecEdidCount}} - Records Inserted</p>
+              </div>
+              <div class="">
+                <p class="colorOrange">{{ExistsCecEdidCount}} - Records Exists</p>
+              </div>
+              <div class="">
+                <p class="colorRed">{{FailedCecEdidCount}} - Records Failed</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      
+      </div>
+  </div>

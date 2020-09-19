@@ -1,0 +1,44 @@
+<div class="container-fluid">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Admin</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter info hover-cursor" (click)="clientsView()">
+        <i class="fa fa-users"></i>
+        <span class="count-name">Clients</span>
+        <!--<span class="count-numbers">12</span>-->
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter bg-green info hover-cursor" (click)="userView()">
+        <i class="fa fa-cogs"></i>
+        <span class="count-name">Accessibility</span>
+        <!--<span class="count-numbers">2000</span>-->
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter bg-purple info hover-cursor" (click)="searchHistory()">
+        <i class="fa fa-history" aria-hidden="true"></i>
+        <span class="count-name">Search History</span>
+        <!--<span class="count-numbers">2000</span>-->
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter bg-dark-blue info hover-cursor" (click)="addApi()">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        <span class="count-name">Add API</span>
+        <!--<span class="count-numbers">2000</span>-->
+      </div>
+    </div>
+
+  </div>
+</div>

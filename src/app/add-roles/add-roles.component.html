@@ -1,0 +1,75 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-12 col-12 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/accessible-modules']">Accessibility</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active" *ngIf="isCreateUsers"><a [routerLink]="['/user-library']">Users</a><i class="fa fa-arrow-right" aria-hidden="true"></i></li>
+        <li class="breadcrumb-item active" *ngIf="isCreateUsers"><a [routerLink]="['/create-users']">Create Users</a><i class="fa fa-arrow-right" aria-hidden="true"></i></li>
+        <li class="breadcrumb-item active" *ngIf="isEditUsers"><a [routerLink]="['/edit-user-details']">Update User Details</a><i class="fa fa-arrow-right" aria-hidden="true"></i></li>
+        <li class="breadcrumb-item active" *ngIf="isroleModules"><a [routerLink]="['/role-module-view']">Role-Module-View</a><i class="fa fa-arrow-right" aria-hidden="true"></i></li>
+        
+        <li class="breadcrumb-item active">Create Role</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-8">
+      <div class="card">
+        <div class="card-block">
+          <div class="row">
+            <div class="col-sm-6">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th class="colorBlue">Role</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <input type="text" placeholder="Please Enter the Role" [(ngModel)]="roleName" [ngModelOptions]="{standalone: true}" class="form-control form-control-line" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-sm-6">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th class="colorBlue">Modules</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let list of modulesList;let i=index;">
+                    <td>
+                      <div class="custom-control custom-checkbox">
+                        <input #checkboxes type="checkbox" class="custom-control-input" id="customCheck-{{i}}" value="{{list}}" (change)="click(list,$event.target.checked)">
+                        <label class="custom-control-label" for="customCheck-{{i}}">&nbsp;&nbsp;{{list}}</label>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="form-group row text-right">
+            <div class="col-sm-12">
+              <button type="button" (click)="close()" class="btn btn-secondary">Close</button>&nbsp;
+              <button type="submit" (click)="roleSubmit()" class="btn btn-info">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng4-loading-spinner [threshold]="2000" [timeout]="5000" [loadingText]="'Please wait...'" [zIndex]="9999"></ng4-loading-spinner>
+
+</div>

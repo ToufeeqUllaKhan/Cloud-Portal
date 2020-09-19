@@ -1,0 +1,121 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-12 col-12 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/accessible-modules']">Accessibility</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/user-library']">Users</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Update User Details</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-11 col-xlg-12 col-md-10">
+      <div class="card">
+        <div class="card-block">
+          <h5 class="h5-color">User Details</h5>
+          <br />
+          <form [formGroup]="updateUserForm" class="form-material" (ngSubmit)="onUpdateUserSubmit()">
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label class="labelsubSpan col-sm-12 col-form-label">First Name</label>
+                  <input type="text" [(ngModel)]="firstname" formControlName="firstName" class="form-control form-control-line col-sm-12" [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }" />
+
+                  <div *ngIf="submitted && f.firstName.errors" class="invalid-feedback">
+                    <div *ngIf="f.firstName.errors.required" class="error-defined">First Name is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label class="labelsubSpan col-sm-12 col-form-label">Last Name</label>
+                  <input type="text" [(ngModel)]="lastname" formControlName="lastName" class="form-control form-control-line col-sm-12" [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }" />
+
+                  <div *ngIf="submitted && f.lastName.errors" class="invalid-feedback">
+                    <div *ngIf="f.lastName.errors.required" class="error-defined">Last Name is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label class="labelsubSpan col-sm-12 col-form-label">Username</label>
+                  <input type="text" [(ngModel)]="username" formControlName="userName" [attr.disabled]="true" class="form-control form-control-line col-sm-12 disableField" [ngClass]="{ 'is-invalid': submitted && f.userName.errors }" />
+
+                  <div *ngIf="submitted && f.userName.errors" class="invalid-feedback">
+                    <div *ngIf="f.userName.errors.required" class="error-defined">Username is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label class="labelsubSpan col-sm-12 col-form-label">Password</label>
+                  <input type="{{typeInput}}" [(ngModel)]="password" formControlName="passWord" class="form-control form-control-line col-sm-12" [ngClass]="{ 'is-invalid': submitted && f.passWord.errors }" style="position:relative;" /><i *ngIf="showPassword" class="fa fa-eye-slash eyeIcon" (click)="hide()"></i><i *ngIf="hidePassword" class="fa fa-eye eyeIcon" (click)="show()"></i>
+
+                  <div *ngIf="submitted && f.passWord.errors" class="invalid-feedback">
+                    <div *ngIf="f.passWord.errors.required" class="error-defined">Password is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label class="labelsubSpan col-sm-12 col-form-label">Email</label>
+                  <input type="text" [(ngModel)]="email" formControlName="eMail" class="form-control form-control-line col-sm-12" [ngClass]="{ 'is-invalid': submitted && f.eMail.errors }" />
+
+                  <div *ngIf="submitted && f.eMail.errors" class="invalid-feedback">
+                    <div *ngIf="f.eMail.errors.required" class="error-defined">Email is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label class="labelsubSpan col-sm-12 col-form-label">Mobile Number</label>
+                  <input type="text" [(ngModel)]="mobileNumber" formControlName="mobileNo" maxlength="10" onkeydown="return ( event.ctrlKey || event.altKey || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false) || (95<event.keyCode && event.keyCode<106) || (event.keyCode==8) || (event.keyCode==9) || (event.keyCode>34 && event.keyCode<40) || (event.keyCode==46))" class="form-control form-control-line col-sm-12" [ngClass]="{ 'is-invalid': submitted && f.mobileNo.errors }" />
+
+                  <div *ngIf="submitted && f.mobileNo.errors" class="invalid-feedback">
+                    <div *ngIf="f.mobileNo.errors.required" class="error-defined">Mobile Number is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <label class="labelsubSpan col-sm-12 col-form-label">Project</label>
+                <ng-multiselect-dropdown name="projects" class="col-sm-12 projectAccess" [ngModelOptions]="{standalone: true}" [(ngModel)]="projectNames" [placeholder]="'Select Projects'" [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)"  (onSelect)="onProjectSelect($event)"></ng-multiselect-dropdown>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label class="labelsubSpan col-sm-11 col-form-label">Role</label>
+                  <span (click)="newRole()" class="float-right oval col-sm-1" title="Add Role">
+                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                  </span>
+                  <select [(ngModel)]='role' (change)="roleChange()" formControlName="Role" class="col-sm-12 form-control dropdown-list" [ngClass]="{ 'is-invalid': submitted && f.Role.errors }">
+                    <option [value]=null>Select</option>
+                    <option *ngFor="let list of roles" [value]="list.name">{{list.name}}</option>
+                  </select>
+                  <div *ngIf="submitted && f.Role.errors" class="invalid-feedback">
+                    <div *ngIf="f.Role.errors.required" class="error-defined">Role is required</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row text-right">
+              <div class="col-sm-12">
+                <button type="button" (click)="close()" class="btn btn-secondary">Close</button>&nbsp;
+                <button type="submit" class="btn btn-info">Save</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <ng4-loading-spinner [threshold]="2000" [timeout]="4000" [loadingText]="'Please wait...'" [zIndex]="9999"></ng4-loading-spinner>
+
+</div>

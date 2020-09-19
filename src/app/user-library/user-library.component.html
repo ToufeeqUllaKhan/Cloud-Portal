@@ -1,0 +1,50 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-12 col-12 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/accessible-modules']">Accessibility</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Users</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xl-12 col-md-12">
+      <button class="btn btn-primary float-right" (click)="CreateUser()">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        New User
+      </button>
+    </div>
+    <div class="col-xl-12 col-md-12">&nbsp;</div>
+    <div class="col-xl-12 col-md-12">
+      <table id="projectView" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="dataTable" style="width:100%">
+        <thead>
+          <tr>
+            <th>SL No.</th>
+            <th>User Name</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of userDetails;let i=index;">
+            <td class="align-center">{{i+1}}</td>
+            <td>{{user.username}}</td>
+            <td>{{user.role}}</td>
+            <td>{{user.eMail}}</td>
+            <td class="btn-access" (click)="editUser(user.username)"><u><strong>Edit</strong></u></td>
+          </tr>
+        </tbody>
+      </table>
+      <br /><br />
+    </div>
+
+  </div>
+</div>

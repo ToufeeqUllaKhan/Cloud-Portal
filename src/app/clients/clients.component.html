@@ -1,0 +1,59 @@
+<div class="container-fluid main-scroll" (resized)="onResized($event)">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-12 col-12 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Data Management</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Clients</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row" *ngFor="let lists of activeRegionsList;">
+    <div class="row-full col-sm-12">
+      <h2 class="font-bold"><i class="fa fa-globe" aria-hidden="true"></i> {{lists}}</h2>
+    </div>
+    <div class="container-fluid scroll-x">
+      <div class="row flex-nowrap">
+        <ng-container *ngFor="let list of arrClients;let i=index;">
+          
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" *ngIf="list.clientRegion==lists">
+            <div class="box-part text-center" [style.background-color]="list.background">
+              <ul class="nav">
+                <li class="dropdown">
+                  <button class="no-border dropdown-toggle" value={{list.clientName}} (mouseenter)="chooseClient(list.clientName,list.clientRegion)"><i class="fa fa-cog color-white" aria-hidden="true"></i></button>
+                  <ul class="dropdown-menu">
+                    <li *ngFor="let proj of projects;let i=index;" class="text-wrap">&nbsp;&nbsp;&nbsp;<input type="checkbox" id="{{proj}}" (change)="pushpopcategory(proj,$event,list.clientName,list.clientRegion)" [checked]="toggleCheckBox(proj)" class="example" name={{proj}} value={{proj}} />&nbsp;&nbsp;{{proj}}</li>
+                  </ul>
+                </li>
+                <li><button class="no-border float-right check toggle" value={{list.clientName}} (click)="selectClient(list.name,list.clientName,list.clientRegion,$event)"><i class="fa fa-check-circle icons-check zoom-img"></i></button></li>
+              </ul>
+              
+              <svg class="bi bi-grid-fill cursor" width="1em" height="1em" viewBox="0 0 16 16" (click)="selectSingleClient(list.clientName,list.clientRegion)" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm-8 8A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3z" />
+              </svg>
+              <div class="title cursor" (click)="selectSingleClient(list.clientName,list.clientRegion)">
+                <h4>&nbsp;</h4>
+              </div>
+              <h4 class="cursor h4-title" (click)="selectSingleClient(list.clientName,list.clientRegion)">{{list.clientName}}</h4>
+            </div>
+          </div>
+
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group row text-right">
+    <div class="col-sm-12">
+      <button type="submit" (click)="nextBtn()" *ngIf="isNextVisible" class="btn btn-info pull-btm">Next</button>
+    </div>
+    <div class="col-sm-12">&nbsp;<br /></div>
+  </div>
+  <br />
+  <br />
+  <br />
+</div>

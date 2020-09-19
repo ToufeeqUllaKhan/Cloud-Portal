@@ -1,0 +1,213 @@
+<div class="container-fluid">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/api-configuration']">Api Configuration</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Edit Api</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-block">
+          <div class="row">
+            <div class="col-sm-5">
+              <label class="colorBlue">Project Name<span class="color-red">*</span></label>
+              <select [(ngModel)]="projectNames" class="form-control selectDrop" (change)="changeProject()">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+              </select>
+              <br />
+              <div *ngIf="modulesAvailability">
+                <label class="colorBlue">Url<span class="color-red">*</span></label><span class="float-right" title="Edit Path" (click)="editAddress()"><i class="fa fa-pencil" aria-hidden="true"></i></span>
+                <textarea rows="2" type="text" [(ngModel)]="address" (change)="addressValid()" class="form-control disable"></textarea>
+                <div class="invalid-feedback" *ngIf="invalidUrl">Invalid Url</div>
+              </div>
+            </div>
+            <div class="col-sm-7">
+              <p class="mb-2">
+                <span id="btn_id" class="float-right oval" title="Add Modules" (click)="AddModules()">
+                  <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                </span>
+              </p>
+              <div class="col-sm-12"><p class="colorRed mr-2" *ngIf="NoData">&nbsp;&nbsp;&nbsp;No Modules Available for this Project.</p></div>
+              <div class="form-scroll" *ngIf="isApiModules">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th class="colorBlue">Api Modules</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let list of apimodulesList;let i=index;">
+                      <td>
+                        <div class="custom-control custom-checkbox">
+                          <input #checkboxes type="checkbox" class="custom-control-input" id="customCheck-{{i}}" value="{{list.name}}" checked="{{ arr && -1 !== arr.indexOf(list.name) && list.statusFlag == 1 ? 'checked' : '' }}" (change)="removedItems(list.name,$event.target.checked,list.description,list.address,list.uri,list.apiId)">
+                          <label class="custom-control-label" for="customCheck-{{i}}" title="{{list.description}}">&nbsp;&nbsp;{{list.name}}</label>
+                          <span class="float-right editField" (click)="editApi(list.apiId,list.name,list.description,list.address,list.uri,list.statusFlag)">Edit</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="form-group row text-right" *ngIf="isApiModules">
+            <div class="col-sm-12">
+              <button type="button" (click)="close()" class="btn btn-secondary">Close</button>&nbsp;
+              <button type="submit" (click)="ModuleSubmit()" class="btn btn-info">Save</button>
+            </div>
+          </div>
+          <div class="row"><br /></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-deactive" id="btn-active" data-toggle="modal" data-target="#editDataModal">
+  </button>
+  <div class="modal fade" id="editDataModal" tabindex="-1" role="dialog" aria-labelledby="editDataModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="editDataModalLabel">Add Modules</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalClose()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="addModules" class="form-material" (ngSubmit)="onsaveModules()">
+            <br />
+            <div class="row" *ngIf="isModulesVisible">
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-2 col-form-label">Url<span class="color-red">*</span></label>
+                  <textarea type="text" [(ngModel)]="address" formControlName="Address" (change)="addressValid()" class="addressAttr form-control form-control-line col-sm-10" [ngClass]="{ 'is-invalid': submitted && f.Address.errors,'disable': showMyClass }"></textarea>
+                  <div *ngIf="submitted && f.Address.errors" class="invalid-feedback">
+                    <div *ngIf="f.Address.errors.required" class="error-defined text-right">Url is required</div>
+                  </div>
+                  <div class="invalid-feedback" *ngIf="invalidUrl">Invalid Url</div>
+                </div>
+              </div>
+            </div>
+            <p *ngIf="noModules" class="darkBlue">&nbsp;&nbsp;&nbsp;All Modules are available for this project!!!</p>
+            <div class="row" *ngIf="isModulesVisible">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th class="colorBlue">Api Modules</th>
+                    <th class="colorBlue border-left">Path</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let list of apimodules;let i=index;">
+                    <td>
+                      <div class="custom-control custom-checkbox">
+                        <input #checkboxes type="checkbox" class="custom-control-input addModulesChecklist" id="check_{{i}}" value="{{list.name}}" (change)="checkedItems(list.name,$event.target.checked,list.description,i+1)">
+                        <label class="custom-control-label" for="check_{{i}}" title="{{list.description}}">&nbsp;&nbsp;{{list.name}}</label>
+                      </div>
+                    </td>
+                    <td>
+                      <input id="input_{{i+1}}" type="text" (keydown)="keyDownHandler($event)" class="form-control form-control-line" (change)="checkUrlValidation()" />
+                      <p class="invalid-feedback disabled" id="isIndex{{i+1}}Url">Path is required</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="form-group row text-right" *ngIf="isModulesVisible">
+              <div class="col-sm-12">
+                <button type="button" (click)="modalClose()" class="btn btn-secondary" data-dismiss="modal">Close</button>&nbsp;
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-deactive" id="editApis" data-toggle="modal" data-target="#editApiModal">
+  </button>
+  <div class="modal fade" id="editApiModal" tabindex="-1" role="dialog" aria-labelledby="editApiModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="editApiModalLabel">Edit API</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalClose()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="editApiData" class="form-material" (ngSubmit)="onsaveUpdateApiSubmit()">
+            <br />
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-4 col-form-label">Path<span class="color-red">*</span></label>
+                  <input type="text" [(ngModel)]="updatedUrl" (keydown)="keyDownHandler($event)" formControlName="urlUpdate" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': editsubmitted && g.urlUpdate.errors }" />
+                  <div *ngIf="editsubmitted && g.urlUpdate.errors" class="invalid-feedback">
+                    <div *ngIf="g.urlUpdate.errors.required" class="error-defined text-right">Path is required</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row text-right">
+              <div class="col-sm-12">
+                <button type="button" (click)="modalClose()" class="btn btn-secondary" data-dismiss="modal">Close</button>&nbsp;
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-deactive" id="editAddressData" data-toggle="modal" data-target="#editAddressModal">
+  </button>
+  <div class="modal fade" id="editAddressModal" tabindex="-1" role="dialog" aria-labelledby="editAddressModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="editApiModalLabel">Edit Url</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalClose()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="editAddressData" class="form-material" (ngSubmit)="onsaveUpdateAddressSubmit()">
+            <br />
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-4 col-form-label">Url<span class="color-red">*</span></label>
+                  <textarea type="text" [(ngModel)]="upd_addr" (change)="editaddressValid()" formControlName="updatedAddress" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': addrsubmitted && h.updatedAddress.errors }"></textarea>
+                  <div *ngIf="addrsubmitted && h.updatedAddress.errors" class="invalid-feedback">
+                    <div *ngIf="h.updatedAddress.errors.required" class="error-defined text-right">Url is required</div>
+                  </div>
+                  <div class="invalid-feedback" *ngIf="editinvalidUrl">Invalid Url</div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row text-right">
+              <div class="col-sm-12">
+                <button type="button" (click)="modalClose()" class="btn btn-secondary" data-dismiss="modal">Close</button>&nbsp;
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng4-loading-spinner [threshold]="500" [timeout]="3000" [loadingText]="'Please wait...'" [zIndex]="9999"></ng4-loading-spinner>
+
+</div>

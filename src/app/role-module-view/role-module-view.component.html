@@ -1,0 +1,67 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-12 col-12 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/accessible-modules']">Accessibility</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Role-Module-View</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-10">
+      <div class="card">
+        <div class="card-block">
+          <div class="row">
+            <div class="col-sm-6 form-scroll">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th class="colorBlue">Role
+                    <span (click)="newRole()" class="float-right oval col-sm-1" title="Add Role">
+                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                    </span>
+                    </th>
+                    <th class="colorBlue">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let list of roles;let i=index;">
+                    <td>
+                      {{list.name}}
+                    </td>
+                    <td (click)="EditRole(list.name)"><u><strong>Edit</strong></u></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-sm-6">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th class="colorBlue">Modules</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let list of modulesList;let i=index;">
+                    <td>
+                      {{list}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng4-loading-spinner [threshold]="2000" [timeout]="5000" [loadingText]="'Please wait...'" [zIndex]="9999"></ng4-loading-spinner>
+
+</div>

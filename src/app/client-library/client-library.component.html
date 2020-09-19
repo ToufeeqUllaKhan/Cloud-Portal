@@ -1,0 +1,91 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Clients</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xl-12 col-md-12">
+      <button class="btn btn-primary float-right" (click)="newClient()">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        New Client
+      </button>
+    </div>
+    <div class="col-xl-12 col-md-12">&nbsp;</div>
+    <div class="col-xl-12 col-md-12">
+      <table id="projectView" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="dataTable" style="width:100%">
+        <thead>
+          <tr>
+            <th>SL No.</th>
+            <th>Project Name</th>
+            <th>Signature Key</th>
+            <th>Allow Download</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let client of clientDetails;let i=index;">
+            <td class="align-center">{{i+1}}</td>
+            <td class="align-width">{{client.projectName}}</td>
+            <td class="signatureData">{{client.signatureKey}}</td>
+            <td class="">{{client.allowDownload}}</td>
+            <td class="pr-btn" (click)="editSignatureKey(client,client.allowDownload)">
+              <u>Edit</u>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br /><br />
+      <button class="btn-deactive" id="btn-active" data-toggle="modal" data-target="#editDataModal">
+      </button>
+      <div class="modal fade" id="editDataModal" tabindex="-1" role="dialog" aria-labelledby="editDataModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title h5-color" id="editDataModalLabel">Edit Signature Key</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalClose()">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form [formGroup]="editSignatureData" class="form-material" (ngSubmit)="onsaveUpdateSignatureSubmit()">
+                <br />
+                <div class="row">
+                  <div class="col-sm-12">
+                    <div class="form-group form-inline">
+                      <label class="labelsubSpan col-sm-4 col-form-label">Signature Key<span class="color-red">*</span></label>
+                      <input type="text" [(ngModel)]="editedSignature" formControlName="editSignatureKey" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': submitted && f.editSignatureKey.errors }" />
+                      <div *ngIf="submitted && f.editSignatureKey.errors" class="invalid-feedback">
+                        <div *ngIf="f.editSignatureKey.errors.required" class="error-defined text-right">Signature Key is required</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-12">
+                    <div class="custom-control custom-checkbox checkbox-lg" style="padding-left: 2.4rem;">
+                      <input type="checkbox" class="custom-control-input" id="allow_download" value="" />
+                      <label class="custom-control-label" for="allow_download">Allow Downloads</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group row text-right">
+                  <div class="col-sm-12">
+                    <button type="button" (click)="modalClose()" class="btn btn-secondary" data-dismiss="modal">Close</button>&nbsp;
+                    <button type="submit" class="btn btn-primary">Save</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+   </div>
+  </div>

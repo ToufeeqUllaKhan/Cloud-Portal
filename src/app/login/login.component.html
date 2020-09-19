@@ -1,0 +1,88 @@
+<div class="container-fluid">
+  <!-- <div class="container-login">
+         <div class="row">
+           <div class="col-md-12">
+               <div class="col login-sec">
+               <div class="text-center">
+                 <span class="login100-form-logo text-center">
+                   <img src="assets/images/omni_logo1.png" alt="omni_logo" class="omni_logo">&nbsp;&nbsp;
+                   <strong class="text-center text-xl">SSC PORTAL</strong>
+                 </span>
+               </div>
+               <br />
+               <h2 class="text-center h2-style">LOG IN</h2>
+               <form [formGroup]="loginForm" class="login-form" (ngSubmit)="onLoginSubmit()">
+                 <div class="form-group">
+                   <span class="fa fa-user focus-input100"></span>
+                   <input type="text" class="form-control" formControlName="username" placeholder="Username" [(ngModel)]="userName" [ngClass]="{ 'is-invalid': submitted && f.username.errors }" />
+                   <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+                     <div *ngIf="f.username.errors.required" style="font-size: 12pt;">Username is required</div>
+                   </div>
+                 </div>
+                 <div class="form-group">
+                   <span class="fa fa-lock focus-input100"></span>
+                   <input type="password" class="form-control" formControlName="password" placeholder="Password" [(ngModel)]="pwd" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+                   <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                     <div *ngIf="f.password.errors.required" style="font-size: 12pt;">Password is required</div>
+                   </div>
+                 </div>
+                 <div class="form-check">
+                   <label class="form-check-label">
+                     <input type="checkbox" class="form-check-input">
+                     <small>Remember Me</small>
+                   </label>
+                 </div>
+                 <div class="text-center">
+                   <button type="submit" class="btn btn-login">Login</button>
+                 </div>
+                 <br />
+                 <div class="text-center">
+                   <a class="txt1" href="#">
+                     Forgot Password?
+                   </a>
+                 </div>
+               </form>
+             </div>
+           </div>
+       </div>
+  </div>-->
+    <div class="row">
+      <div class="col-md-3 mx-auto">
+        <div class="card card-signin my-5">
+          <div class="card-body">
+            <div class="text-center">
+              <span class="login100-form-logo text-center">
+                <img src="assets/images/omni_remotes_logo.png" alt="omni_logo" class="omni_logo">
+              </span>
+            </div>
+            <h5 class="card-title text-center text-muted">Login</h5>
+            <form class="form-signin" [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()">
+              <div class="form-group">
+                <span class="fa fa-user focus-input100"></span>
+                <input type="text" class="form-control" formControlName="username" placeholder="Username" [(ngModel)]="userName" [ngClass]="{ 'is-invalid': submitted && f.username.errors }" />
+                <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+                  <div *ngIf="f.username.errors.required" class="error-defined">Username is required</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <span class="fa fa-lock focus-input100"></span>
+                <input type="password" class="form-control" formControlName="password" placeholder="Password" [(ngModel)]="pwd" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+                <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                  <div *ngIf="f.password.errors.required" class="error-defined">Password is required</div>
+                </div>
+              </div>
+              <div class="text-center">
+                <button class="btn btn-primary btn-lg" type="submit">Login</button>
+                </div>
+                <br />
+                <div class="text-center">
+                  <a class="txt1" href="#">
+                    <u>Forgot Password?</u>
+                  </a>
+                </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

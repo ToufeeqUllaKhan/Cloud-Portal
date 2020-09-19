@@ -1,0 +1,204 @@
+
+#tabs {
+  background: #007b5e;
+  color: #eee;
+}
+
+  #tabs h6.section-title {
+    color: #eee;
+  }
+  #tabs .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    color: #ffffff;
+    /*background-color: #337ab7;
+    border-color: transparent transparent #f3f3f3;*/
+    border-bottom: 4px solid !important;
+    font-weight: bold;
+    background: linear-gradient(60deg,#66bb6a,#43a047) !important;
+  }
+.nav-tabs .nav-link {
+  background: #e4e4e4a1;
+  border: 1px solid #adafb1;
+}
+.tab-content {
+  border: 1px solid #e4e4e4a1;
+  padding: 0px 8px;
+}
+table.dataTable thead th, table.dataTable thead td {
+  color: #ffffff !important;
+  background: linear-gradient(60deg,#66bb6a,#43a047) !important;
+  /*color: #5c5c5d;*/
+  /*background: #e7f8f3;*/
+}
+table.dataTable td, table.dataTable th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+.nav-fill .nav-item {
+  flex: none;
+  text-align: center;
+  color: #14af4b;
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 133px;
+  min-width: 130px;
+}
+.dropright .dropdown-toggle::after {
+  display:none;
+}
+.btn-green{
+  color:forestgreen;
+}
+.btn-red{
+  color:red;
+}
+.pop-menu {
+  background-color: #f1f1f1;
+  border: 1px solid #1e88e5;
+  min-width: 6rem;
+  padding: .1rem 0;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  transform-origin: top;
+  transform: rotateX(-90deg);
+  transition: transform 0.3s linear;
+  padding: 0;
+  left: 8px !important;
+}
+.icon-label{
+  padding-left:0.5rem;
+}
+.pop-menu button:hover{
+  background: #e4e4e4a1;
+}
+.list-values{
+  width:100%;
+  text-align:left;
+}
+.align-center{
+  /*text-align:center;*/
+}
+.pop-menu:before {
+  content: "\25C0";
+  width: 0;
+  height: 0;
+  position: absolute;
+  bottom: 100%;
+  right: 106px;
+  border-width: 0 6px 6px 6px;
+  color: #1e88e5;
+}
+table.dataTable tbody th, table.dataTable tbody td {
+  padding: 8px 18px;
+}
+.pr-btn {
+  padding: 8px 38px !important;
+}
+.no-data-available {
+  text-align: center;
+}
+.dataTables_empty {
+  display: none;
+}
+.mt {
+  margin-top: 2.5rem;
+  margin-bottom: 0rem;
+}
+.modal-title {
+  color: blue;
+}
+.modal-header {
+  background: #BEEBE9;
+}
+
+
+.labelsubSpan {
+  justify-content: left;
+}
+.color-merron {
+  color: #dc3545;
+  font-size: inherit;
+}
+.error-defined{
+  font-size:inherit;
+}
+.upperCase {
+  text-transform: uppercase;
+}
+table.dataTable.display tbody tr td {
+  display: block;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow: hidden;
+  width: 100px;
+}
+th {
+  text-align: left;
+}
+.dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody > table > tbody > tr > td {
+  border-spacing: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  -ms-text-overflow: ellipsis !important;
+}
+.dataTables_scrollBody {
+  overflow-x: auto !important;
+}
+.display tbody tr td:nth-child(2) {
+  width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  float: left;
+}
+table tr.odd td:first-child + td {
+  width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  float: left;
+  background: black !important;
+}
+table.dataTable.display tbody td {
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  float: left;
+}
+#removeall{
+  display:none;
+}
+
+::-webkit-scrollbar {
+  width: 0.7em;
+  height: 0.7em
+}
+
+.form-scroll {
+  overflow-y: auto;
+  overflow-x:hidden;
+  height: 450px;
+}
+
+  .form-scroll::-webkit-scrollbar-track {
+    border: 1px solid rgba(38, 198, 218, 0.7);
+    background-color: #fff;
+  }
+
+  .form-scroll::-webkit-scrollbar {
+    background-color: #2dcdb4;
+    width: 0.7em;
+    height: 0.7em
+  }
+
+  .form-scroll::-webkit-scrollbar-thumb {
+    background-color: #2dcdb4;
+  }
+.cursorPointer{
+  cursor:pointer;
+}
+.dataTables_scrollBody thead tr[role="row"] {
+  visibility: collapse !important;
+}

@@ -1,0 +1,829 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-12 col-12 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="" (click)="prev()">Clients</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/data-configuration-list']">Data Configuration</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Zip Uploads</li>
+      </ol>
+    </div>
+  </div>
+  <br />
+  <div class="row">
+    <div class="col-lg-12 col-xlg-12 col-md-12">
+      <div class="card">
+        <div class="card-block">
+          <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'" [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)" (onSelect)="onProjectSelect($event)" style="pointer-events:none;"></ng-multiselect-dropdown>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br />
+  <div class="row" *ngIf="VersionAvailability">
+    <div class="col-xs-12 col-sm-6">
+      <div class="card">
+        <div class="card-block">
+          <h5 class="h5-color">Data Updates</h5>
+          <div class="row">
+            <div class="col-md-12 float-right">
+              <button class="btn-data" (click)="CreateNewVersion()" title="Create New Version">
+                <span><i class="fa fa-plus-circle green" aria-hidden="true"></i></span>
+              </button>
+            </div>
+          </div>
+          <form [formGroup]="uploadData" class="form-material" (ngSubmit)="onUploadDataSubmit()">
+            <br />
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-4 col-form-label">Version</label>
+                  <select [(ngModel)]='version_list' (change)="changeVersion()" formControlName="VersionData" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': submitted && f.VersionData.errors }">
+                    <option [value]=null>Select</option>
+                    <option *ngFor="let list of versions" value={{list}}>{{list}}</option>
+                  </select>
+                  <div *ngIf="submitted && f.VersionData.errors" class="invalid-feedback">
+                    <div *ngIf="f.VersionData.errors.required" class="error-defined">Version is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="col-form-label col-sm-4">Zip File</label>
+                  <label (click)="fileUpload()" class="custom-file-upload" *ngIf="uploadIcon">
+                    <i class="fa fa-cloud-upload"></i>&nbsp;<span>Upload</span>
+                  </label>
+                  <label (click)="fileUpload()" class="custom-file-upload" *ngIf="updateIcon">
+                    <i class="fa fa-cloud-upload"></i>&nbsp;<span>Update</span>
+                  </label>
+                  &nbsp;&nbsp;
+                  <label></label>
+                  <label *ngIf="versionAvail">File Already Exists!!</label>
+                  <label *ngIf="versionUpdate" class="dark-blue">Click here to Update</label>
+                  <input formControlName="zipUpload" id="file-upload" (change)="uploadFileData($event)" name='upload_cont_img' type="file" style="display:none;" class="form-control" accept="application/zip">
+                  <button id="openModalButton" [hidden]="true" data-toggle="modal" data-target="#updateModal" data-backdrop="static" data-keyboard="false"></button>
+
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-6" *ngIf="statsVisible">
+      <div class="main-card mb-3 card">
+        <div class="card-block">
+          <h6 class="text-muted text-uppercase font-size-md opacity-7 mb-3 font-weight-normal">Highlights</h6>
+          <ul style="list-style:none;" *ngFor="let count of countDetails;">
+            <li class="list-group-item light-purple">Brand Count <span class="float-right">{{count.brandCount}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-yellow">Brand Info CeC <span class="float-right">{{count.brandInfoCEC}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-purple">Brand Info Edid <span class="float-right">{{count.brandInfoEdid}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-yellow">Codeset Count <span class="float-right">{{count.codesetCount}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-purple">Cross Reference Count <span class="float-right">{{count.crossReferenceCount}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-yellow">Brand Model Count <span class="float-right">{{count.brandModelCount}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-purple">CEC-EDID <span class="float-right">{{count.ceC_EDID_Data}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-6" *ngIf="deletedHistory">
+      <div class="main-card mb-3 card">
+        <div class="card-block">
+          <h5 class="h5-color">Summary</h5>
+          <span class="bb-grey">&nbsp;</span>
+          <p class="highlight-red">{{deletedprogressName}}</p>
+          <!--<div class="progress" *ngIf="isDeleteProgreessVisible">
+            <div class="progress-bar progress-bar-striped progress-bar-animated active bg-info" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width.%':progressWidth}">
+              {{deletedprogressWidth}}%
+            </div>
+          </div>-->
+          <br />
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th style="text-align:center;width:80px;">
+                  <span><i class="fa fa-star blue" aria-hidden="true"></i></span>
+                </th>
+                <th class="blueHeader" style="width: 218px;">Files</th>
+                <th class="blueHeader">Status</th>
+              </tr>
+            </thead>
+            <tbody class="form-scroll">
+              <tr *ngFor="let delete of deletedItems;let i=index;">
+                <td style="text-align:center;width:80px;">{{i+1}}</td>
+                <td style="width: 218px;">{{delete}}</td>
+                <td id={{i+1}}>pending</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="createVersion">
+    <div class="col-xs-12 col-sm-6">
+      <div class="card">
+        <div class="card-block">
+          <h5 class="h5-color">Data Upload</h5>
+          <form [formGroup]="uploadNewVersionData" class="form-material" (ngSubmit)="onUploadNewVersionDataSubmit()">
+            <br />
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">Project Version</label>
+                  <input type="text" [(ngModel)]="project_version" formControlName="projectVersion" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': newDataSubmitted && g.projectVersion.errors }" />
+
+                  <div *ngIf="newDataSubmitted && g.projectVersion.errors" class="invalid-feedback">
+                    <div *ngIf="g.projectVersion.errors.required" class="error-defined">Project Version is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">Embedded dbversion</label>
+                  <input type="text" [(ngModel)]="embed_version" formControlName="embeddedDBversion" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': newDataSubmitted && g.embeddedDBversion.errors }" />
+
+                  <div *ngIf="newDataSubmitted && g.embeddedDBversion.errors" class="invalid-feedback">
+                    <div *ngIf="g.embeddedDBversion.errors.required" class="error-defined">Embedded dbversion is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">DB Version</label>
+                  <input type="text" [(ngModel)]="db_version" formControlName="dbversion" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': newDataSubmitted && g.dbversion.errors }" />
+
+                  <div *ngIf="newDataSubmitted && g.dbversion.errors" class="invalid-feedback">
+                    <div *ngIf="g.dbversion.errors.required" class="error-defined">DB Version is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-6 col-form-label">SW Version</label>
+                  <input type="text" [(ngModel)]="sw_version" formControlName="swversion" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': newDataSubmitted && g.swversion.errors }" />
+
+                  <div *ngIf="newDataSubmitted && g.swversion.errors" class="invalid-feedback">
+                    <div *ngIf="g.swversion.errors.required" class="error-defined">SW Version is required</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row text-right">
+              <div class="col-sm-12">
+                <button type="button" (click)="close()" class="btn btn-secondary">Close</button>&nbsp;
+                <button type="submit" class="btn btn-info">Create</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="zipUploadDiv">
+    <div class="col-xs-12 col-sm-6">
+      <div class="card">
+        <div class="card-block">
+          <h5 class="h5-color">Zip Upload</h5>
+          <div class="row">
+            <div class="col-sm-12 float-right" style="display:none;">
+              <span style="color: #1e88e5;">Cancel &nbsp;</span>
+              <button class="reset" title="Click here to Cancel Zip Uploads" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false">
+                <i class="fa fa-stop" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+          <form [formGroup]="uploadZipFileData" class="form-material" (ngSubmit)="onUploadZipSubmit()">
+            <br />
+            <p class="blue-bold">{{progressName}}</p>
+            <div class="progress" *ngIf="isProgreessVisible">
+              <div class="progress-bar progress-bar-striped progress-bar-animated active bg-info" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width.%':progressWidth}">
+                {{progressWidth}}%
+              </div>
+            </div>
+            <br />
+            <div class="row">
+              <div class="col-sm-10">
+                <div class="form-group form-inline">
+                  <label class="col-form-label col-sm-3">Zip File</label>
+                  <label for="zip-upload" class="custom-file-upload">
+                    <i class="fa fa-cloud-upload"></i>&nbsp; Upload
+                  </label>
+                  &nbsp;&nbsp;
+                  <label></label>
+                  <input formControlName="zipFileUpload" (change)="zipUpload($event)" accept="application/zip" id="zip-upload" name='upload_cont_img' type="file" style="display:none;" class="form-control" />
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-group form-inline" *ngIf="loaderVisible">
+                  <button class="buttonload"><i class="fa fa-spinner fa-spin"></i></button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-6" *ngIf="viewFiles">
+      <div class="card">
+        <div class="card-block">
+          <h5 class="h5-color">Summary</h5>
+          <span class="bb-grey">&nbsp;</span>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th style="text-align:center;width:80px;">
+                  <span><i class="fa fa-star blue" aria-hidden="true"></i></span>
+                </th>
+                <th class="blueHeader" style="width: 222px;">Unzipped Files</th>
+                <th class="blueHeader">Status</th>
+              </tr>
+            </thead>
+            <tbody class="form-scroll">
+              <tr *ngFor="let data of Listitems;let i=index;" class="addDataAttr">
+                <td class="checkGreen" style="text-align:center;width:80px;"><i class="fa fa-check-circle-o green" aria-hidden="true"></i></td>
+                <td class="purple" style="width: 222px;">{{data}}</td>
+                <td class="red" attr.data-val="data-{{data}}">pending</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-6" *ngIf="isdataUploaded">
+      <div class="card" style="height:372px;">
+        <h5 class="h5-color">Overview</h5>
+        <span class="bb-grey">&nbsp;</span>
+        <div class="card-block">
+          <table class="table table-bordered table-data">
+            <thead>
+              <tr>
+                <th style="width:217px;">
+                  <span><i class="fa fa-star blue" aria-hidden="true"></i></span>
+                </th>
+                <th class="colorGreen" style="width:90px;">Inserted</th>
+                <th class="colorOrange" style="width: 90px;">Exists</th>
+                <th class="colorRed">Failed</th>
+              </tr>
+            </thead>
+            <tbody class="form-scroll">
+              <tr *ngIf="masterDataVisible">
+                <th class="blueHeader width-align">{{dataName}}</th>
+                <td class="colorGreen">{{InsertCount}}</td>
+                <td class="colorOrange">{{ExistsCount}}</td>
+                <td class="colorRed">{{FailedCount}}</td>
+              </tr>
+              <tr *ngIf="codeVisible">
+                <th class="blueHeader width-align">{{dataCodeName}}</th>
+                <td class="colorGreen">{{InsertCodeCount}}</td>
+                <td class="colorOrange">{{ExistsCodeCount}}</td>
+                <td class="colorRed">{{FailedCodeCount}}</td>
+              </tr>
+              <tr *ngIf="crossDataVisible">
+                <th class="blueHeader width-align">{{dataCrossName}}</th>
+                <td class="colorGreen">{{InsertCrossCount}}</td>
+                <td class="colorOrange">{{ExistsCrossCount}}</td>
+                <td class="colorRed">{{FailedCrossCount}}</td>
+              </tr>
+              <tr *ngIf="brandVisible">
+                <th class="blueHeader width-align">{{dataBrandName}}</th>
+                <td class="colorGreen">{{InsertBrandCount}}</td>
+                <td class="colorOrange">{{ExistsBrandCount}}</td>
+                <td class="colorRed">{{FailedBrandCount}}</td>
+              </tr>
+              <tr *ngIf="cecDataVisible">
+                <th class="blueHeader width-align">{{dataCecName}}</th>
+                <td class="colorGreen">{{InsertCecCount}}</td>
+                <td class="colorOrange">{{ExistsCecCount}}</td>
+                <td class="colorRed">{{FailedCecCount}}</td>
+              </tr>
+              <tr *ngIf="edidDataVisible">
+                <th class="blueHeader width-align">{{dataEdidName}}</th>
+                <td class="colorGreen">{{InsertEdidCount}}</td>
+                <td class="colorOrange">{{ExistsEdidCount}}</td>
+                <td class="colorRed">{{FailedEdidCount}}</td>
+              </tr>
+              <tr *ngIf="cecEdidDataVisible">
+                <th class="blueHeader width-align">{{dataCecEdidName}}</th>
+                <td class="colorGreen">{{InsertCecEdidCount}}</td>
+                <td class="colorOrange">{{ExistsCecEdidCount}}</td>
+                <td class="colorRed">{{FailedCecEdidCount}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="UpdateZip">
+    <div class="col-xs-12 col-sm-6">
+      <div class="card">
+        <div class="card-block">
+          <h5 class="h5-color">Update Zip</h5>
+          <form [formGroup]="updateZipFileData" class="form-material" (ngSubmit)="onUpdateZipSubmit()">
+            <br />
+            <p class="blue-bold">{{progressName}}</p>
+            <div class="progress" *ngIf="isProgreessVisible">
+              <div class="progress-bar progress-bar-striped progress-bar-animated active bg-info" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width.%':progressWidth}">
+                {{progressWidth}}%
+              </div>
+            </div>
+            <br />
+            <div class="row">
+              <div class="col-sm-10">
+                <div class="form-group form-inline">
+                  <label class="col-form-label col-sm-3">Zip File</label>
+                  <label for="zip-update" class="custom-file-upload">
+                    <i class="fa fa-cloud-upload"></i>&nbsp; Upload
+                  </label>
+                  &nbsp;&nbsp;
+                  <label></label>
+                  <input formControlName="zipFileUpdate" (change)="UpdatezipFiles($event)" accept="application/zip" id="zip-update" name='upload_cont_img' type="file" style="display:none;" class="form-control" />
+                  <button id="selectModalButton" [hidden]="true" data-toggle="modal" data-target="#UpdateSelectedModal" data-backdrop="static" data-keyboard="false"></button>
+                  <button id="uploadedModalButton" [hidden]="true" data-toggle="modal" data-target="#uploadedModal" data-backdrop="static" data-keyboard="false"></button>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-group form-inline" *ngIf="loaderVisible">
+                  <button class="buttonload"><i class="fa fa-spinner fa-spin"></i></button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-6" *ngIf="viewFiles">
+      <div class="card">
+        <div class="card-block">
+          <h5 class="h5-color">Summary</h5>
+          <span class="bb-grey">&nbsp;</span>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th style="text-align:center;width:80px;">
+                  <span><i class="fa fa-star blue" aria-hidden="true"></i></span>
+                </th>
+                <th class="blueHeader" style="width: 218px;">Unzipped Files</th>
+                <th class="blueHeader">Status</th>
+              </tr>
+            </thead>
+            <tbody class="form-scroll">
+              <tr *ngFor="let data of Listitems;let i=index;" class="addDataAttr">
+                <td class="checkGreen" style="text-align:center;width:80px;"><i class="fa fa-check-circle-o green" aria-hidden="true"></i></td>
+                <td class="purple" style="width: 218px;">{{data}}</td>
+                <td class="red" attr.data-val="data-{{data}}">pending</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-6" *ngIf="isdataUploaded">
+      <div class="card" style="height:372px;">
+        <h5 class="h5-color">Overview</h5>
+        <span class="bb-grey">&nbsp;</span>
+        <div class="card-block">
+          <table class="table table-bordered table-data">
+            <thead>
+              <tr>
+                <th style="width:217px;">
+                  <span><i class="fa fa-star blue" aria-hidden="true"></i></span>
+                </th>
+                <th class="colorGreen" style="width:90px;">Inserted</th>
+                <th class="colorOrange" style="width: 90px;">Exists</th>
+                <th class="colorRed">Failed</th>
+              </tr>
+            </thead>
+            <tbody class="form-scroll">
+              <tr *ngIf="masterDataVisible">
+                <th class="blueHeader width-align">{{dataName}}</th>
+                <td class="colorGreen">{{InsertCount}}</td>
+                <td class="colorOrange">{{ExistsCount}}</td>
+                <td class="colorRed">{{FailedCount}}</td>
+              </tr>
+              <tr *ngIf="codeVisible">
+                <th class="blueHeader width-align">{{dataCodeName}}</th>
+                <td class="colorGreen">{{InsertCodeCount}}</td>
+                <td class="colorOrange">{{ExistsCodeCount}}</td>
+                <td class="colorRed">{{FailedCodeCount}}</td>
+              </tr>
+              <tr *ngIf="crossDataVisible">
+                <th class="blueHeader width-align">{{dataCrossName}}</th>
+                <td class="colorGreen">{{InsertCrossCount}}</td>
+                <td class="colorOrange">{{ExistsCrossCount}}</td>
+                <td class="colorRed">{{FailedCrossCount}}</td>
+              </tr>
+              <tr *ngIf="brandVisible">
+                <th class="blueHeader width-align">{{dataBrandName}}</th>
+                <td class="colorGreen">{{InsertBrandCount}}</td>
+                <td class="colorOrange">{{ExistsBrandCount}}</td>
+                <td class="colorRed">{{FailedBrandCount}}</td>
+              </tr>
+              <tr *ngIf="cecDataVisible">
+                <th class="blueHeader width-align">{{dataCecName}}</th>
+                <td class="colorGreen">{{InsertCecCount}}</td>
+                <td class="colorOrange">{{ExistsCecCount}}</td>
+                <td class="colorRed">{{FailedCecCount}}</td>
+              </tr>
+              <tr *ngIf="edidDataVisible">
+                <th class="blueHeader width-align">{{dataEdidName}}</th>
+                <td class="colorGreen">{{InsertEdidCount}}</td>
+                <td class="colorOrange">{{ExistsEdidCount}}</td>
+                <td class="colorRed">{{FailedEdidCount}}</td>
+              </tr>
+              <tr *ngIf="cecEdidDataVisible">
+                <th class="blueHeader width-align">{{dataCecEdidName}}</th>
+                <td class="colorGreen">{{InsertCecEdidCount}}</td>
+                <td class="colorOrange">{{ExistsCecEdidCount}}</td>
+                <td class="colorRed">{{FailedCecEdidCount}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-white" id="deleteModalLabel">Alert !!!</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="dark-blue">Are you sure you want to delete the Zip Uploads ???</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" (click)="deleteZip()" class="btn btn-primary">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="uploadedModal" tabindex="-1" role="dialog" aria-labelledby="uploadedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-width" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-white" id="uploadedModalLabel">Status</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="display:none;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="dark-green">Data Uploaded Successfully</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" (click)="uploadedZip()" class="btn btn-primary">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="UpdateSelectedModal" tabindex="-1" role="dialog" aria-labelledby="UpdateSelectedModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-white" id="UpdateSelectedModalLabel">
+            <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+            Uploads
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="dark-blue">Please Select the List of files to Update</p>
+          <form [formGroup]="selecttoUpdateForm" class="form-material" (ngSubmit)="onselecttoUpdateFilesSubmit()">
+            <div class="row">
+              <div class="col-sm-12">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <td class="font-bold align-header">Files to Upload</td>
+                      <td class="font-bold">Dependencies</td>
+                    </tr>
+                  </thead>
+                  <tbody class="table-scroll">
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" (click)="cecEdidCheck()" class="custom-control-input selectedCheck" id="cec_edid" value="" />
+                          <label class="custom-control-label font-small" for="cec_edid">CEC-EDID</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="cec_edid1" value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="cec_edid1">CEC-EDID</label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" (click)="componentDataCheck()" class="custom-control-input selectedCheck" id="component_data" value="" />
+                          <label class="custom-control-label font-small" for="component_data">Component Data</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="component_data1" value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="component_data1">Component Data</label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" (click)="crossRefDataCheck()" class="custom-control-input selectedCheck" id="cross_ref_value" value="" />
+                          <label class="custom-control-label font-small" for="cross_ref_value">Cross Reference by Brands</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="cross_ref_value1" value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="cross_ref_value1">Cross Reference by Brands</label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" (click)="codesetsDataCheck()" class="custom-control-input selectedCheck" id="codeset_data" value="" />
+                          <label class="custom-control-label font-small" for="codeset_data">Codesets</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="codeset_data1" value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="codeset_data1">Codesets</label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" (click)="masterBrandCheck()" class="custom-control-input selectedCheck" id="master_brand_data" value="" />
+                          <label class="custom-control-label font-small" for="master_brand_data">Master Brand List</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="master_brand_data1" value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="master_brand_data1">Master Brand List</label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" (click)="brandInfoCecCheck()" class="custom-control-input selectedCheck" id="cec_data" value="" />
+                          <label class="custom-control-label font-small" for="cec_data">Brand Info CEC</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="cec_data1" value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="cec_data1">Brand Info CEC</label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" (click)="brandInfoEdidCheck()" class="custom-control-input selectedCheck" id="edid_data" value="" />
+                          <label class="custom-control-label font-small" for="edid_data">Brand Info EDID</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="edid_data1" value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="edid_data1">Brand Info EDID</label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" (click)="zipDataCheck()" class="custom-control-input" id="zip_data" value="" />
+                          <label class="custom-control-label font-small" for="zip_data">Zip Data</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" class="custom-control-input" id="zip_data1" value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="zip_data1">Zip Data</label>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" (click)="binDataCheck()" class="custom-control-input" id="bin_data" value="" />
+                          <label class="custom-control-label font-small" for="bin_data">Bin Data</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="custom-control custom-checkbox checkbox-lg">
+                          <input type="checkbox" class="custom-control-input" id="bin_data1" value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="bin_data1">Bin Data</label>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="col-sm-12">
+                <div class="form-group float-right">
+                  <button type="reset" class="btn btn-secondary" (click)="closeModal()" data-dismiss="modal">Close</button>&nbsp;
+                  <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+              </div>
+            </div>
+          </form>
+          <!--<form [formGroup]="selecttoUpdateForm" class="form-material" (ngSubmit)="onselecttoUpdateFilesSubmit()">
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" (click)="cecEdidCheck()" class="custom-control-input selectedCheck" id="cec_edid" value="" />
+                  <label class="custom-control-label" for="cec_edid">CEC-EDID</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" (click)="componentDataCheck()" class="custom-control-input selectedCheck" id="component_data" value="" />
+                  <label class="custom-control-label" for="component_data">Component Data</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" (click)="crossRefDataCheck()" class="custom-control-input selectedCheck" id="cross_ref_value" value="" />
+                  <label class="custom-control-label" for="cross_ref_value">Cross Reference by Brands</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" (click)="codesetsDataCheck()" class="custom-control-input selectedCheck" id="codeset_data" value="" />
+                  <label class="custom-control-label" for="codeset_data">Codesets</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input selectedCheck" id="master_brand_data" value="" />
+                  <label class="custom-control-label" for="master_brand_data">Master Brand List</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input selectedCheck" id="cec_data" value="" />
+                  <label class="custom-control-label" for="cec_data">Brand Info CEC</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input selectedCheck" id="edid_data" value="" />
+                  <label class="custom-control-label" for="edid_data">Brand Info EDID</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input" id="zip_data" value="" />
+                  <label class="custom-control-label" for="zip_data">Zip Data</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input" id="bin_data" value="" />
+                  <label class="custom-control-label" for="bin_data">Bin Data</label>
+                </div>
+              </div>
+              <div class="col-sm-12">
+                &nbsp;
+              </div>
+              <div class="col-sm-12">
+                <div class="form-group float-right">
+                  <button type="button" class="btn btn-secondary" (click)="closeModal()" data-dismiss="modal">Close</button>&nbsp;
+                  <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+              </div>
+            </div>
+          </form>-->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-white" id="updateModalLabel">Alert !!!</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="closeModal()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="dark-blue">This will overwrite your existing records !!</p>
+          <p class="h5-red">If yes, Please choose the data sections to delete.</p>
+          <form [formGroup]="UpdateForm" class="form-material" (ngSubmit)="onUpdateFilesSubmit()">
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input" id="brandinfocecEdidData" value="" />
+                  <label class="custom-control-label" for="brandinfocecEdidData">CEC-EDID</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" (click)="deleteCompData()" class="custom-control-input" id="brand_model_value" value="" />
+                  <label class="custom-control-label" for="brand_model_value">Component Data</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input" id="cross_reference_value" value="" />
+                  <label class="custom-control-label" for="cross_reference_value">Cross Reference by Brands</label>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" (click)="deleteCodesetData()" class="custom-control-input" id="code_value" value="" />
+                  <label class="custom-control-label" for="code_value">Codesets</label>
+                </div>
+              </div>
+
+              <div class="col-sm-12" *ngIf="hideAdvanced">
+                <a class="advanced" (click)="advanceOptions()" title="Click here to select more options">Advanced</a>
+              </div>
+              <div class="col-sm-12" *ngIf="advancedOption">
+                <a class="advanced" (click)="hideOptions()" title="Click here to select more options">Hide</a>
+              </div>
+              <div class="col-sm-6" *ngIf="advancedOption">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input" id="search_data" value="" />
+                  <label class="custom-control-label" for="search_data">Search Data</label>
+                </div>
+              </div>
+              <div class="col-sm-6" *ngIf="advancedOption">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" (click)="deviceAuth()" class="custom-control-input" id="device_auth" value="" />
+                  <label class="custom-control-label" for="device_auth">Device Authentication</label>
+                </div>
+              </div>
+              <div class="col-sm-6" *ngIf="advancedOption">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input" id="session_data" value="" />
+                  <label class="custom-control-label" for="session_data">Sessions</label>
+                </div>
+              </div>
+              <div class="col-sm-6" *ngIf="advancedOption">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input" id="download_track" value="" />
+                  <label class="custom-control-label" for="download_track">Download Tracker</label>
+                </div>
+              </div>
+              <div class="col-sm-6" *ngIf="advancedOption">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input" id="zip_file" value="" />
+                  <label class="custom-control-label" for="zip_file">Zip File</label>
+                </div>
+              </div>
+              <div class="col-sm-6" *ngIf="advancedOption">
+                <div class="custom-control custom-checkbox checkbox-lg">
+                  <input type="checkbox" class="custom-control-input" id="bin_file" value="" />
+                  <label class="custom-control-label" for="bin_file">Bin File</label>
+                </div>
+              </div>
+              <div class="col-sm-12">
+                &nbsp;
+              </div>
+              <div class="col-sm-12">
+                <div class="form-group float-right">
+                  <button type="button" class="btn btn-secondary" (click)="closeModal()" data-dismiss="modal">Close</button>&nbsp;
+                  <button type="submit" class="btn btn-primary">Delete</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <notifier-container></notifier-container>
+</div>
+
+

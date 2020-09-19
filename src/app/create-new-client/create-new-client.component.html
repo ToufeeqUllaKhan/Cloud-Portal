@@ -1,0 +1,177 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-12 col-12 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/client-library']">Clients</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Create Client</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row" *ngIf="!NewRegion">
+    <div class="col-lg-6 col-xlg-6 col-md-6">
+      <div class="card">
+        <div class="card-block">
+          <h5 class="h5-color">Create New Region</h5>
+          <br />
+          <div class="col-md-12">
+            <form [formGroup]="newregionForm" class="form-material" (ngSubmit)="onNewRegionSubmit()">
+              <div class="col-md-12">
+                <div class="form-group form-inline">
+                  <label class="col-form-label col-sm-4">Region Name</label>
+                  <input type="text" [(ngModel)]="newRegName" formControlName="newRegionName"
+                         class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': newRegSubmitted && n.newRegionName.errors }" />
+                  <div *ngIf="newRegSubmitted && n.newRegionName.errors" class="invalid-feedback">
+                    <div *ngIf="n.newRegionName.errors.required" style="text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Region Name is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row text-right">
+                <div class="col-sm-12">
+                  <button type="button" (click)="regBack()" class="btn btn-secondary">Back</button>&nbsp;
+                  <button type="submit" class="btn btn-info">Submit</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  <div class="row" *ngIf="!NewDbInstance">
+    <div class="col-lg-6 col-xlg-6 col-md-6">
+      <div class="card">
+        <div class="card-block">
+          <h5 class="h5-color">Create New DB Instance</h5>
+          <br />
+          <div class="col-md-12">
+            <form [formGroup]="newdbInstanceForm" class="form-material" (ngSubmit)="onNewDbInstanceSubmit()">
+              <div class="col-md-12">
+                <div class="form-group form-inline">
+                  <label class="col-form-label col-sm-4">DB Instance</label>
+                  <input type="text" [(ngModel)]="new_DB_Instance" formControlName="newDBInstance" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': dbNewsubmitted && g.newDBInstance.errors }" />
+                  <div *ngIf="dbNewsubmitted && g.newDBInstance.errors" class="invalid-feedback">
+                    <div *ngIf="g.newDBInstance.errors.required" style="font-size: 12pt;text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;DB Instance is required</div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row text-right">
+                <div class="col-sm-12">
+                  <button type="button" (click)="dbBack()" class="btn btn-secondary">Back</button>&nbsp;
+                  <button type="submit" class="btn btn-info">Submit</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="row" *ngIf="!isClientDivVisible">
+      <div class="col-lg-9 col-xlg-10 col-md-8">
+        <div class="card">
+          <div class="card-block">
+            <h5 class="h5-color">Create Client Details</h5>
+            <div>&nbsp;</div>
+            <div class="row" *ngIf="!isClientDivVisible">
+              <div class="col-md-12">
+                <form [formGroup]="createClientForm" (ngSubmit)="oncreateClientSubmit()">
+                  <div class="row">
+                    <div class="col-md-6 form-material form-custom">
+                      <div class="form-group">
+                        <label class="col-form-label">Client Name</label>
+                        <input type="text" formControlName="clientName" [(ngModel)]="clientSelected" class="form-control form-control-line" [ngClass]="{ 'is-invalid': submitted && f.clientName.errors }">
+                        <div *ngIf="submitted && f.clientName.errors" class="invalid-feedback">
+                          <div *ngIf="f.clientName.errors.required">Client Name is required</div>
+                        </div>
+                      </div>
+                    </div>
+                    <!--<div class="col-sm-6 form-material form-custom">
+    <div class="form-group">
+      <label class="col-form-label">Logo</label>
+      &nbsp;&nbsp;<label for="file-upload" class="custom-file-upload">
+        <i class="fa fa-cloud-upload"></i> Upload
+      </label>
+      &nbsp;&nbsp;
+      <label></label>
+      <input formControlName="clientLogo" id="file-upload" name='upload_cont_img' type="file" style="display:none;" class="form-control">
+    </div>
+  </div>-->
+                    <div class="col-md-6 form-material form-custom">
+                      <div class="form-group">
+                        <label class="col-form-label">Region</label>
+                        <span (click)="newRegion()" class="float-right oval" title="Add Region">
+                          <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                        </span>
+                        <select [(ngModel)]='regionSelected' formControlName="regionName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.regionName.errors }">
+                          <option [value]=null>Select</option>
+                          <option *ngFor="let list of regions" value={{list.name}}>{{list.name}}</option>
+                        </select>
+                        <div *ngIf="submitted && f.regionName.errors" class="invalid-feedback">
+                          <div *ngIf="f.regionName.errors.required">Region is required</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6 form-material form-custom">
+                      <div class="form-group">
+                        <label class="col-form-label">DB Instance</label>
+                        <span (click)="newDbInstances()" class="float-right oval" title="Add DB Instance">
+                          <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                        </span>
+                        <select [(ngModel)]='db_instance' formControlName="dbInstance" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.dbInstance.errors }">
+                          <option [value]=null>Select</option>
+                          <option *ngFor="let list of dbinstance" value={{list.dbInstance}}>{{list.dbInstance}}</option>
+                        </select>
+                        <div *ngIf="submitted && f.dbInstance.errors" class="invalid-feedback">
+                          <div *ngIf="f.dbInstance.errors.required">DB Instance is required</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6 form-material form-custom">
+                      <div class="form-group">
+                        <label class="col-form-label">Project Name</label>
+                        <input type="text" formControlName="projectName" [(ngModel)]="project_name" class="form-control form-control-line" [ngClass]="{ 'is-invalid': submitted && f.projectName.errors }">
+                        <div *ngIf="submitted && f.projectName.errors" class="invalid-feedback">
+                          <div *ngIf="f.projectName.errors.required">Project Name is required</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6 form-material form-custom">
+                      <div class="form-group">
+                        <label class="col-form-label">Signature Key</label>
+                        <input type="text" formControlName="signatureKey" [(ngModel)]="signature_key" class="form-control form-control-line" [ngClass]="{ 'is-invalid': submitted && f.signatureKey.errors }">
+                        <div *ngIf="submitted && f.signatureKey.errors" class="invalid-feedback">
+                          <div *ngIf="f.signatureKey.errors.required">Signature Key is required</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-sm-6">
+                      <div class="custom-control custom-checkbox checkbox-lg" style="padding-left: 2.4rem;padding-top:2rem">
+                        <input #checkboxes type="checkbox" class="custom-control-input" id="allow_download" value="" />
+                        <label class="custom-control-label" for="allow_download">Allow Downloads</label>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="form-group row text-right">
+                    <div class="col-sm-12">
+                      <button type="button" (click)="close()" class="btn btn-secondary">Close</button>&nbsp;
+                      <button type="submit" class="btn btn-info">Create</button>&nbsp;
+                      <!--<button type="button" *ngIf="isNextVisible" class="btn btn-info">Next</button>-->
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
