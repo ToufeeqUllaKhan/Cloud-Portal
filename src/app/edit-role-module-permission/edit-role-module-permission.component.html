@@ -1,0 +1,84 @@
+<div class="container-fluid main-scroll">
+    <div class="row page-titles">
+      <div class="col-md-12 col-12 align-self-center">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item"><a [routerLink]="['/accessible-modules']">Accessibility</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active">Assign Permission-View</li>
+        </ol>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card">
+          <div class="card-block">
+            <div class="row">
+              <div class="col-sm-5">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th class="colorBlue">Role</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                          <select [(ngModel)]='roleName' class="form-control selectDrop" (change)="onchangerole()">
+                            <option value=null>Select</option>
+                            <option *ngFor="let list of roles" value={{list.name}}>{{list.name}}</option>
+                        </select>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="col-sm-7">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th class="colorBlue">Modules</th>
+                      <th class="colorBlue">Read</th>
+                      <th class="colorBlue">Write</th>
+                      <th class="colorBlue">Download</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                          <select [(ngModel)]='module' class="form-control selectDrop" (change)="onchangerole()">
+                            <option value=null>Select</option>
+                            <option *ngFor="let list of modulesList" value={{list}}>{{list}}</option>
+                          </select>
+                      </td>
+                      <td>
+                          <input type="checkbox" id="Read" value={{read}} checked="{{ read === 1 ? 'checked' : '' }}"  (change)="click( $event,$event.target.checked)">
+                      </td>
+                      <td>
+                          <input type="checkbox" id="Write" value={{write}} checked="{{ write === 1 ? 'checked' : '' }}" (change)="click( $event,$event.target.checked)">
+                      </td>
+                      <td>
+                          <input type="checkbox" id="Down" value={{download}} checked="{{ download ===1 ? 'checked' : '' }}" (change)="click( $event,$event.target.checked)">
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="form-group row text-right">
+              <div class="col-sm-12">
+                <button type="button" (click)="close()" class="btn btn-secondary">Close</button>&nbsp;
+                <button type="submit" (click)="roleSubmit()" class="btn btn-info">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
+  
+  </div>
+  

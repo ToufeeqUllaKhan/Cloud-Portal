@@ -1,146 +1,909 @@
 <div class="container-fluid main-scroll">
-    <!-- Bread crumb and right sidebar toggle -->
-    <!-- ============================================================== -->
-    <div class="row page-titles">
-      <div class="align-self-center">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
-          <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
-          <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active">View Staging Data</li>
-        </ol>
-      </div>
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">View Staging Data</li>
+      </ol>
     </div>
-    <div class="row">
-        <select [(ngModel)]='status'  class="form form-control selectDrop" (change)="onchangestatus()" (ngModelChange)="onModelChange($event)"  style="width:auto;margin-left: auto;">
-          <option value=null>All</option>
-          <option value=0>Exported</option>
-          <option value=1>Not Exported</option>
-          
-        </select>&nbsp;&nbsp;
-        <button  id="button" class="btn btn-primary float-right" >
-          <i class="fas fa-file-export" ></i>
-          Export to Production
-        </button>
+  </div>
 
-        <div class="col-md-12">&nbsp;</div>
-        <div class="col-md-12">
-            <div class="col-xl-12 col-md-12">
-                <table id="projectView" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
-              class="display select nowrap table table-striped table-bordered" cellspacing="0" style="width:auto;">
-                <thead>
-                  <tr>
-                    <th><input name="select_all" value="1" type="checkbox"></th>
-                    <th> Device </th>
-                    <th> Subdevice </th>
-                    <th> Brand </th>
-                    <th> Targetmodel</th>
-                    <th> TargetRegion</th>
-                    <th> TargetCountry </th>
-                    <th> Remotemodel </th>
-                    <th> Regionofcapture </th>
-                    <th> Countryofcapture </th>
-                    <th> Year </th>
-                    <th> CECDevice </th>
-                    <th> Cecpresent </th>
-                    <th> Cecenabled </th>
-                    <th> Vendoridhex </th>
-                    <th> Vendoridstring </th>
-                    <th> Osdhex </th>
-                    <th> Osdstring </th>
-                    <th> Edid </th>
-                    <th> Sourcetype </th>
-                    <th> Sourcename </th>
-                    <th> Region Country Model </th>
-                    <th> Remarks </th>
-                    <th> Status </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- <tr *ngFor="let client of clientDetails;let i=index;"> -->
-                    <!-- <td class="align-center">{{i+1}}</td> -->
-                    
-                  <tr  *ngFor="let client of rawdatacapture;let i=index;">
-                    <td><input value={{client.Detectionid}} type="checkbox"></td>
-                      <td> {{client.Device}}</td>
-                      <td> {{client.Subdevice }}</td>
-                      <td> {{client.Brand }}</td>
-                      <td> {{client.Targetmodel}}</td>
-                      <td> {{client.TargetRegion}}</td>
-                      <td> {{client.TargetCountry }}</td>
-                      <td> {{client.Remotemodel }}</td>
-                      <td> {{client.Regionofcapture }}</td>
-                      <td> {{client.Countryofcapture }}</td>
-                      <td> {{client.Year }}</td>
-                      <td> {{client.CECDevice }}</td>
-                      <td> {{client.Cecpresent }}</td>
-                      <td> {{client.Cecenabled }}</td>
-                      <td> {{client.Vendoridhex }}</td>
-                      <td> {{client.Vendoridstring }}</td>
-                      <td> {{client.Osdhex }}</td>
-                      <td> {{client.Osdstring }}</td>
-                      <td><button type="button" data-toggle="modal" data-target="#edidDataModal" class="btn btn-primary btn-edid" value= {{client.Edid}}><i class="fa fa-eye" aria-hidden="true"></i></button></td>
-                      <td> {{client.Sourcetype }}</td>
-                      <td> {{client.Sourcename }}</td>
-                      <td><button type="button" data-toggle="modal" data-target="#edidDataModal" class="btn btn-primary btn-supportedregions" value= {{client.Supportedregions}}><i class="fa fa-eye" aria-hidden="true"></i></button></td>
-                      <td><button type="button" data-toggle="modal" data-target="#edidDataModal" class="btn btn-primary btn-remarks" value= {{client.Remarks}}><i class="fa fa-eye" aria-hidden="true"></i></button></td>
-                      <td> {{client.Status }}</td>
-                  </tr>
-                </tbody>
-              </table>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-block">
+          <div class="row">
+            <div class="col-sm-3">
+              <label class="colorBlue">Project Name<span class="color-red">*</span></label>
+              <select id="projectname" [(ngModel)]="projectNames" class="form-control selectDrop"
+                (change)="changeProject()">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+              </select>
+              <br />
             </div>
+            <div class="col-sm-5">
+              <label class="colorBlue">Upload Codesetinclude.xml<span class="color-red">*</span></label>
+              <input id="upload" class="form-control" type="file" accept=".xml" (change)="Upload($event)"
+                style="overflow: hidden;" />
+              <br />
+            </div>
+            <div style="margin-top: 28px;">
+              <!-- <button class="btn btn-primary" id="uploadxml" > Upload </button>&nbsp;&nbsp;&nbsp; -->
+              <button id="button" class="btn btn-primary float-right" data-toggle="modal"
+                data-target="#edidproductionModal">
+                <i class="fa fa-file-export"></i>
+                Export to Production
+              </button>&nbsp;&nbsp;&nbsp;&nbsp;
+            </div>
+            <div style="margin-top: 28px;">
+              <button class="btn btn-info float-right" title="Download based on filtered data" id="single_download">
+                <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>&nbsp;&nbsp;
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-4">
+              <input id="file-upload" class="form-control" type="file" accept=".xls,.xlsx,.csv"
+                (change)="onFileChange($event)" style="overflow: hidden;" />
+            </div>
+            <div class="col-sm-4">
+              <button class="btn btn-primary" id="transfer" (click)=directtostaging()>Transfer to Staging</button>
+            </div>
+            <div style="width:auto;margin-left: auto;">
+              <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
+                  aria-hidden="true"></i></button>
+            </div>&nbsp;&nbsp;
+            <!-- <select [(ngModel)]='device' class="form form-control selectDrop" (change)="onchangedevice()"
+              (ngModelChange)="onModelChange($event)" style="width:auto;">
+              <option [value]=null hidden> Device </option>
+              <option value=null>All</option>
+              <option *ngFor="let list of filter_Device" value={{list}}>{{list}}</option>
+            </select>&nbsp;&nbsp;
+            <select [(ngModel)]='subdevice' class="form form-control selectDrop" (change)="onchangestatus()"
+              (ngModelChange)="onModelChange($event)" style="width:auto;">
+              <option [value]=null hidden> SubDevice </option>
+              <option value=null>All</option>
+              <option *ngFor="let list of filter_Subdevice" value={{list}}>{{list}}</option>
+            </select>&nbsp;&nbsp; -->
+            <select [(ngModel)]='status' class="form form-control selectDrop" (change)="onchangestatus()"
+              (ngModelChange)="onModelChange($event)" style="width:auto;">
+              <option [value]=null hidden>Status </option>
+              <option value=null>All</option>
+              <option value=1>Imported from Raw</option>
+              <option value=2>Imported from Excel</option>
+            </select>&nbsp;&nbsp;
+            <button class="btn btn-primary float-right newBtn" data-toggle="modal" data-target="#StagingModal_1">
+              <i class="fa fa-plus" aria-hidden="true"></i>
+              New
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-    
-   
-    <div class="modal fade" id="edidDataModal" tabindex="-1" role="dialog" aria-labelledby="edidDataModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title h5-color" id="edidDataModalLabel"  *ngIf="edidDataView">Edid View</h5>
-              <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="RemarksView">Remarks View</h5>
-              <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="SupportedregionsView">Supported Regions View</h5>
-              <button type="button" class="close" data-dismiss="modal"  aria-label="Close">&times;</button>  
-            </div>
-            <div class="modal-body">
-              <div class="col-sm-12">
-                <table class="table table-bordered" cellspacing="0">
-                  <tbody *ngIf="edidDataView">
-                    <tr>
+  </div>
+  <br />
+  <div class="row">
+    <div class="col-md-12">&nbsp;</div>
+    <button id="showeditUIDbutton" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
+      data-toggle="modal" data-target="#edidStagingModal" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u>
+    </button>
+    <button id="showeditbutton" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
+      data-toggle="modal" data-target="#edidStagingModal_1" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u>
+    </button>
+    <button id="unlink" type="button" style="cursor:pointer;background:none;border:none;" data-toggle="modal"
+      data-target="#deleteconfirmation_1" class="unlink" hidden>&nbsp;&nbsp;<u><strong>Unlink</strong></u>
+    </button>
+
+    <div class="row">
+      <div class="example-header">
+        <label>Show
+          <select (change)="onPageSizeChanged()" id="page-size">
+            <option value="10">10</option>
+            <option value="100">100</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+          </select>
+          entries</label>
+      </div>
+      <div style="margin-left: auto;">
+        <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue" />
+        </label>
+      </div>
+      <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+        style="width: 1075px; height: 380px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+        [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
+        [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents"
+        [rowSelection]="rowSelection" [suppressRowClickSelection]="true" [rowMultiSelectWithClick]="true"
+        (click)="onRowClicked()">
+      </ag-grid-angular>
+
+      <br />
+      <br />
+      <br />
+
+    </div>
+    <button type="button" style="cursor:pointer;background:none;border:none;margin-left: auto;" data-toggle="modal"
+      data-target="#deleteconfirmation" class="multiple_unlink ">&nbsp;&nbsp;<u><strong>Unlink</strong></u></button>
+    &nbsp;
+    <!-- <button type="button" style="cursor:pointer;background:none;border:none;" *ngIf="multiplecodeset"
+              class="multiple_codeset float-right" (click)=SingleexcelDownload()>&nbsp;&nbsp;<u><strong>Download</strong></u></button> -->
+  </div>
+
+  <div class="conatiner mt-5">
+    <div class="row">
+      <div class="col-md-3"></div>
+
+    </div>
+  </div>
+
+  <div class="modal fade" id="edidDataModal" tabindex="-1" role="dialog" aria-labelledby="edidDataModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="edidDataView">Edid View</h5>
+          <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="SupportedregionsView">Supported Regions View
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+            <table class="table table-bordered" cellspacing="0">
+              <tbody *ngIf="edidDataView">
+                <!-- <tr>
                       <th>EDID</th>
                       <td>{{EdidData}}</td>
                     </tr>
-                  </tbody>
-                  <tbody *ngIf="RemarksView">
-                    <tr>
-                      <th>MetaData</th>
-                      <td>{{Metadata}}</td>
-                    </tr>
-                    <tr>
-                      <th>CEC</th>
-                      <td>{{CEC}}</td>
-                    </tr>
                     <tr>
                       <th>EDID</th>
-                      <td>{{EDID}}</td>
-                    </tr>
-                    <tr>
-                      <th>Scan Device</th>
-                      <td>{{Scandevice}}</td>
-                    </tr>
-                  </tbody>
-                  <tbody *ngIf="SupportedregionsView">
-                    <tr>
-                      <th>Supported Regions</th>
-                      <td>{{Supportedregions}}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                      <th>Actions</th>
+                    </tr> -->
+                <tr>
+                  <td>{{EdidData}}</td>
+                  <td style="vertical-align: middle;">
+                    <button type="button" (click)="decodeedid()"
+                      style="vertical-align: middle;cursor: pointer;background:none;border:none;" data-toggle="modal"
+                      data-target="#DecodeedidDataModal" class="btn btn-primary">Decode
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody *ngIf="SupportedregionsView">
+                <tr>
+                  <th>Supported Regions</th>
+                  <td>{{Supportedregions}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="edidStagingModal" tabindex="-1" role="dialog" aria-labelledby="edidStagingModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidStagingModalLabel">Edit Staging data</h5>
+          <button type="button" class="close" (click)="modalClose()" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+            <form [formGroup]="saveEditStagingData" (ngSubmit)="onsaveEditStagingSubmit()">
+              <br />
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">UID<span class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" formControlName="Uid"
+                      [(ngModel)]="editedUid" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted && m.Uid.errors }" required />
+                    <div *ngIf="stagingdatasubmitted && m.Uid.errors" class="invalid-feedback">
+                      <div *ngIf="m.Uid.errors.required" class="error-defined text-right">UID is required</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Model<span class="color-red">*</span></label>
+                    <select id="model" [(ngModel)]='editedModel' formControlName="Model"
+                      class="form-control form-control-line col-sm-7">
+                      <option [value]=null>Select</option>
+                      <option *ngFor="let v of ModelList" value={{v}}>{{v}}</option>
+                    </select>
+                    <div *ngIf="stagingdatasubmitted && m.Model.errors" class="invalid-feedback">
+                      <div *ngIf="m.Model.errors.required" class="error-defined text-right">Model is required</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">UID<span class="color-red">*</span></label>
+                    <input id="uid" type="text" (keypress)="keyPressHandler($event)" formControlName="Uid"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted && m.Uid.errors }" required />
+                    <div *ngIf="stagingdatasubmitted && m.Uid.errors" class="invalid-feedback">
+                      <div *ngIf="m.Uid.errors.required" class="error-defined text-right">UID is required</div>
+                    </div>
+                  </div>
+                </div>
+                <input type="button" id="add" value="Add" style="margin-left: auto;" />&nbsp;
+                <div class="col-sm-12" style="margin-top: 10px;">
+                  <div class="form-group form-inline">
+                    <textarea id="myTextarea" class="form-control form-control-line col-sm-12" formControlName="Uids"
+                      type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedUid" value="{{Uid}}" disabled>
+                          {{Uid}}
+                        </textarea>
+                  </div>
+                </div>
+                <input type="button" id="edit" value="Edit" style="margin-left: auto;" /> -->
               </div>
+              <div class="form-group row text-right" style="margin-top: 10px;">
+                <div class="col-sm-12">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                    (click)="modalClose()">Close</button>&nbsp;
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="edidStagingModal_1" tabindex="-1" role="dialog" aria-labelledby="edidStagingModal_1Label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidStagingModal_1Label">Edit Staging data</h5>
+          <button type="button" class="close" (click)="modalClose()" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12 form-scroll">
+            <form [formGroup]="saveEditStagingData_1" (ngSubmit)="onsaveEditStagingSubmit_1()">
+              <br />
+              <!-- <div class="row">
+                      <div class="col-sm-12">
+                        <div class="form-group form-inline">
+                          <label class="labelsubSpan col-sm-5 col-form-label">Model<span class="color-red">*</span></label>
+                          <select id="model1" [(ngModel)]='editedModel' formControlName="Model" class="form-control form-control-line col-sm-7">
+                            <option [value]=null>Select</option>
+                            <option *ngFor="let v of ModelList" value={{v}}>{{v}}</option>
+                          </select>
+                          <div *ngIf="stagingdatasubmitted && m.Model.errors" class="invalid-feedback">
+                            <div *ngIf="m.Model.errors.required" class="error-defined text-right">Model is required</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="col-sm-12">
+                        <div class="form-group form-inline">
+                          <label class="labelsubSpan col-sm-5 col-form-label">UID<span class="color-red">*</span></label>
+                          <input id="uid1" type="text" (keypress)="keyPressHandler($event)" formControlName="Uid" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': stagingdatasubmitted && m.Uid.errors }" required/>
+                          <div *ngIf="stagingdatasubmitted && m.Uid.errors" class="invalid-feedback">
+                            <div *ngIf="m.Uid.errors.required" class="error-defined text-right">UID is required</div>
+                          </div>
+                        </div>
+                      </div>
+                      <input type="button" id="add1" value="Add" style="margin-left: auto;"/>&nbsp;
+                      <div class="col-sm-12" style="margin-top: 10px;">
+                        <div class="form-group form-inline">
+                         <textarea id="myTextarea1" class="form-control form-control-line col-sm-12" formControlName="Uids" type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedUid" value="{{Uid}}" disabled>
+                            {{Uid}}
+                          </textarea>
+                        </div>
+                      </div>
+                      <input type="button" id="edit1" value="Edit" style="margin-left: auto;"/>
+                    </div> -->
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Device<span class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedDevice"
+                      formControlName="Device" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Device.errors }" />
+                    <div *ngIf="stagingdatasubmitted_1 && n.Device.errors" class="invalid-feedback">
+                      <div *ngIf="n.Device.errors.required" class="error-defined text-right">Device is required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">SubDevice<span
+                        class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedSubdevice"
+                      formControlName="Subdevice" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Subdevice.errors }" />
+                    <div *ngIf="stagingdatasubmitted_1 && n.Subdevice.errors" class="invalid-feedback">
+                      <div *ngIf="n.Subdevice.errors.required" class="error-defined text-right">Subdevice is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Brand<span class="color-red">*</span></label>
+                    <!-- <input id="typeahead-format4" type="text" (keypress)="keyPressHandler($event)" (change)="brandCECSelect()" class="form-control form-control-line col-sm-7" formControlName="ceconlyBrand" [(ngModel)]="editedCeconlyBrandname" [ngbTypeahead]="brandSearch" [resultFormatter]="formatter" [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.ceconlyBrand.errors }" /> -->
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedBrand"
+                      formControlName="Brand" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Brand.errors }" />
+                    <div *ngIf="stagingdatasubmitted_1 && n.Brand.errors" class="invalid-feedback">
+                      <div *ngIf="n.Brand.errors.required" class="error-defined text-right">Brand Name is required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Target Model<span
+                        class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedModel"
+                      formControlName="Model_1" class="form-control form-control-line col-sm-7 upperCase"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Model_1.errors }" />
+                    <div *ngIf="stagingdatasubmitted_1 && n.Model_1.errors" class="invalid-feedback">
+                      <div *ngIf="n.Model_1.errors.required" class="error-defined text-right">Target Model is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Region Country Model</label>
+                    <textarea (keypress)="keyPressHandler($event)" type="text" rows="4"
+                      [(ngModel)]="editedSupportedRegion" formControlName="Region_Country_Model"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Region_Country_Model.errors }"></textarea>
+                    <div *ngIf="stagingdatasubmitted_1 && n.Region_Country_Model.errors" class="invalid-feedback">
+                      <div *ngIf="n.Region_Country_Model.errors.required" class="error-defined text-right">Region
+                        Country Model is required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Vendor ID</label>
+                    <input type="text" id="checkInputValid" (change)="vendorMod()" [(ngModel)]="editedVendor"
+                      maxlength="6" (keypress)="hexaOnly($event)" formControlName="VendorId"
+                      class="form-control form-control-line col-sm-7 upperCase"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.VendorId.errors }" />
+                    <div *ngIf="stagingdatasubmitted_1 && n.VendorId.errors" class="invalid-feedback">
+                      <div *ngIf="n.VendorId.errors.required" class="error-defined text-right">Vendor ID is required
+                      </div>
+                    </div>
+                    <div class="text-right color-merron" style="padding-left: 68%;" *ngIf="vendorError">Vendor ID is
+                      Required</div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">VendorID String</label>
+                    <input type="text" [(ngModel)]="editedVendorstr" formControlName="Vendoridstring"
+                      class="form-control form-control-line col-sm-7 upperCase"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Vendoridstring.errors }" />
+                    <div *ngIf="stagingdatasubmitted_1 && n.Vendoridstring.errors" class="invalid-feedback">
+                      <div *ngIf="n.Vendoridstring.errors.required" class="error-defined text-right">VendorID string is
+                        required</div>
+                    </div>
+                    <div class="text-right color-merron" style="padding-left: 68%;" *ngIf="vendorError">VendorID string
+                      is Required</div>
+                  </div>
+                </div>
+
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">OSD String</label>
+                    <input type="text" [(ngModel)]="editedOSD" (change)="vendorMod()" formControlName="OSDString"
+                      class="form-control form-control-line col-sm-7 upperCase"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.OSDString.errors }" />
+                    <div *ngIf="stagingdatasubmitted_1 && n.OSDString.errors" class="invalid-feedback">
+                      <div *ngIf="n.OSDString.errors.required" class="error-defined text-right">OSD String is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Edid</label>
+                    <textarea (keypress)="keyPressHandler($event)" id="checkEdidValid" (change)="vendorMod()"
+                      type="text" rows="5" [(ngModel)]="editedEDID128" formControlName="Edid"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Edid.errors }"></textarea>
+                    <div *ngIf="stagingdatasubmitted_1 && n.Edid.errors" class="invalid-feedback">
+                      <div *ngIf="n.Edid.errors.required" class="error-defined text-right">Edid is required</div>
+                    </div>
+                    <div class="text-right color-merron" style="padding-left: 76%;" *ngIf="edidError">Enter Valid Edid
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Year</label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editYear"
+                      formControlName="Year" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Year.errors }" />
+                    <div *ngIf="stagingdatasubmitted_1 && n.Year.errors" class="invalid-feedback">
+                      <div *ngIf="n.Year.errors.required" class="error-defined text-right">Year is required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Cecpresent</label>
+                    <!-- <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedStatus" formControlName="Status" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Status.errors }" /> -->
+                    <select [(ngModel)]="editcecPresent" formControlName="CecPresent"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.CecPresent.errors }">
+                      <option [value]=null>Select</option>
+                      <option value=1>Yes</option>
+                      <option value=0>No</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">CecEnabled</label>
+                    <!-- <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedStatus" formControlName="Status" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Status.errors }" /> -->
+                    <select [(ngModel)]="editcecEnabled" formControlName="CecEnabled"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.CecEnabled.errors }">
+                      <option [value]=null>Select</option>
+                      <option value=1>Yes</option>
+                      <option value=0>No</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">UID</label>
+                    <input type="text" (keypress)="keyPressHandler($event)" formControlName="Uid_1"
+                      class="form-control form-control-line col-sm-7" [(ngModel)]="editedUid" />
+                  </div>
+                </div>
+                <!-- <hr>
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-5 col-form-label">Model<span class="color-red">*</span></label>
+                  <select id="model_1" [(ngModel)]='editedModel' formControlName="Model_1" class="form-control form-control-line col-sm-7">
+                    <option [value]=null>Select</option>
+                    <option *ngFor="let v of ModelList" value={{v}}>{{v}}</option>
+                  </select>
+                  <div *ngIf="stagingdatasubmitted_1 && n.Model_1.errors" class="invalid-feedback">
+                    <div *ngIf="n.Model_1.errors.required" class="error-defined text-right">Model is required</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-sm-12">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-5 col-form-label">UID<span class="color-red">*</span></label>
+                  <input type="text" name ="Uid_1" (keypress)="keyPressHandler($event)" formControlName="Uid_1" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Uid_1.errors }" />
+                  <div *ngIf="stagingdatasubmitted_1 && n.Uid_1.errors" class="invalid-feedback">
+                    <div *ngIf="n.Uid_1.errors.required" class="error-defined text-right">UID is required</div>
+                  </div>
+                </div>
+              </div>
+              <input type="button" id="add1" value="Add" style="margin-left: auto;"/>&nbsp;
+              <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="form-group form-inline">
+                 <textarea id="myTextarea_1" class="form-control form-control-line col-sm-12" formControlName="Uids_1" type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedUid" value="{{Uid}}" disabled>
+                    {{Uid}}
+                  </textarea>
+                </div>
+              </div>
+              <input type="button" id="edit1" value="Edit" style="margin-left: auto;"/> -->
+
+              </div>
+
+              <div class="form-group row text-right" style="margin-top: 10px;">
+                <div class="col-sm-12">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                    (click)="modalClose()">Close</button>&nbsp;
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="StagingModal_1" tabindex="-1" role="dialog" aria-labelledby="StagingModal_1Label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="StagingModal_1Label">Insert Staging data</h5>
+          <button type="button" class="close" (click)="modalClose()" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12 form-scroll">
+            <form [formGroup]="saveUpdateStagingData" (ngSubmit)="onsaveEditStagingSubmit_2()">
+              <br />
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Device<span class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedDevice"
+                      formControlName="UDevice" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UDevice.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.UDevice.errors" class="invalid-feedback">
+                      <div *ngIf="o.UDevice.errors.required" class="error-defined text-right">Device is required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">SubDevice<span
+                        class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedSubdevice"
+                      formControlName="USubdevice" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.USubdevice.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.USubdevice.errors" class="invalid-feedback">
+                      <div *ngIf="o.USubdevice.errors.required" class="error-defined text-right">Subdevice is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Brand<span class="color-red">*</span></label>
+                    <!-- <input id="typeahead-format4" type="text" (keypress)="keyPressHandler($event)" (change)="brandCECSelect()" class="form-control form-control-line col-sm-7" formControlName="UceconlyBrand" [(ngModel)]="UpdatedCeconlyBrandname" [ngbTypeahead]="brandSearch" [resultFormatter]="formatter" [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UceconlyBrand.errors }" /> -->
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedBrand"
+                      formControlName="UBrand" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UBrand.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.UBrand.errors" class="invalid-feedback">
+                      <div *ngIf="o.UBrand.errors.required" class="error-defined text-right">Brand Name is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Target Region<span
+                        class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedTRegion"
+                      formControlName="URegion_1" class="form-control form-control-line col-sm-7 "
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.URegion_1.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.URegion_1.errors" class="invalid-feedback">
+                      <div *ngIf="o.URegion_1.errors.required" class="error-defined text-right">Target Region is
+                        required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Target Country<span
+                        class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedTCountry"
+                      formControlName="UCountry_1" class="form-control form-control-line col-sm-7 "
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UCountry_1.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.UCountry_1.errors" class="invalid-feedback">
+                      <div *ngIf="o.UCountry_1.errors.required" class="error-defined text-right">Target Country is
+                        required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Target Model<span
+                        class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedModel"
+                      formControlName="UModel_1" class="form-control form-control-line col-sm-7 upperCase"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UModel_1.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.UModel_1.errors" class="invalid-feedback">
+                      <div *ngIf="o.UModel_1.errors.required" class="error-defined text-right">Target Model is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- <div class="col-sm-12">
+                        <div class="form-group form-inline">
+                          <label class="labelsubSpan col-sm-5 col-form-label"> Region Country Model</label>
+                          <textarea (keypress)="keyPressHandler($event)" type="text" rows="4" [(ngModel)]="UpdatedSupportedRegion" formControlName="URegion_Country_Model" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.URegion_Country_Model.errors }"></textarea>
+                          <div *ngIf="stagingdatasubmitted_2 && o.URegion_Country_Model.errors" class="invalid-feedback">
+                            <div *ngIf="o.URegion_Country_Model.errors.required" class="error-defined text-right">Region Country Model is required</div>
+                          </div>
+                        </div>
+                      </div> -->
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Vendor ID</label>
+                    <input type="text" id="checkInputValid" (change)="vendorMod()" [(ngModel)]="UpdatedVendor"
+                      maxlength="6" (keypress)="hexaOnly($event)" formControlName="UVendorId"
+                      class="form-control form-control-line col-sm-7 upperCase"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UVendorId.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.UVendorId.errors" class="invalid-feedback">
+                      <div *ngIf="o.UVendorId.errors.required" class="error-defined text-right">Vendor ID is required
+                      </div>
+                    </div>
+                    <div class="text-right color-merron" style="padding-left: 68%;" *ngIf="vendorError">Vendor ID is
+                      Required</div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">VendorID String</label>
+                    <input type="text" [(ngModel)]="UpdatedVendorstr" formControlName="UVendoridstring"
+                      class="form-control form-control-line col-sm-7 upperCase"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UVendoridstring.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.UVendoridstring.errors" class="invalid-feedback">
+                      <div *ngIf="o.UVendoridstring.errors.required" class="error-defined text-right">VendorID string is
+                        required</div>
+                    </div>
+                    <div class="text-right color-merron" style="padding-left: 68%;" *ngIf="vendorError">VendorID string
+                      is Required</div>
+                  </div>
+                </div>
+
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">OSD String</label>
+                    <input type="text" [(ngModel)]="UpdatedOSD" (change)="vendorMod()" formControlName="UOSDString"
+                      class="form-control form-control-line col-sm-7 upperCase"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UOSDString.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.UOSDString.errors" class="invalid-feedback">
+                      <div *ngIf="o.UOSDString.errors.required" class="error-defined text-right">OSD String is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Edid</label>
+                    <textarea (keypress)="keyPressHandler($event)" id="checkEdidValid" (change)="vendorMod()"
+                      type="text" rows="5" [(ngModel)]="UpdatedEDID128" formControlName="UEdid"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UEdid.errors }"></textarea>
+                    <div *ngIf="stagingdatasubmitted_2 && o.UEdid.errors" class="invalid-feedback">
+                      <div *ngIf="o.UEdid.errors.required" class="error-defined text-right">Edid is required</div>
+                    </div>
+                    <div class="text-right color-merron" style="padding-left: 76%;" *ngIf="edidError">Enter Valid Edid
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Year</label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedYear"
+                      formControlName="UYear" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UYear.errors }" />
+                    <div *ngIf="stagingdatasubmitted_2 && o.UYear.errors" class="invalid-feedback">
+                      <div *ngIf="o.UYear.errors.required" class="error-defined text-right">Year is required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Cecpresent<span
+                        class="color-red">*</span></label>
+                    <!-- <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedStatus" formControlName="UStatus" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UStatus.errors }" /> -->
+                    <select [(ngModel)]="UpdatedcecPresent" formControlName="UCecPresent"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UCecPresent.errors }">
+                      <option [value]=null>Select</option>
+                      <option value=1>Yes</option>
+                      <option value=0>No</option>
+                    </select>
+                    <div *ngIf="stagingdatasubmitted_2 && o.UCecPresent.errors" class="invalid-feedback">
+                      <div *ngIf="o.UCecPresent.errors.required" class="error-defined text-right">CecPresent is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">CecEnabled<span
+                        class="color-red">*</span></label>
+                    <!-- <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedStatus" formControlName="UStatus" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UStatus.errors }" /> -->
+                    <select [(ngModel)]="UpdatedcecEnabled" formControlName="UCecEnabled"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UCecEnabled.errors }">
+                      <option [value]=null>Select</option>
+                      <option value=1>Yes</option>
+                      <option value=0>No</option>
+                    </select>
+                    <div *ngIf="stagingdatasubmitted_2 && o.UCecEnabled.errors" class="invalid-feedback">
+                      <div *ngIf="o.UCecEnabled.errors.required" class="error-defined text-right">CecPresent is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- <div class="col-sm-12" style="margin-top: 10px;">
+                <div class="form-group form-inline">
+                  <label class="labelsubSpan col-sm-5 col-form-label">UID</label>
+                 <textarea id="myTextarea_1" class="form-control form-control-line col-sm-12" formControlName="UUids_1" type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="UpdatedUid">
+                    {{UpdatedUid}}
+                  </textarea>
+                </div>
+              </div> -->
+              </div>
+
+              <div class="form-group row text-right" style="margin-top: 10px;">
+                <div class="col-sm-12">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                    (click)="modalClose()">Close</button>&nbsp;
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="deleteconfirmation" tabindex="-1" role="dialog" aria-labelledby="deleteconfirmationLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="deleteconfirmationLabel"><b> Please Confirm..</b></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+            <p>Are you sure you want to delete the selected records </p>
+          </div>
+          <div class="form-group row text-right" style="margin-top: 10px;">
+            <div class="col-sm-12">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>&nbsp;
+              <button type="submit" id="ModuleSubmit" class="btn btn-secondary">Yes</button>
             </div>
           </div>
         </div>
       </div>
     </div>
-  
+  </div>
+  <div class="modal fade" id="deleteconfirmation_1" tabindex="-1" role="dialog"
+    aria-labelledby="deleteconfirmation_1Label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="deleteconfirmation_1Label"><b> Please Confirm..</b></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+            <p>Are you sure you want to delete the record</p>
+          </div>
+          <div class="form-group row text-right" style="margin-top: 10px;">
+            <div class="col-sm-12">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>&nbsp;
+              <button type="submit" id="ModuleSubmit_1" class="btn btn-secondary">Yes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="DecodeedidDataModal" tabindex="-1" role="dialog"
+    aria-labelledby="DecodeedidDataModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="margin-top: 60px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="DecodeedidDataModalLabel" *ngIf="DecodeedidDataView">Decode Edid View
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow: auto;">
+            <table class="display select nowrap tables table-striped table-bordered" cellspacing="0"
+              style="width:auto;">
+              <tbody *ngIf="DecodeedidDataView">
+                <tr>
+                  <th *ngFor="let header of keys">{{header}}</th>
+                </tr>
+                <tr>
+                  <td *ngFor="let Defn of Values">{{Defn}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="edidproductionModal" tabindex="-1" role="dialog"
+    aria-labelledby="edidproductionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidproductionModalLabel">Records with single codeset</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="table" class="col-sm-12 form-scroll" *ngIf="!nocodeset">
+            <div style="overflow: auto;">
+              <table class="display select table table-striped table-bordered" cellspacing="0"
+                style="width:auto;white-space: nowrap;">
+                <thead>
+                  <tr>
+                    <th> Device </th>
+                    <th> Subdevice </th>
+                    <th> Brand </th>
+                    <th> Region</th>
+                    <th> Country</th>
+                    <th> Model </th>
+                    <th> Cecpresent </th>
+                    <th> Cecenabled </th>
+                    <th> Vendorid </th>
+                    <th> OSD </th>
+                    <th> EDID </th>
+                    <th> UID </th>
+                    <th> Codeset </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- <tr *ngFor="let client of clientDetails;let i=index;"> -->
+                  <!-- <td class="align-center">{{i+1}}</td> -->
+
+                  <tr *ngFor="let client of singlecodesetassigned;let i=index;">
+                    <td>{{client.device}}</td>
+                    <td>{{client.subdevice}}</td>
+                    <td>{{client.brand}}</td>
+                    <td>{{client.region}}</td>
+                    <td>{{client.country}}</td>
+                    <td>{{client.model}}</td>
+                    <td>{{client.iscecpresent}}</td>
+                    <td>{{client.iscecenabled}}</td>
+                    <td>{{client.vendorid}}</td>
+                    <td>{{client.osd}}</td>
+                    <td>{{client.edid}}</td>
+                    <td>{{client.uid}}</td>
+                    <td>{{client.codeset}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="form-group row text-right" style="margin-top: 10px;" *ngIf="show">
+            <div class="col-sm-12">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                (click)="modalClose()">Close</button>&nbsp;
+              <button type="submit" class="btn btn-primary" (click)=assigncodesettouid()>Save</button>
+            </div>
+          </div>
+          <div *ngIf="nocodeset">
+            <p>
+              No codesets assigned to selected records
+            </p>
+          </div>
+          <div *ngIf="!nocodeset">
+            <p>
+              {{message}}
+            </p>
+          </div>
+          <button type="button" style="cursor:pointer;background:none;border:none;" *ngIf="multiplecodeset"
+            class="multiple_codeset float-right"
+            (click)=SingleexcelDownload()>&nbsp;&nbsp;<u><strong>Download</strong></u></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
+    [fullScreen]="true">
+    <p style="color: white"> Loading... </p>
+  </ngx-spinner>
+</div>

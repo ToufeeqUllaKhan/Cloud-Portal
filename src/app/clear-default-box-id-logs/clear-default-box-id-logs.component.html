@@ -1,0 +1,123 @@
+<div class="container-fluid">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">UpdateDefaultBoxIdLogs</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-block">
+          <div class="row">
+            <div class="col-sm-5">
+              <label class="colorBlue">Project Name<span class="color-red">*</span></label>
+              <select [(ngModel)]="projectNames" class="form-control selectDrop" (change)="changeProject()">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+              </select>
+              <br />
+            </div>
+            <!-- <div class="col-sm-5">
+                <label class="colorBlue">Version<span class="color-red">*</span></label>
+                <select id ="version" [(ngModel)]="versionlist" class="form-control selectDrop" (change)="changeProject()">
+                  <option [value]=null>Select</option>
+                  <option *ngFor="let list of version" value={{list}}>{{list}}</option>
+                </select>
+                <br />
+              </div> -->
+            <div class="col-sm-5">
+              <label class="colorBlue">Default Boxid<span class="color-red">*</span></label>
+              <textarea rows="2" type="text" [(ngModel)]="defaultboxid" class="form-control disable"></textarea>
+              <br />
+            </div>
+          </div>
+          <div class="form-group row text-right">
+            <div class="col-sm-12">
+              <button id="defaultboxid_update" class="btn btn-primary" type="button" data-toggle="modal"
+                data-target="#edidRawModal">Update DeviceID</button>&nbsp;
+              <!-- <button type="submit" id="defaultboxid_delete" data-toggle="modal" data-target="#deleteconfirmation" class="btn btn-info">Delete Logs</button> -->
+            </div>
+          </div>
+          <div class="row"><br /></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="deleteconfirmation" tabindex="-1" role="dialog" aria-labelledby="deleteconfirmationLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="deleteconfirmationLabel"><b> Please Confirm..</b></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+            <p>Are you sure you want to delete the Logs related to </p>
+            <p> Boxid: <b>{{defaultboxid}}</b></p>
+          </div>
+          <div class="form-group row text-right" style="margin-top: 10px;">
+            <div class="col-sm-12">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>&nbsp;
+              <button type="submit" id="ModuleSubmit" class="btn btn-secondary">Yes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="edidRawModal" tabindex="-1" role="dialog" aria-labelledby="edidRawModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidRawModalLabel">Update DeviceId data</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+
+            <form [formGroup]="updatedeviceidForm" class="form-material form-scroll" (ngSubmit)="updatedeviceid()">
+              <br />
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Device<span class="color-red">*</span></label>
+                    <textarea id="updatedevice_id" maxlength="25" rows="2" type="text" [(ngModel)]="updatedevice_id"
+                      formControlName="updatedeviceId" class="form-control form-control-line col-sm-7"
+                      aria-required="true"></textarea>
+                  </div>
+                  <!-- <div *ngIf="submitted && a.updatedeviceId.errors" class="invalid-feedback">
+                      <div *ngIf="a.updatedeviceId.errors.required">Device Id is required</div>
+                    </div> -->
+                </div>
+              </div>
+              <div class="form-group row text-right">
+                <div class="col-sm-12">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>&nbsp;
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
+
+</div>

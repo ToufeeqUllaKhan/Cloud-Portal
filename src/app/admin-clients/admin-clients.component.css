@@ -255,6 +255,7 @@ svg{
 
 .dropdown:hover .dropdown-menu {
   display: block;
+  width: auto;
 }
 .nav {
   display: inline;

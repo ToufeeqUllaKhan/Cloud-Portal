@@ -8,7 +8,7 @@
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
           <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Change History</a></li>
+          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">{{switchRoute}}</a></li>
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
           <li class="breadcrumb-item active"><a [routerLink]="" (click)="AdminClients()">Clients</a></li>
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
@@ -24,9 +24,9 @@
         </div>
       </div>
     </div>
-    <div class="col-xl-1 col-md-1 hideData">
+    <!-- <div class="col-xl-1 col-md-1 hideData">
       <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh" aria-hidden="true"></i></button>
-    </div>
+    </div> -->
     </div>
     <br />
     <div class="tab tabView" role="tabpanel">
@@ -35,49 +35,37 @@
       </div>
       <div class="tab-content">
         <div class="col-md-12">&nbsp;</div>
-            <div class="col-md-12">
-              <div class="col-xl-12 col-md-12">&nbsp;</div>
-              <div class="col-xl-12 col-md-12">
-                <table id="projectView" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
-                class="display nowrap table table-striped table-bordered" cellspacing="0" style="width:auto;">
-                  <thead>
-                    <tr>
-                       <!-- <th>SL No.</th> -->
-                      <th> DataHistoryId </th>
-                      <th> Project Name </th>
-                      <th> Data Section </th>
-                      <th> Operation</th>
-                      <th> Total Failed Record </th>
-                      <th> Total Inserted Record </th>
-                      <th> Total Updated Record </th>
-                      <th> Update Description </th>
-                      <th> Record Count </th>
-                      <th> IPaddress </th>
-                      <th> Remarks </th>
-                      <th> TimeStamp </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let client of clientDetails;let i=index;">
-                      <!-- <td class="align-center">{{i+1}}</td> -->
-                      <!-- <td class="align-width">{{client.projectName}} -->
-                      <td >{{client.dataHistoryId}}</td>
-                      <td >{{client.projectName}}</td>
-                      <td >{{client.dataSection}}</td>
-                      <td >{{client.operation}}</td>
-                      <td >{{client.totalFailedRecord}}</td>
-                      <td >{{client.totalInsertedRecord}}</td>
-                      <td >{{client.totalUpdatedRecord}}</td>
-                      <td >{{client.updateDescription}}</td>
-                      <td >{{client.recordCount}}</td>
-                      <td >{{client.iPaddress}}</td>
-                      <td >{{client.remarks}}</td>
-                      <td >{{client.createdDate}}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-      </div>
+        <div class="row">
+          <div class="example-header">
+            <label>Show
+              <select (change)="onPageSizeChanged()" id="page-size">
+                <option value="10">10</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+              </select>
+              entries</label>
+          </div>
+          <div style="margin-left: auto;">
+            <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue"/>
+            </label>
+          </div>
+          <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+            style="width: 100%; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+            [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
+            [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents">
+          </ag-grid-angular>
+          <div class="col-md-12">
+            <table *ngIf="noData">
+              <tbody><tr><td style="padding-top: 2rem;">No Data Available!!!</td></tr></tbody>
+            </table>
+          </div>
+
+          <br />
+          <br />
+          <br />
+
+        </div>
         </div>
     </div>
     </div>

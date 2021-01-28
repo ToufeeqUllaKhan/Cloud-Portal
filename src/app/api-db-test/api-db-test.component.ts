@@ -3,7 +3,7 @@ import { MainService } from '../services/main-service';
 import { Router } from '@angular/router';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { UUID } from 'angular2-uuid';
 import { Logintoken } from '../model/logintoken';
 import { User } from '../model/user';
@@ -15,7 +15,7 @@ import { User } from '../model/user';
 })
 export class ApiDbTestComponent implements OnInit {
 
-  apiModelsearchForm: FormGroup; apiloginForm: FormGroup;
+  apiModelsearchForm: FormGroup; apiloginForm: FormGroup; updatedevice_id: any;
   apiregisterForm: FormGroup; apiDownloadBinForm: FormGroup;
   apiDownloadZipForm: FormGroup; apiAutosearchForm: FormGroup;
   apiDeltasearchForm: FormGroup; apiFeedbacksearchForm: FormGroup;
@@ -68,15 +68,28 @@ export class ApiDbTestComponent implements OnInit {
   isDownlStatsTab: Boolean = false; downstats: any; ProjectList = [];
   user: User = new User();
   noData: boolean;
-  selected_tab: any;responsetime: any;
+  selected_tab: any; responsetime: any;
+  defaultboxid: any;
+  boxid: any;
+  version: any[];
+  versionlist: any;
+  selectedversion: any;
+  ipAddress: any;
+  loginid: any;
 
   constructor(private mainService: MainService, private router: Router, private fb: FormBuilder, private toastr: ToastrService,
-    private spinnerService: Ng4LoadingSpinnerService) {
+    private spinnerService: NgxSpinnerService) {
     this.user = JSON.parse(localStorage.getItem('currentUser'));
+    this.loginid = JSON.parse(localStorage.getItem('currentUser'))
   }
 
   ngOnInit() {
     this.spinnerService.hide();
+    var self = this;
+    $.getJSON("https://api.ipify.org?format=json",
+      function (data) {
+        self.dataIpAddress(data.ip);
+      });
     let dataSelected = JSON.parse(localStorage.getItem('CloudApiProjects'));
     let cloudApi = localStorage.getItem('CloudApi');
     var clientsProjects = JSON.parse(localStorage.getItem('choosenProjects'));
@@ -94,10 +107,18 @@ export class ApiDbTestComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        this.mainArr = value.data;
-        let resultFetchArr: any = value.data.filter(u =>
+        this.mainArr = value.data.filter(u =>
+          (u.statusFlag != 2 || u.statusFlag != '2'));
+        let resultFetchArr: any = this.mainArr.filter(u =>
           u.projectname == this.projectNames[0]);
         let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = this.projectNames[0];
+        this.sign_key = resultFetchArr[0]['signatureKey'];
+        let defaultboxid = resultFetchArr[0]['defaultBoxId'];
+        if (defaultboxid != null) {
+          this.device_id = defaultboxid.replace("Portal_", "");
+        } else {
+          this.device_id = null;
+        }
         this.mainService.getAPIList(sessionToken, Dbname, Project)
           .subscribe(value => {
             this.apis = value.data;
@@ -105,7 +126,7 @@ export class ApiDbTestComponent implements OnInit {
             this.getRegisterLogin();
             this.checkApiForm();
           });
-        const unique = [...new Set(value.data.map(item => item.projectname))];
+        const unique = [...new Set(this.mainArr.map(item => item.projectname))];
 
         let arrData = [];
         for (var i = 0; i < unique.length; i++) {
@@ -118,7 +139,7 @@ export class ApiDbTestComponent implements OnInit {
         /** List of Projects and projects version list based on role */
         if (RoleLevel != 'Admin') {
           let userName = localStorage.getItem('userName');
-          this.mainService.getRoleModulesAccess(8, null, null, userName, null)
+          this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
               let filterProjects = [];
               for (var i = 0; i < value.data.length; i++) {
@@ -170,7 +191,6 @@ export class ApiDbTestComponent implements OnInit {
               this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[i] });
             }
             this.projectNames = this.selectedItems;
-            console.log(this.projectNames)
             let filterProject: any = this.mainArr.filter(u =>
               u.projectname == Project);
 
@@ -253,6 +273,7 @@ export class ApiDbTestComponent implements OnInit {
       Output: ['', null],
       Result: ['', null]
     });
+
   }
   /** List of devices based on project selection */
   getDevices() {
@@ -281,7 +302,10 @@ export class ApiDbTestComponent implements OnInit {
 
   /** unique UUID Generator */
   generateUUID() {
-    this.uuidValue = UUID.UUID();
+    let uuidvalue = UUID.UUID();
+    if (uuidvalue.length > 25) {
+      this.uuidValue = uuidvalue.slice(0, 25);
+    }
     return this.uuidValue;
   }
 
@@ -289,7 +313,7 @@ export class ApiDbTestComponent implements OnInit {
     Registration form will be shown rest of the form will be hidden */
 
   async checkApiForm() {
-    this.spinnerService.show();
+    this.spinnerService.hide();
     let sessionToken = null;
     let Project;
     if (this.tabName == undefined) {
@@ -303,7 +327,7 @@ export class ApiDbTestComponent implements OnInit {
     }
     this.tabName = Project;
     let resultFetchArr: any = this.mainArr.filter(u =>
-      u.projectname == Project);
+      (u.projectname == Project) && (u.statusFlag != 2 || u.statusFlag != '2'));
     let Dbname = resultFetchArr[0]['dbPath']; let arr = [];
     await this.mainService.getAPIListData(sessionToken, Dbname, Project)
       .then(value => {
@@ -315,9 +339,11 @@ export class ApiDbTestComponent implements OnInit {
           for (let i = 0; i < this.apis.length; i++) {
             arr.push(this.apis[i]['name'])
           }
+          this.apis = arr;
           if (this.api_list != "null") {
             if (arr.includes(this.api_list)) {
               let searchUrl: any = value.data.filter(u => u.name == this.api_list);
+              console.log(searchUrl)
               this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
               if (this.api_list == 'REGISTRATION' || this.api_list == 'LOGIN') {
                 this.isVersionDataVisible = false;
@@ -349,6 +375,13 @@ export class ApiDbTestComponent implements OnInit {
             this.isLatestDb = false;
             this.isDownloadStats = false;
             this.isGenericSearch = false;
+            let filterProject: any = this.mainArr.filter(u =>
+              (u.projectname == this.tabName) && (u.statusFlag != 2 || u.statusFlag != '2'));
+            // let crudType = 2; let project = this.tabName; let signaturekey = filterProject[0]['signatureKey'];
+            // let BoxId= null; let Dbname = filterProject[0]['dbPath'];let dbversion = this.version[0];
+            let defaultboxid = filterProject[0]['defaultBoxId'];
+            this.device_id = defaultboxid.replace("Portal_", "");
+            this.sign_key = filterProject[0]['signatureKey']
           }
           if (this.api_list == 'LOGIN') {
             this.isLogin = true;
@@ -522,7 +555,7 @@ export class ApiDbTestComponent implements OnInit {
 
   async getRegisterLogin() {
 
-    let Project;
+    let Project; let versionarr = [];
     if (this.tabName == undefined || this.tabName == null) {
       if (this.projectNames[0]['item_text'] != undefined || this.projectNames[0]['item_text'] != null) {
         Project = this.projectNames[0]['item_text'];
@@ -533,42 +566,69 @@ export class ApiDbTestComponent implements OnInit {
       Project = this.tabName;
     }
     let resultFetchArr: any = this.mainArr.filter(u =>
-      u.projectname == Project);
+      (u.projectname == Project) && (u.statusFlag != 2 || u.statusFlag != '2'));
+    // var self=this;let versionselected;
+    // $('#version').each(function (i, elem) {
+    //   versionselected = ($(elem).val());
+    //   self.selectedversion=versionselected;
+    // });
     let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath'];
     let SignatureKey = resultFetchArr[0]['signatureKey'];
+    let userName = localStorage.getItem('userName'); let recordCount = 1; let ipaddress = this.ipAddress;
     await this.mainService.getAPIListData(sessionToken, Dbname, Project)
       .then(value => {
         if (this.api_list != 'REGISTRATION' && this.api_list != 'LOGIN') {
           let crudType = 2; let BoxId;
-          BoxId = null;
-          this.mainService.getBoxId(crudType, Project, SignatureKey, BoxId)
+          BoxId = null; let dbversion = this.version_list;
+          this.mainService.getBoxId(crudType, Project, SignatureKey, BoxId, Dbname, dbversion)
             .subscribe(value => {
-              if (value.data[0]['result'] == "0") {
+              if (value.data[0]['result'] == "0" || value.data[0]['result'] === 0) {
                 this.generateUUID();
-                BoxId = this.uuidValue;
-                this.mainService.getBoxId(1, Project, SignatureKey, BoxId)
+                BoxId = 'Portal_' + this.uuidValue;
+                this.mainService.getBoxId(1, Project, SignatureKey, BoxId, Dbname, dbversion)
                   .subscribe(value => {
                     if (value.data.length != 0) {
-                      this.mainService.getBoxId(2, Project, SignatureKey, null)
+                      if ((value.data[0]['result'] === 1 || value.data[0]['result'] === "1") && value.statusCode === "200") {
+                        // this.toastr.success('', value.data[0]['message']);
+                        let Updateadddescription = 'Boxid: ' + BoxId + ' Inserted Successfully'; let Updatestatus = 1; let Operation = "Insert"; let Datasection = 'Default Boxid Insertion';
+                        let log = JSON.stringify({ userName, Project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus }) + '(Update DefaultBoxid)';
+                        let loginid = this.loginid['data'][0]['loginId'];
+                        this.mainService.Genericlog(1, loginid, log)
+                          .then(value => {
+
+                          });
+                      }
+                      // else {
+                      //   this.toastr.warning('', value.data[0]['message']);
+                      // }
+                      this.mainService.getBoxId(2, Project, SignatureKey, null, Dbname, dbversion)
                         .subscribe(value => {
                           if (value.data.length != 0) {
-                            this.uuidValue = value.data[0]['message'];
+                            if (value.data[0]['result'] == "1" || value.data[0]['result'] === 1) {
+                              let len = value.data.length - 1;
+                              this.uuidValue = value.data[len]['message'];
+                            }
+                            // else {
+                            //   this.toastr.warning('', value.data[0]['message'])
+                            // }
                           }
                         });
                     }
                   });
               } else {
                 if (value.data.length != 0) {
-                  this.uuidValue = value.data[0]['message'];
+                  let len = value.data.length - 1;
+                  this.uuidValue = value.data[len]['message'];
                 }
               }
               let resultFetchArr: any = this.mainArr.filter(u =>
                 u.projectname == Project);
-              let Dbname = resultFetchArr[0]['dbPath'];
-              this.mainService.getAPIList(null, Dbname, Project)
+              let DbName = resultFetchArr[0]['dbPath'];
+              this.mainService.getAPIList(null, DbName, Project)
                 .subscribe(value => {
                   if (value.data.length > 0) {
                     let searchUrl: any = value.data.filter(u => u.name == 'REGISTRATION');
+                    let SearchUrl: any = value.data.filter(u => u.name == 'LOGIN');
                     this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
                     let eventUrl = this.urlData; let deviceId = this.uuidValue;
                     // let dbVersion = resultFetchArr[0]['embeddedDbVersion'];
@@ -581,8 +641,7 @@ export class ApiDbTestComponent implements OnInit {
                     let signatureKey = resultFetchArr[0]['signatureKey']; let countryCode = null;
                     this.mainService.getTestApiRegister(eventUrl, deviceId, dbVersion, signatureKey, countryCode)
                       .subscribe(e => {
-                        let searchUrl: any = value.data.filter(u => u.name == 'LOGIN');
-                        this.urlData = searchUrl[0]['address'] + searchUrl[0]['uri'];
+                        this.urlData = SearchUrl[0]['address'] + SearchUrl[0]['uri'];
                         if (Object(e)["data"] != '' && Object(e)["data"] != undefined) {
                           let guid = Object(e)["data"]["guid"];
                           this.mainService.getTestApiLogin(this.urlData, guid)
@@ -590,11 +649,12 @@ export class ApiDbTestComponent implements OnInit {
                               this.guidValue = Object(dataResult)["data"]["jwttoken"];
                               localStorage.setItem('token', JSON.stringify(this.guidValue));
                               this.checkApiForm();
-                              this.spinnerService.show();
+                              this.spinnerService.hide();
                             });
                         }
 
                       });
+
                   }
 
                 });
@@ -629,54 +689,57 @@ export class ApiDbTestComponent implements OnInit {
 
   /** On Project selection in multiselect dropdown to update the api list and and version list based on selection */
 
-  async onProjectSelect(e) {
-    let projectSelectedList = [];
-    let datatype = 1;
-    await this.mainService.getProjectNamesWaitReq(null, null, null, null, null, datatype)
-      .then(value => {
-        for (var i = 0; i < this.projectNames.length; i++) {
-          let filterClient: any = value.data.filter(u =>
-            u.projectname == this.projectNames[i]['item_text']);
-          this.projArr.push(filterClient);
-          projectSelectedList.push(this.projectNames[i]['item_text']);
-        }
-        this.tabslist = projectSelectedList;
-        var resultproj = [];
-        for (var k = 0; k < this.projArr.length; k++) {
-          resultproj = resultproj.concat(this.projArr[k]);
-        }
+  // async onProjectSelect(e) {
+  //   let projectSelectedList = [];
+  //   let datatype = 1;
+  //   await this.mainService.getProjectNamesWaitReq(null, null, null, null, null, datatype)
+  //     .then(value => {
+  //       for (var i = 0; i < this.projectNames.length; i++) {
+  //         let filterClient: any = value.data.filter(u =>
+  //           u.projectname == this.projectNames[i]['item_text']);
+  //         this.projArr.push(filterClient);
+  //         projectSelectedList.push(this.projectNames[i]['item_text']);
+  //       }
+  //       this.tabslist = projectSelectedList;
+  //       var resultproj = [];
+  //       for (var k = 0; k < this.projArr.length; k++) {
+  //         resultproj = resultproj.concat(this.projArr[k]);
+  //       }
 
-        this.projArr = resultproj;
-        let versionArr = [];
-        for (var m = 0; m < this.projArr.length; m++) {
-          let filterVersions: any = this.projArr.filter(u =>
-            u.projectname == projectSelectedList[m]);
-          if (filterVersions.length != 0) {
-            for (var j = 0; j < filterVersions.length; j++) {
-              if (filterVersions.length != 0) {
-                let fetchVersion = filterVersions[j]['embeddedDbVersion'];
-                versionArr.push(fetchVersion);
-              }
-            }
-          }
-        }
-        var uniqueVersions = versionArr.filter((v, i, a) => a.indexOf(v) === i);
-        this.dbVersion = uniqueVersions;
-      });
+  //       this.projArr = resultproj;
+  //       let versionArr = [];
+  //       for (var m = 0; m < this.projArr.length; m++) {
+  //         let filterVersions: any = this.projArr.filter(u =>
+  //           u.projectname == projectSelectedList[m]);
+  //         if (filterVersions.length != 0) {
+  //           for (var j = 0; j < filterVersions.length; j++) {
+  //             if (filterVersions.length != 0) {
+  //               let fetchVersion = filterVersions[j]['embeddedDbVersion'];
+  //               versionArr.push(fetchVersion);
+  //             }
+  //           }
+  //         }
+  //       }
+  //       var uniqueVersions = versionArr.filter((v, i, a) => a.indexOf(v) === i);
+  //       this.dbVersion = uniqueVersions;
+  //     });
+  // }
+
+  onProjectSelect(e) {
+
   }
-
   /** Change of Api in Multiselect Dropdown */
 
   changeApi() {
     this.ApiForm = this.api_list;
-    this.responsetime=' '
+    this.responsetime = ' '
     this.tabVersions();
     this.checkApiForm();
     this.resetFiles();
-    if (JSON.parse(localStorage.getItem('token')) == null) {
-      this.getRegisterLogin();
-    }
-    this.spinnerService.show()
+    // if (JSON.parse(localStorage.getItem('token')) == null) {
+    this.getRegisterLogin();
+    // }
+    this.showSpinner();
   }
 
   /** If Project are deselected and empty in Multiselect Dropdown to hide the entire section until project selects */
@@ -743,8 +806,14 @@ export class ApiDbTestComponent implements OnInit {
       } else {
         projectName = this.tabName
       }
+      var self = this; let versionselected;
+      $('#version').each(function (i, elem) {
+        versionselected = ($(elem).val());
+        self.selectedversion = versionselected;
+      });
+      this.version_list = this.selectedversion;
       let filterVersion: any = this.mainArr.filter(u =>
-        u.projectname == projectName && u.embeddedDbVersion == this.version_list);
+        u.projectname == projectName && u.embeddedDbVersion == this.version_list && (u.statusFlag != 2 || u.statusFlag != '2'));
       if (filterVersion.length != 0) {
         this.changeApi();
         this.tabVersions();
@@ -753,7 +822,7 @@ export class ApiDbTestComponent implements OnInit {
       } else {
         this.noData = true;
       }
-      this.spinnerService.show();
+      this.showSpinner();
     }
   }
 
@@ -848,11 +917,10 @@ export class ApiDbTestComponent implements OnInit {
       this.api_list = 'REGISTRATION';
     }
     this.ApiForm = this.api_list;
-    this.responsetime=' ';
+    this.responsetime = ' ';
     if (tabs != undefined && tabs != '') {
       let versionArray: any = this.mainArr.filter(u =>
-        u.projectname == tabs);
-      console.log(this.version_list)
+        (u.projectname == tabs) && (u.statusFlag != 2 || u.statusFlag != '2'));
       this.version_list = versionArray[0]['embeddedDbVersion'];
       this.tabVersions();
       this.checkApiForm();
@@ -860,7 +928,7 @@ export class ApiDbTestComponent implements OnInit {
         this.getRegisterLogin();
       }
     }
-    this.spinnerService.show();
+    this.spinnerService.hide();
   }
 
   tabVersions() {
@@ -871,7 +939,7 @@ export class ApiDbTestComponent implements OnInit {
       projectName = this.tabName;
     }
     let filterProject: any = this.mainArr.filter(u =>
-      u.projectname == projectName);
+      (u.projectname == projectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
     this.dbVersion = [];
     if (this.dbVersion.length == 0) {
       this.versionArr = [];
@@ -907,19 +975,29 @@ export class ApiDbTestComponent implements OnInit {
   /** Registration Form Submit Operation */
 
   onRegisterSearchSubmit() {
-    this.spinnerService.show();
-    var time1 = (new Date()).getTime();
+    // this.showSpinner();
+    var time1 = (new Date()).getTime(); let deviceId;
     this.regsubmitted = true;
     if (this.apiregisterForm.invalid) {
       return;
     }
-    let eventUrl = this.urlData; let deviceId = this.device_id; let dbVersion = this.db_version;
+    if (this.device_id.startsWith('Portal_')) {
+      deviceId = this.device_id;
+    } else {
+      deviceId = 'Portal_' + this.device_id;
+    }
+
+    if (deviceId.length > 36) {
+      this.device_id = this.device_id.slice(0, 36);
+    }
+    let eventUrl = this.urlData; let dbVersion = this.db_version;
     let signatureKey = this.sign_key; let countryCode = this.country_code;
     this.mainService.getTestApiRegister(eventUrl, deviceId, dbVersion, signatureKey, countryCode)
       .subscribe(value => {
-        this.spinnerService.hide();
+        this.showSpinner();
         var time2 = (new Date()).getTime();
         this.responsetime = time2 - time1 + ' ms';
+        this.device_id = this.device_id;
         if (Object(value)["message"] != '' && Object(value)["message"] != undefined) {
           this.isTabDataVisible = true;
           this.isRegisterTab = true;
@@ -927,37 +1005,15 @@ export class ApiDbTestComponent implements OnInit {
           this.guidData = Object(value)["data"]["guid"];
           this.checksumData = Object(value)["data"]["checksum"];
           this.guid_data = this.guidData;
-          let BoxId = deviceId;
-          let Project;
-          if (this.tabName == undefined || this.tabName == null) {
-            if (this.projectNames[0]['item_text'] != undefined || this.projectNames[0]['item_text'] != null) {
-              Project = this.projectNames[0]['item_text'];
-            } else {
-              Project = this.projectNames[0];
-            }
-          } else {
-            Project = this.tabName;
-          }
-          this.mainService.getProjectNames(null, null, null, null, null, 1)
-            .subscribe(value => {
-              let resultFetchArr: any = value.data.filter(u =>
-                u.projectname == Project);
-              let SignatureKey = resultFetchArr[0]['signatureKey'];
-              this.mainService.getBoxId(1, Project, SignatureKey, BoxId)
-                .subscribe(boxIdData => {
-
-                });
-            });
+          this.device_id = this.device_id;
         }
-
-
       });
   }
 
   /** Login Form Submit Operation */
 
   onLoginSearchSubmit() {
-    this.spinnerService.show();
+    // this.showSpinner();
     var time1 = (new Date()).getTime();
     this.logsubmitted = true;
     if (this.apiloginForm.invalid) {
@@ -967,9 +1023,9 @@ export class ApiDbTestComponent implements OnInit {
     let eventUrl = this.urlData; let guid = this.guid_data;
     this.mainService.getTestApiLogin(eventUrl, guid)
       .subscribe(value => {
-    var time2 = (new Date()).getTime();
-    this.responsetime = time2 - time1 + ' ms';
-        this.spinnerService.hide();
+        var time2 = (new Date()).getTime();
+        this.responsetime = time2 - time1 + ' ms';
+        this.showSpinner();
         if (Object(value)["message"] != '' && Object(value)["message"] != undefined) {
           this.isTabDataVisible = true;
           this.isLoginTab = true;
@@ -982,7 +1038,7 @@ export class ApiDbTestComponent implements OnInit {
   /** Current Db Version Submit Operation */
 
   onCurrentDbSearchSubmit() {
-    this.spinnerService.show();
+    // this.showSpinner();
     var time1 = (new Date()).getTime();
     this.currentdbsubmitted = true;
     if (this.apiCurrentDbForm.invalid) {
@@ -991,6 +1047,7 @@ export class ApiDbTestComponent implements OnInit {
     let eventUrl = this.urlData; let datatype = this.current_datatype;
     this.mainService.getTestApiCurrentDbVersion(eventUrl, datatype)
       .subscribe(value => {
+        this.showSpinner();
         var time2 = (new Date()).getTime();
         this.responsetime = time2 - time1 + ' ms';
         if (value.data != '' && value.data != undefined) {
@@ -998,7 +1055,6 @@ export class ApiDbTestComponent implements OnInit {
           this.isCurrentDBTab = true;
           this.currentDBVersion = value.data.dbversion;
         }
-        this.spinnerService.hide();
       });
   }
 
@@ -1020,7 +1076,7 @@ export class ApiDbTestComponent implements OnInit {
         this.isDownlStatsTab = true;
         this.downstats = value.message;
       });
-    this.spinnerService.show();
+    this.showSpinner();
   }
 
   /** Latest Db Version Submit Operation */
@@ -1035,14 +1091,14 @@ export class ApiDbTestComponent implements OnInit {
     this.mainService.getTestApiLatestDbVersion(eventUrl, datatype)
       .subscribe(value => {
         var time2 = (new Date()).getTime();
-        this.responsetime = time2 - time1 + ' ms';    
+        this.responsetime = time2 - time1 + ' ms';
         if (value.data != '' && value.data != undefined) {
           this.isTabDataVisible = true;
           this.isLatestDBTab = true;
           this.latestDBVersion = value.data.dbversion;
         }
       });
-    this.spinnerService.show();
+    this.showSpinner();
   }
 
   /** Generic Log Submit Operation */
@@ -1056,7 +1112,7 @@ export class ApiDbTestComponent implements OnInit {
     let eventUrl = this.urlData; let apiName = this.apiname;
     let input = this.inputData; let output = this.outputData;
     let result = this.resultData;
-    this.spinnerService.show();
+    this.showSpinner();
     this.mainService.getUpdateGenericLog(eventUrl, apiName, input, output, result)
       .subscribe(value => {
         var time2 = (new Date()).getTime();
@@ -1065,7 +1121,7 @@ export class ApiDbTestComponent implements OnInit {
         this.isGenericLogTab = true;
         this.genericlog = value.message;
       });
-    this.spinnerService.show();
+    this.showSpinner();
   }
 
   /** Download Bin Submit Operation */
@@ -1097,7 +1153,7 @@ export class ApiDbTestComponent implements OnInit {
           }
         }
       });
-    this.spinnerService.show();
+    this.showSpinner();
   }
 
   /** Bin File Download format to download in .bin file extension and the binFile data to save in local folders */
@@ -1112,7 +1168,7 @@ export class ApiDbTestComponent implements OnInit {
 
   downloadZip() {
     var fileText = this.getZipData;
-    var fileName = this.zipFilename + '.zip';
+    var fileName = this.zipFilename + '.tar.gz';
     this.saveTextAsFile(fileText, fileName);
   }
 
@@ -1145,7 +1201,7 @@ export class ApiDbTestComponent implements OnInit {
           }
         }
       });
-    this.spinnerService.show();
+    this.showSpinner();
   }
 
   /** Auto Search Submit Operation */
@@ -1180,7 +1236,7 @@ export class ApiDbTestComponent implements OnInit {
     } else {
       this.toastr.warning('', 'Please Enter Edid or Vendor Id or OSD to proceed further');
     }
-    this.spinnerService.show();
+    this.showSpinner();
   }
 
   /** Model Search Submit Operation */
@@ -1203,7 +1259,7 @@ export class ApiDbTestComponent implements OnInit {
           this.modelResult = value.data;
         }
       });
-    this.spinnerService.show();
+    this.showSpinner();
   }
 
   /** Delta Search Submit Operation */
@@ -1240,7 +1296,7 @@ export class ApiDbTestComponent implements OnInit {
           });
         }
       });
-    this.spinnerService.show();
+    this.showSpinner();
   }
 
   /** Feedback Submit Operation */
@@ -1290,7 +1346,7 @@ export class ApiDbTestComponent implements OnInit {
         //  this.toastr.warning('', value.message);
         //}
       });
-    this.spinnerService.show();
+    this.showSpinner();
   }
 
   /** Saving File Operations */
@@ -1329,5 +1385,14 @@ export class ApiDbTestComponent implements OnInit {
     }
   }
 
+  dataIpAddress(ipdata) {
+    this.ipAddress = ipdata
+  }
 
+  showSpinner() {
+    this.spinnerService.show();
+    setTimeout(() => {
+      this.spinnerService.hide();
+    }, 3000);
+  }
 }

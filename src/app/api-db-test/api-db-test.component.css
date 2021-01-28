@@ -258,3 +258,7 @@ button:hover .create_region {
   color: #dc3545;
   font-size: 0.9rem;
 }
+.disable {
+  pointer-events: none;
+  background-color: grey;
+}

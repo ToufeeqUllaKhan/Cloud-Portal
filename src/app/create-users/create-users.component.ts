@@ -15,7 +15,7 @@ export class CreateUsersComponent implements OnInit {
   createUserForm: FormGroup;
   submitted: Boolean = false;
   user: User = new User();
-  roles = [];
+  roles :any=null;
   role: any = null; username: any; firstname: any; lastname: any;
   email: any; phonenumber: any; password: any; selectedproject: any;
   projects: Array<any> = [];
@@ -33,12 +33,13 @@ export class CreateUsersComponent implements OnInit {
     $(document).ready(function () {
       $('.dropdown-list ul').css('max-height', '97px');
     });
-  /** List of Overall Projects */
+    /** List of Overall Projects */
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-
-        const unique = [...new Set(value.data.map(item => item.projectname))];
+        let FilterProject = value.data.filter(u =>
+          (u.statusFlag != 2 || u.statusFlag != '2'));
+        const unique = [...new Set(FilterProject.map(item => item.projectname))];
 
         let arrData = [];
         for (var i = 0; i < unique.length; i++) {
@@ -47,7 +48,7 @@ export class CreateUsersComponent implements OnInit {
         this.projects = arrData;
 
       });
-  /** Validation for create user */
+    /** Validation for create user */
     this.createUserForm = this.fb.group({
       Role: ['', Validators.required],
       userName: ['', Validators.required],
@@ -57,13 +58,13 @@ export class CreateUsersComponent implements OnInit {
       eMail: ['', Validators.required],
       mobileNo: ['', [Validators.required, Validators.maxLength(10)]]
     });
-  /** List of Roles */
+    /** List of Roles */
     let crudType = 5;
     this.mainService.createUser(crudType, null, null, null, null, null, null, null, null, null)
       .subscribe(value => {
         this.roles = value.data;
       });
-  /** Project list multiselect option settings */
+    /** Project list multiselect option settings */
     this.dropdownSettings = {
       singleSelection: false,
       idField: 'item_id',
@@ -102,7 +103,7 @@ export class CreateUsersComponent implements OnInit {
     // console.log(this.projectNames);
   }
 
-/** Role change functionality ie., if admin role is selected default all projects will be selected else selected projects will select based on selection */
+  /** Role change functionality ie., if admin role is selected default all projects will be selected else selected projects will select based on selection */
 
   roleChange() {
     if (this.role != 'Admin') {
@@ -121,7 +122,7 @@ export class CreateUsersComponent implements OnInit {
 
   get f() { return this.createUserForm.controls; }
 
-/** Create Users Submit Operation */
+  /** Create Users Submit Operation */
   onCreateUserSubmit() {
     if (this.password.length < 4) {
       this.toastr.warning('', 'Please enter a password with at least 4 characters');
@@ -130,10 +131,10 @@ export class CreateUsersComponent implements OnInit {
     if (this.createUserForm.invalid) {
       return;
     }
-    
+
     let crudType = 1;
     let userName = this.username;
-    this.mainService.createUser(crudType, userName, this.password, this.role, this.firstname, this.lastname, this.email, this.mobileNumber,null,null)
+    this.mainService.createUser(crudType, userName, this.password, this.role, this.firstname, this.lastname, this.email, this.mobileNumber, null, null)
       .pipe()
       .subscribe(value => {
         if (value.data[0]['result'] == 1) {
@@ -152,9 +153,9 @@ export class CreateUsersComponent implements OnInit {
         } else {
           this.toastr.warning('', value.data[0]['message']);
         }
-    });
+      });
   }
-/** New Role is clicked to handle new role page breadcrumbs list in add role page */
+  /** New Role is clicked to handle new role page breadcrumbs list in add role page */
   newRole() {
     localStorage.removeItem('previousUrl');
     this.router.events

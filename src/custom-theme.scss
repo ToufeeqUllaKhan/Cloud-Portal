@@ -7,7 +7,8 @@
 // have to load a single css file for Angular Material in your app.
 // Be sure that you only ever include this mixin once!
 @include mat-core();
-
+@import "ag-grid-community/dist/styles/ag-grid.css";
+@import "~ag-grid-community/src/styles/ag-theme-alpine/sass/ag-theme-alpine-mixin";
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
@@ -25,3 +26,17 @@ $ssc-app-ver1-theme: mat-light-theme($ssc-app-ver1-primary, $ssc-app-ver1-accent
 // that you are using.
 @include angular-material-theme($ssc-app-ver1-theme);
 
+.ag-theme-alpine {
+  @include ag-theme-alpine(
+    (
+      // use theme parameters where possible
+        // Default border for cells. This can be used to specify the border-style and border-color properties e.g. `dashed red` but the border-width is fixed at 1px.
+        cell-horizontal-border: solid ag-derived(secondary-border-color)
+    )
+  );
+
+  .ag-header-cell {
+    // or write CSS selectors to make customisations beyond what the parameters support
+    border-right: 1px solid ag-param(secondary-border-color);
+  }
+}

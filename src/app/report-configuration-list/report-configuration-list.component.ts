@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MainService } from '../services/main-service';
 import { Title } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
+declare var $: any;
 
 @Component({
   selector: 'app-report-configuration-list',
@@ -32,40 +33,74 @@ export class ReportConfigurationListComponent implements OnInit {
     let zipUploadsProjects = JSON.parse(localStorage.getItem('dataConfigProjects'));
     
     this.switchRoute = localStorage.getItem('logSelected');
+    let projectNames: any;
     if (getBrandProjects != null && getBrandProjects.length != 0) {
-      this.projectNames = getBrandProjects;
+      projectNames = getBrandProjects;
     } else {
-      this.projectNames = getClientProjects;
+      projectNames = getClientProjects;
     }
     if (getBrandProjects == null && getClientProjects == null) {
-      this.projectNames = zipUploadsProjects;
+      projectNames = zipUploadsProjects;
     }
+    // this.projectNames.push(projectNames)
+    this.projectNames=projectNames;
     var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
     if (browserZoomLevel != 100) {
       this.zoomFunction();
     }
-   /** list of projects in multiselect dropdown */
+    /** list of projects in multiselect dropdown */
     let dataType = 1;
-    this.mainService.getProjectNames(null,null,null,null,null,dataType)
+    this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-
-        const unique = [...new Set(value.data.map(item => item.projectname))];
-
-        let arrData = [];
+        let filterProjectwithstatus2=value.data.filter(u=>u.statusFlag===2);
+        let filterProjectwithstatus=value.data.filter(u=>u.statusFlag!=2);
+        const unique = [...new Set(filterProjectwithstatus.map(item => item.projectname))];
+        const unique1 = [...new Set(filterProjectwithstatus2.map(item => item.projectname))];
+        let arrData = [];let arrData_1 = [];
         for (var i = 0; i < unique.length; i++) {
           arrData.push({ item_id: i, item_text: unique[i] });
         }
-        this.ProjectList = arrData;
+        for (var i = 0; i < unique1.length; i++) {
+          arrData.push({ item_id: i, item_text: "PROD_"+unique1[i] });
+        }
+        for (var i = 0; i < arrData.length; i++) {
+          arrData_1.push({ item_id: i, item_text: arrData[i]['item_text'] });
+        }
+        
+        this.ProjectList = arrData_1;
+        // let FilterProject: any  = value.data.filter(u =>
+        //   (u.statusFlag === 2 || u.statusFlag === '2'));
+        // const unique = [...new Set(FilterProject.map(item => item.projectname))];
+
+        // let arrData = [];
+        // for (var i = 0; i < unique.length; i++) {
+        //   arrData.push({ item_id: i, item_text: "PROD_"+unique[i] });
+        // }
+        // this.ProjectList = arrData;
 
         let RoleLevel = localStorage.getItem('AccessRole');
         if (RoleLevel != 'Admin') {
           let userName = localStorage.getItem('userName');
-          this.mainService.getRoleModulesAccess(8, null, null, userName, null)
+          this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
-              let filterProjects = [];
+              let filterProjects = [];let ProjectName: any;let clientsArray: any
               for (var i = 0; i < value.data.length; i++) {
-                let clientsArray: any = this.ProjectList.filter(u =>
-                  u.item_text == value.data[i]['name']);
+                if (this.ProjectList[i]['item_text'] != undefined) {
+          ProjectName = this.ProjectList[i]['item_text'];
+        } else {
+          ProjectName = this.ProjectList[i]
+        }
+        
+        if(ProjectName.startsWith('PROD_')){
+          clientsArray = this.ProjectList.filter(u =>
+            u.item_text == ("PROD_"+value.data[i]['name']) && (u.statusFlag === 2 || u.statusFlag === '2'));
+        }
+        else{
+          clientsArray = this.ProjectList.filter(u =>
+            u.item_text == value.data[i]['name'] && (u.statusFlag != 2 || u.statusFlag != '2'));
+        }
+                // let clientsArray: any = this.ProjectList.filter(u =>
+                  // u.item_text == ("PROD_"+value.data[i]['name']));
                 filterProjects.push(...clientsArray);
               }
               let modifyItems = [];
@@ -79,11 +114,11 @@ export class ReportConfigurationListComponent implements OnInit {
                   this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[k] });
                 }
                 this.projectNames = this.selectedItems;
-                
+
               }
             });
         } else {
-          this.projects = arrData;
+          this.projects = arrData_1;
           if (this.projectNames != '' && this.projectNames != undefined) {
             for (var i = 0; i < this.projectNames.length; i++) {
               var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[i]);
@@ -108,7 +143,7 @@ export class ReportConfigurationListComponent implements OnInit {
     $(document).ready(function () {
       $(window).resize(function () {
         var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
-        
+
         if (browserZoomLevel == 100) {
           $('.dashboard-stats__item').css('width', '100%');
           $('.col-sm-3').css('max-width', '25%');
@@ -141,10 +176,10 @@ export class ReportConfigurationListComponent implements OnInit {
           $('.dashboard-stats__item').css('width', '325px');
           $('.col-sm-3').css('max-width', '55%');
         }
-        
+
       });
     });
-    
+
   }
 
   zoomFunction() {
@@ -248,16 +283,18 @@ export class ReportConfigurationListComponent implements OnInit {
 
   /** Multiselect dropdown setting functions start */
   onInstanceSelect(item: any) {
-   // console.log('onItemSelect', item);
+    // console.log('onItemSelect', item);
   }
+
   onSelectAll(items: any) {
-   // console.log('onSelectAll', items);
+    // console.log('onSelectAll', items);
     let arrData1 = [];
     for (var i = 0; i < items.length; i++) {
-      arrData1.push(items[i]['item_text']);
+      arrData1.push("PROD_"+items[i]['item_text']);
     }
     this.projectNames = arrData1;
   }
+
   toogleShowFilter() {
     this.ShowFilter = !this.ShowFilter;
     this.dropdownSettings = Object.assign({}, this.dropdownSettings, { allowSearchFilter: this.ShowFilter });
@@ -272,16 +309,16 @@ export class ReportConfigurationListComponent implements OnInit {
     }
   }
 
-/** Multiselect dropdown setting functions end */
+  /** Multiselect dropdown setting functions end */
 
   onProjectSelect(e) {
-   // console.log(this.projectNames);
+    // console.log(this.projectNames);
   }
 
-  
+
   changeProject() {
     if (this.projectNames.length == 0) {
-      $('.scroll-x').css('display','none')
+      $('.scroll-x').css('display', 'none')
       this.toastr.warning('Please Select the Project to Activate the fields', '');
     }
     if (this.projectNames.length == 1) {
@@ -290,57 +327,55 @@ export class ReportConfigurationListComponent implements OnInit {
     }
   }
 
-  
-  listofbrands(){
-    let projArr=[];
-    let projectSelectedList = [];
-    let datatype = 1;
-     this.mainService.getProjectNamesWaitReq(null, null, null, null, null, datatype)
+
+  listofbrands() {
+    
+    let datatype = 1;let resultFetchArr: any;
+    this.mainService.getProjectNamesWaitReq(null, null, null, null, null, datatype)
       .then(value => {
-        for (var i = 0; i < this.projectNames.length; i++) {
-          let filterClient: any = value.data.filter(u =>
-            u.projectname == this.projectNames[i]);
-          projArr.push(filterClient);
+        let ProjectName;
+        if (this.projectNames[0]['item_text'] != undefined) {
+          ProjectName = this.projectNames[0]['item_text'];
+        } else {
+          ProjectName = this.projectNames[0]
         }
-        var resultproj = [];
-        for (var j = 0; j < projArr.length; j++) {
-          resultproj = resultproj.concat(projArr[j]);
+        
+        if(ProjectName.startsWith('PROD_')){
+          resultFetchArr= value.data.filter(u =>
+            (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
         }
-        projArr = resultproj;
-let ProjectName;
-                if (this.projectNames[0]['item_text'] != undefined) {
-                  ProjectName = this.projectNames[0]['item_text'];
-                } else {
-                  ProjectName = this.projectNames[0]
-                }
-              let resultFetchArr: any = value.data.filter(u =>
-                u.projectname == ProjectName);
-              let Dbname = resultFetchArr[0]['dbPath']; 
-              let dataType=0; let arr=[];
-          this.mainService.getSearchDetails(Dbname, null, null, null, dataType)
-            .then(value => {
-              if(this.switchRoute=='SearchLog'){
-                if (value.data.length != 0) {
-                  value.data = value.data.filter(function (obj) {
-                    return obj.dataType !== 2 && obj.dataType !== 6 && obj.dataType !== 10;
-                  });
-                }
-                for(let i=0;i<value.data.length;i++){
-                   arr.push({ticketName:value.data[i]['description'],description:value.data[i]['description']});
-                  }
+        else{
+           resultFetchArr = value.data.filter(u =>
+            (u.projectname == ProjectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
+        }
+        // let resultFetchArr: any = value.data.filter(u =>
+        //   (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
+        let Dbname = resultFetchArr[0]['dbPath'];
+        let dataType = 0; let arr = [];
+        this.mainService.getSearchDetails(Dbname, null, null, null, dataType)
+          .then(value => {
+            if (this.switchRoute == 'SearchLog') {
+              if (value.data.length != 0) {
+                value.data = value.data.filter(function (obj) {
+                  return obj.dataType !== 2 && obj.dataType !== 6 && obj.dataType !== 10;
+                });
               }
-              else if(this.switchRoute=='GenericLog'){
-                if (value.data.length != 0) {
-                  value.data = value.data.filter(function (obj) {
-                    return obj.dataType == 10;
-                  });
-                }
-                for(let i=0;i<value.data.length;i++){
-                   arr.push({ticketName:value.data[i]['description'],description:value.data[i]['description']});
-                  }
+              for (let i = 0; i < value.data.length; i++) {
+                arr.push({ ticketName: value.data[i]['description'], description: value.data[i]['description'] });
               }
-                        this.dataTickets = arr;
-                      })
+            }
+            else if (this.switchRoute == 'GenericLog') {
+              if (value.data.length != 0) {
+                value.data = value.data.filter(function (obj) {
+                  return obj.dataType == 10;
+                });
+              }
+              for (let i = 0; i < value.data.length; i++) {
+                arr.push({ ticketName: value.data[i]['description'], description: value.data[i]['description'] });
+              }
+            }
+            this.dataTickets = arr;
+          })
       });
   }
   /** Select Ticket functionality to proceed further start */
@@ -349,6 +384,7 @@ let ProjectName;
     if (name != '') {
       let arrData2 = [];
       for (var j = 0; j < this.projectNames.length; j++) {
+        // arrData2.push(this.projectNames[j]['item_text'].replace("PROD_", ""));
         arrData2.push(this.projectNames[j]['item_text']);
       }
       this.projectNames = arrData2;
@@ -357,16 +393,16 @@ let ProjectName;
 
       if (name != '' && this.projectNames.length != 0) {
         localStorage.setItem('selectedBrand', name);
-         this.router.navigate(['/history']);
+        this.router.navigate(['/history']);
       }
       if (this.projectNames.length == 0) {
         this.toastr.warning('Please Select the project', '');
       }
     }
-    
+
   }
 
-/** Select Ticket functionality to proceed further end */
+  /** Select Ticket functionality to proceed further end */
 
 
   prev() {
@@ -376,7 +412,7 @@ let ProjectName;
     }
     this.projectNames = projSelectedData;
     localStorage.setItem('fetchedAdminProj', JSON.stringify(this.projectNames));
-    this.router.navigate(['/admin-clients'])
+    this.router.navigate(['/report-clients'])
       .then(() => {
         location.reload();
       });

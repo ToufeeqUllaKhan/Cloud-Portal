@@ -1,0 +1,61 @@
+<div class="container-fluid main-scroll">
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="row page-titles">
+      <div class="align-self-center">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+          <li class="breadcrumb-item active">View CEC-EDID History</li>
+        </ol>
+      </div>
+    </div>
+  
+    <div class="row">
+        <div class="col-xl-1 col-md-1 hideData" style="width:auto;margin-left: auto;">
+          <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
+              aria-hidden="true"></i></button>
+        </div>&nbsp;&nbsp;
+        <select [(ngModel)]='userid' class="form form-control selectDrop" (change)="onchangeid()"
+        style="width:auto;">
+          <option [value]=null hidden>Users </option>
+          <option value=null>All</option>
+          <option *ngFor="let list of users" value="{{list.loginid}}">{{list.loginid}} - {{list.user}}</option>
+    
+        </select>&nbsp;&nbsp;
+        <div>
+          <button class="btn btn-info float-right"
+            title="Download based on filtered data" id="single_download">
+            <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
+        </div>
+    
+        <div class="row" style="margin-top: 20px;">
+          <div class="example-header">
+            <label>Show
+              <select (change)="onPageSizeChanged()" id="page-size">
+                <option value="10">10</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+              </select>
+              entries</label>
+          </div>
+          <div style="margin-left: auto;">
+            <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue" />
+            </label>
+          </div>
+          <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+            style="width: 1075px; height: 380px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+            [pagination]="true" [paginationPageSize]="paginationPageSize" [paginationNumberFormatter]="paginationNumberFormatter">
+          </ag-grid-angular>
+    
+        </div>
+      </div>
+
+    <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
+      [fullScreen]="true">
+    </ngx-spinner>
+  </div>
+  

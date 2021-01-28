@@ -30,9 +30,9 @@
     <div class="col-xl-4 col-md-4 noneProjects">
       <div class="card">
         <div class="card-block">
-          <select [(ngModel)]='api_list' class="form-control" (change)="changeApi()">
+          <select [(ngModel)]='api_list' class="form-control selectDrop" (change)="changeApi()">
             <option [value]=null>Select</option>
-            <option *ngFor="let list of apis" value={{list.name}}>{{list.name}}</option>
+            <option *ngFor="let list of apis" value={{list}}>{{list}}</option>
           </select>
         </div>
       </div>
@@ -47,7 +47,7 @@
     <div class="col-xl-2 col-md-2 hideData noneProjects">
       <div class="card" *ngIf="isVersionDataVisible">
         <div class="card-block">
-          <select [(ngModel)]='version_list' class="form-control" (change)="changeVersion()">
+          <select id="version" [(ngModel)]='version_list' class="form-control" (change)="changeVersion()">
             <option [value]=null>Versions</option>
             <option *ngFor="let v of dbVersion" value={{v}}>{{v}}</option>
           </select>
@@ -77,7 +77,7 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Signature Key</label>
-                  <textarea type="text" rows="2" [(ngModel)]="sign_key" formControlName="SignatureKey" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': regsubmitted && g.SignatureKey.errors }"></textarea>
+                  <textarea type="text" rows="2" [(ngModel)]="sign_key" formControlName="SignatureKey" class="form-control disable form-control-line col-sm-8" [ngClass]="{ 'is-invalid': regsubmitted && g.SignatureKey.errors }"></textarea>
                   <div *ngIf="regsubmitted && g.SignatureKey.errors" class="invalid-feedback">
                     <div *ngIf="g.SignatureKey.errors.required">Signature Key is required</div>
                   </div>
@@ -86,7 +86,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Device ID</label>
-                  <textarea rows="2" type="text" [(ngModel)]="device_id" formControlName="deviceId" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': regsubmitted && g.deviceId.errors }"></textarea>
+                  <span style="pointer-events: none;">Portal_</span>
+                  <textarea rows="1" type="text" maxlength="25" [(ngModel)]="device_id" formControlName="deviceId" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': regsubmitted && g.deviceId.errors }"></textarea>
+                  <!-- <input type="text" [(ngModel)]="device_id" formControlName="deviceId" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': regsubmitted && g.deviceId.errors }"/> -->
                   <div *ngIf="regsubmitted && g.deviceId.errors" class="invalid-feedback">
                     <div *ngIf="g.deviceId.errors.required">Device ID is required</div>
                   </div>
@@ -652,7 +654,9 @@
       </div>
     </div>
   </div>
+  
+  
   <div class="row"><br />&nbsp;</div>
-  <ng4-loading-spinner [threshold]="500" [timeout]="2000" [loadingText]="'Please wait...'" [zIndex]="9999"></ng4-loading-spinner>
+  <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
 
 </div>

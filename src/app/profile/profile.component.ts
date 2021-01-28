@@ -4,7 +4,7 @@ import { MainService } from '../services/main-service';
 import { User } from '../../app/model/user';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 
 @Component({
@@ -21,12 +21,12 @@ export class ProfileComponent implements OnInit {
   firstname: any; role: any; phonenumber: any; email: any; lastname: any;
   username: any; userSelected: any; fileExt: any; imagePath: any; profilePicture: any;
 
-  constructor(private fb: FormBuilder, private mainService: MainService, private toastr: ToastrService, private router: Router, private spinnerService: Ng4LoadingSpinnerService) {
+  constructor(private fb: FormBuilder, private mainService: MainService, private toastr: ToastrService, private router: Router, private spinnerService: NgxSpinnerService) {
     this.user = JSON.parse(localStorage.getItem('currentUser'));
   }
 
   ngOnInit() {
-  /** Profile Validations */
+    /** Profile Validations */
     this.profileForm = this.fb.group({
       Role: ['', Validators.required],
       userName: ['', Validators.required],
@@ -35,34 +35,34 @@ export class ProfileComponent implements OnInit {
       eMail: ['', Validators.required],
       phoneNumber: ['', Validators.required]
     });
-  /** User related Information to set in the form */
-        let crudtype = 4;
-        let userName = localStorage.getItem('userName');
-        this.mainService.createUser(crudtype, userName, null, null, null, null, null, null, null, null)
-          .subscribe(value => {
-            if (value.data.length > 0) {
-              this.firstname = value.data[0]['firstName'];
-              this.role = value.data[0]['roleName'];
-              this.phonenumber = value.data[0]['mobile'];
-              this.email = value.data[0]['eMail'];
-              this.lastname = value.data[0]['lastName'];
-              this.username = localStorage.getItem('userName');
-              this.userSelected = value.data[0]['firstName'] + ' ' + value.data[0]['lastName'];
-            }
-            if (value.data[0]['profilePicture'] != null) {
-              this.imagePath = value.data[0]['profilePicture'];
-              this.profilePicture = 'data:image/jpg;base64,' + this.imagePath;
-            } else {
-              this.profilePicture = 'assets/images/logo_user.png';
-            }
+    /** User related Information to set in the form */
+    let crudtype = 4;
+    let userName = localStorage.getItem('userName');
+    this.mainService.createUser(crudtype, userName, null, null, null, null, null, null, null, null)
+      .subscribe(value => {
+        if (value.data.length > 0) {
+          this.firstname = value.data[0]['firstName'];
+          this.role = value.data[0]['roleName'];
+          this.phonenumber = value.data[0]['mobile'];
+          this.email = value.data[0]['eMail'];
+          this.lastname = value.data[0]['lastName'];
+          this.username = localStorage.getItem('userName');
+          this.userSelected = value.data[0]['firstName'] + ' ' + value.data[0]['lastName'];
+        }
+        if (value.data[0]['profilePicture'] != null) {
+          this.imagePath = value.data[0]['profilePicture'];
+          this.profilePicture = 'data:image/jpg;base64,' + this.imagePath;
+        } else {
+          this.profilePicture = 'assets/images/logo_user.png';
+        }
 
-          });
-  /** List of roles */
+      });
+    /** List of roles */
     this.mainService.createUser(5, null, null, null, null, null, null, null, null, null)
       .subscribe(value => {
         this.roles = value.data;
       });
-  /** For Image Upload */
+    /** For Image Upload */
     $(document).ready(function () {
       $("#profileImage").click(function (e) {
         $("#imageUpload").click();
@@ -81,10 +81,10 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-/** Validation of Image Size to restrict the file size of an image */
+  /** Validation of Image Size to restrict the file size of an image */
 
   ValidateSize(e) {
-    this.spinnerService.show();
+    this.spinnerService.hide();
     var file_list = e.target.files;
     for (var i = 0, file; file = file_list[i]; i++) {
       var sFileName = file.name;
@@ -93,24 +93,30 @@ export class ProfileComponent implements OnInit {
       var iFileSize = file.size;
       var iConvert = (file.size / 1048576).toFixed(2);
       var sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
-      if (iFileSize > 1000000) {
-        this.toastr.warning('', 'Please upload file less than 1MB');
-        $('#imageUpload').val('');
-      } else {
-        var files = e.target.files;
+      if ((this.fileExt === 'jpg') || (this.fileExt === 'jpeg') || (this.fileExt === 'png')) {
+        if (iFileSize > 1000000) {
+          this.toastr.warning('', 'Please upload file less than 1MB');
+          $('#imageUpload').val('');
+        } else {
+          var files = e.target.files;
 
-        if (files) {
-          var reader = new FileReader();
+          if (files) {
+            var reader = new FileReader();
 
-          reader.onload = this.FileReader.bind(this);
+            reader.onload = this.FileReader.bind(this);
 
-          reader.readAsBinaryString(file);
+            reader.readAsBinaryString(file);
+          }
         }
+      }
+      else {
+        this.toastr.error('', 'Accepts only .jpg, .jpeg, .png format');
+        $('#imageUpload').val('');
       }
     }
   }
 
-/** File Reader the convert image file to base64 to save the image in DB */
+  /** File Reader the convert image file to base64 to save the image in DB */
 
   FileReader(readerEvt) {
 
@@ -143,7 +149,7 @@ export class ProfileComponent implements OnInit {
 
   get f() { return this.profileForm.controls; }
 
-/** Profile Updation Operation */
+  /** Profile Updation Operation */
 
   onUpdateProfileSubmit() {
 

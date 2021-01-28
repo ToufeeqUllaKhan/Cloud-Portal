@@ -202,3 +202,9 @@ table.dataTable.display tbody td {
 .dataTables_scrollBody thead tr[role="row"] {
   visibility: collapse !important;
 }
+
+.fa-plus-circle {
+  color: #28a745;
+  font-size: 1.5rem;
+  cursor: pointer;
+}

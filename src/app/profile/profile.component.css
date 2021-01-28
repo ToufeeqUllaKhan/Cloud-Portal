@@ -174,8 +174,8 @@ label {
 .gradientBlue {
   /*background-color: #29b6f6;
   background: linear-gradient(87deg,#36d1dc 0,#5b86e5 100%);*/
-  background-color: #2dcdb4;
-  background-image: linear-gradient(45deg, #29c8ba, #3ddf9e);
+  /* background-color: #2dcdb4;
+  background-image: linear-gradient(45deg, #29c8ba, #3ddf9e); */
   color: #fff;
 }
 .text-center {

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MainService } from '../services/main-service';
 import { Title } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
+declare var $: any;
 
 @Component({
   selector: 'app-data-configuration-list',
@@ -29,7 +30,7 @@ export class DataConfigurationListComponent implements OnInit {
     var getBrandProjects = JSON.parse(localStorage.getItem('BrandLibraryProjects'));
     var getClientProjects = JSON.parse(localStorage.getItem('choosenProjects'));
     let zipUploadsProjects = JSON.parse(localStorage.getItem('dataConfigProjects'));
-    
+
     if (getBrandProjects != null && getBrandProjects.length != 0) {
       this.projectNames = getBrandProjects;
     } else {
@@ -42,12 +43,13 @@ export class DataConfigurationListComponent implements OnInit {
     if (browserZoomLevel != 100) {
       this.zoomFunction();
     }
-   /** list of projects in multiselect dropdown */
+    /** list of projects in multiselect dropdown */
     let dataType = 1;
-    this.mainService.getProjectNames(null,null,null,null,null,dataType)
+    this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-
-        const unique = [...new Set(value.data.map(item => item.projectname))];
+        let filterProject: any = value.data.filter(u =>
+          (u.statusFlag != 2 || u.statusFlag != '2'));
+        const unique = [...new Set(filterProject.map(item => item.projectname))];
 
         let arrData = [];
         for (var i = 0; i < unique.length; i++) {
@@ -58,7 +60,7 @@ export class DataConfigurationListComponent implements OnInit {
         let RoleLevel = localStorage.getItem('AccessRole');
         if (RoleLevel != 'Admin') {
           let userName = localStorage.getItem('userName');
-          this.mainService.getRoleModulesAccess(8, null, null, userName, null)
+          this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
               let filterProjects = [];
               for (var i = 0; i < value.data.length; i++) {
@@ -77,7 +79,7 @@ export class DataConfigurationListComponent implements OnInit {
                   this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[k] });
                 }
                 this.projectNames = this.selectedItems;
-                
+
               }
             });
         } else {
@@ -90,23 +92,36 @@ export class DataConfigurationListComponent implements OnInit {
             this.projectNames = this.selectedItems;
           }
         }
-        
+
       });
 
-    
+
     /** Remove ticket wdb bin since its not in use */
     let datatype = 20;
     this.mainService.getProjectNames(null, null, null, null, null, datatype)
       .subscribe(value => {
-        for (var i = value.data.length - 1; i >= 0; --i) {
-          if (value.data[i].ticketName == "WDB Bin") {
-            value.data.splice(i, 1);
+        // for (var i = value.data.length - 1; i >= 0; --i) {
+        //   if (value.data[i].ticketName == "WDB Bin") {
+        //     value.data.splice(i, 1);
+        //   }
+        // }
+        // console.log(value.data);
+        // this.dataTickets = value.data;
+        let Tickets=[];
+        for(var i = value.data.length - 1; i >= 0; --i){
+          let RoleLevel = localStorage.getItem('AccessRole');
+          if(RoleLevel==='Admin'){
+            if (value.data[i].ticketName == "WDB Bin") {
+              value.data.splice(i, 1)            }
+          }else{
+            if ((value.data[i].ticketName == "WDB Bin") || (value.data[i].ticketName == "Zip") ) {
+              value.data.splice(i, 1)            }
           }
         }
-        console.log(value.data);
-        this.dataTickets = value.data;
+        console.log(value.data)
+        this.dataTickets=value.data;;
       });
-   
+
     this.dropdownSettings = {
       singleSelection: false,
       idField: 'item_id',
@@ -120,7 +135,7 @@ export class DataConfigurationListComponent implements OnInit {
     $(document).ready(function () {
       $(window).resize(function () {
         var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
-        
+
         if (browserZoomLevel == 100) {
           $('.dashboard-stats__item').css('width', '100%');
           $('.col-sm-3').css('max-width', '25%');
@@ -153,10 +168,10 @@ export class DataConfigurationListComponent implements OnInit {
           $('.dashboard-stats__item').css('width', '325px');
           $('.col-sm-3').css('max-width', '55%');
         }
-        
+
       });
     });
-    
+
   }
 
   zoomFunction() {
@@ -260,10 +275,10 @@ export class DataConfigurationListComponent implements OnInit {
 
   /** Multiselect dropdown setting functions start */
   onInstanceSelect(item: any) {
-   // console.log('onItemSelect', item);
+    // console.log('onItemSelect', item);
   }
   onSelectAll(items: any) {
-   // console.log('onSelectAll', items);
+    // console.log('onSelectAll', items);
     let arrData1 = [];
     for (var i = 0; i < items.length; i++) {
       arrData1.push(items[i]['item_text']);
@@ -284,10 +299,10 @@ export class DataConfigurationListComponent implements OnInit {
     }
   }
 
-/** Multiselect dropdown setting functions end */
+  /** Multiselect dropdown setting functions end */
 
   onProjectSelect(e) {
-   // console.log(this.projectNames);
+    // console.log(this.projectNames);
   }
 
   /** Select Ticket functionality to proceed further start */
@@ -318,16 +333,16 @@ export class DataConfigurationListComponent implements OnInit {
 
       if (name != '' && this.projectNames.length != 0) {
         localStorage.setItem('selectedBrand', name);
-         this.router.navigate(['/brand-library']);
+        this.router.navigate(['/brand-library']);
       }
       if (this.projectNames.length == 0) {
         this.toastr.warning('Please Select the project', '');
       }
     }
-    
+
   }
 
-/** Select Ticket functionality to proceed further end */
+  /** Select Ticket functionality to proceed further end */
 
 
   prev() {

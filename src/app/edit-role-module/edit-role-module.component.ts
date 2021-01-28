@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { MainService } from '../services/main-service';
 import { Router } from '@angular/router';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -20,18 +20,18 @@ export class EditRoleModuleComponent implements OnInit {
 
   @ViewChildren("checkboxes") checkboxes: QueryList<ElementRef>;
 
-  constructor(private mainService: MainService, private router: Router, private spinnerService: Ng4LoadingSpinnerService,
+  constructor(private mainService: MainService, private router: Router, private spinnerService: NgxSpinnerService,
     private toastr: ToastrService) { }
 
   ngOnInit() {
     let role = localStorage.getItem('roleSelected');
     this.roleName = role;
     this.spinnerService.show();
-  /** List of Roles */
+    /** List of Roles */
     let crudType = 7;
-    this.mainService.getRoleModules(crudType, null, null, null, null)
-      .subscribe(value => {
-      /** based on role get modules accessible checked or not checked*/
+    this.mainService.getRoleModule(crudType, null, null, null, null)
+      .then(value => {
+        /** based on role get modules accessible checked or not checked*/
         let resultFetchArr: any = value.data.filter(u =>
           u.name == role);
         let fetchModule = [];
@@ -43,8 +43,8 @@ export class EditRoleModuleComponent implements OnInit {
           this.click(this.arr[j], true);
         }
         let crudtype = 9; let moduleData = [];
-        this.mainService.getRoleModules(crudtype, null, null, null, null)
-          .subscribe(value => {
+        this.mainService.getRoleModule(crudtype, null, null, null, null)
+          .then(value => {
             for (var k = 0; k < value.data.length; k++) {
               moduleData.push(value.data[k]['mainModule']);
             }
@@ -54,7 +54,7 @@ export class EditRoleModuleComponent implements OnInit {
             uniqueModules = uniqueModules.filter(item => item !== deleteValue);
             this.modulesList = uniqueModules;
           });
-        
+
         this.spinnerService.hide();
       });
     let getPrevUrl = localStorage.getItem('prevEditUrl');
@@ -62,7 +62,7 @@ export class EditRoleModuleComponent implements OnInit {
     this.urlMap = "" + getPrevUrl + "";
   }
 
-/** Checked List to map module to the particular role */
+  /** Checked List to map module to the particular role */
 
   click(value, status: boolean) {
     if (this.checkedArr.indexOf(value) === -1 && status) {
@@ -80,7 +80,7 @@ export class EditRoleModuleComponent implements OnInit {
     }
   }
 
-/** Resetting checkboxes */
+  /** Resetting checkboxes */
 
   uncheckAll() {
     this.checkboxes.forEach((element) => {
@@ -88,7 +88,7 @@ export class EditRoleModuleComponent implements OnInit {
     });
   }
 
-/** Edit Role Module mapping submit operation */
+  /** Edit Role Module mapping submit operation */
 
   async roleSubmit() {
     this.success = 0;
@@ -99,7 +99,7 @@ export class EditRoleModuleComponent implements OnInit {
         this.checkedArr.splice($.inArray(this.arr[k], this.checkedArr), 1);
       }
     }
-     let crudType = 3; let role = this.roleName;
+    let crudType = 3; let role = this.roleName;
     this.mainService.createUser(6, null, null, role, null, null, null, null, null, null)
       .subscribe(value => {
         if (value.data[0]['result'] == 1) {
@@ -108,8 +108,8 @@ export class EditRoleModuleComponent implements OnInit {
       });
     for (var i = 0; i < this.uncheckedArr.length; i++) {
       let module = this.uncheckedArr[i]; let user = null; let project = null;
-      await this.mainService.getRoleModulesAccess(4, role, module, user, project)
-        .then(value => {
+      await this.mainService.getRoleModules(4, role, module, user, project,null,null,null)
+        .subscribe(value => {
           if (value.data[0]['result'] == 1) {
             this.success++;
           } else {
@@ -117,11 +117,9 @@ export class EditRoleModuleComponent implements OnInit {
           }
         });
       if (i + 1 == this.uncheckedArr.length) {
-        if (this.success != 0) {
-          this.toastr.success('', this.success + ' ' + 'Records Removed Successfully');
-        }
+          this.toastr.success('',  'Records Removed Successfully');
         if (this.failed != 0) {
-          this.toastr.warning('', this.failed + ' ' + 'Records Mapping Failed');
+          this.toastr.warning('', 'Records Mapping Failed');
         }
         if (this.checkedArr.length == 0) {
           this.router.navigate(['' + this.urlMap + '']);
@@ -129,31 +127,29 @@ export class EditRoleModuleComponent implements OnInit {
         this.success = 0; this.failed = 0;
       }
     }
-    
+
     for (var j = 0; j < this.checkedArr.length; j++) {
       let module = this.checkedArr[j]; let user = null; let project = null;
-      await this.mainService.getRoleModulesAccess(crudType, role, module, user, project)
-        .then(value => {
+      await this.mainService.getRoleModules(crudType, role, module, user, project,1,null,null)
+        .subscribe(value => {
           if (value.data[0]['result'] == 1) {
             this.success++;
             this.uncheckAll();
             this.roleName = null;
-            this.router.navigate([''+this.urlMap+'']);
+            this.router.navigate(['' + this.urlMap + '']);
           } else {
             this.failed++;
           }
         });
       if (j + 1 == this.checkedArr.length) {
-        if (this.success != 0) {
-          this.toastr.success('', this.success + ' ' + 'Records Mapped Successfully');
-        }
+          this.toastr.success('', 'Records Mapped Successfully');
         if (this.failed != 0) {
-          this.toastr.warning('', this.failed + ' ' + 'Records Mapping Unsuccessful');
+          this.toastr.warning('', 'Records Mapping Unsuccessful');
         }
       }
     }
     this.spinnerService.hide();
-    location.reload();
+    // location.reload();
   }
 
   close() {

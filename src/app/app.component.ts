@@ -1,11 +1,9 @@
-import { Component, HostListener  } from '@angular/core';
-import * as $ from 'jquery';
+import { Component, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { MainService } from './services/main-service';
 import { User } from '../app/model/user';
 import { environment } from '../environments/environment';
-import { contains } from 'jquery';
-
+declare var $: any;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -26,6 +24,13 @@ export class AppComponent {
   isCloudApi1: Boolean = false; isCloudApi2: Boolean = false; isCloudApi3: Boolean = false;
   isReports1: Boolean = false; isReports2: Boolean = false; isReports3: Boolean = false;
   isMenu1: Boolean = false; isMenu2: Boolean = false; isMenu3: Boolean = false
+  notificationcount: any;
+  message: string;
+  notificationdetails: any;
+  notificationlist: any = [];
+  keys: any[];
+  Values: unknown[];
+  previewNotification: any;
 
   constructor(public router: Router, private mainService: MainService) {
     this.user = JSON.parse(localStorage.getItem('currentUser'));
@@ -46,8 +51,8 @@ export class AppComponent {
             $('.searchReports').css('display', 'none');
           }
           let crudType = 7;
-          this.mainService.getRoleModules(crudType, null, null, null, null)
-            .subscribe(value => {
+          this.mainService.getRoleModule(crudType, null, null, null, null)
+            .then(value => {
               let resultFetchArr: any = value.data.filter(u =>
                 u.name == this.role);
               let mainModules = [];
@@ -55,45 +60,52 @@ export class AppComponent {
                 mainModules.push(resultFetchArr[i]['mainModule']);
               }
               this.mainService.sidebarLists()
-              .subscribe(value => {
-                if (value.data.length > 0) {
-                  this.mainMenu1 = value.data[0]['mainmenu'];
-                  this.datas = value.data[0]['submenu'];
-                  this.mainMenu2 = value.data[1]['mainmenu'];
-                  this.searchApi = value.data[1]['submenu'];
-                  this.mainMenu3 = value.data[2]['mainmenu'];
-                  this.searchReports = value.data[2]['submenu'];
+                .subscribe(value => {
+                  if (value.data.length > 0) {
+                    this.mainMenu1 = value.data[0]['mainmenu'];
+                    this.datas = value.data[0]['submenu'];
+                    this.mainMenu2 = value.data[1]['mainmenu'];
+                    this.searchApi = value.data[1]['submenu'];
+                    this.mainMenu3 = value.data[2]['mainmenu'];
+                    this.searchReports = value.data[2]['submenu'];
+                    if (mainModules.indexOf('Cloud API Search Tester') > -1) {
+                      this.isCloudApi2 = true;
+                      this.isDataUpload2 = false;
+                      this.isReports2 = false;
+                      $('.menu2Data').css('display', 'block');
+                      $('.menu2Data').click(function(e){
+                        localStorage.setItem('moduleselected','Cloud API Search Tester')
+                      })
 
-                  console.log(mainModules.indexOf('Data Management Tool'),mainModules.indexOf('Cloud API Search Tester'),
-                  mainModules.indexOf('Analytics Report'));
-                  if (mainModules.indexOf('Cloud API Search Tester') > -1) {
-                    this.isCloudApi2 = true;
-                    this.isDataUpload2 = false;
-                    this.isReports2 = false;
-                    $('.menu2Data').css('display', 'block');
+                    }
+                    else {
+                      $('.menu2Data').css('display', 'none');
+                    }
+                    if (mainModules.indexOf('Data Management Tool') > -1) {
+                      this.isDataUpload1 = true;
+                      this.isCloudApi1 = false;
+                      this.isReports1 = false;
+                      $('.menu1Data').css('display', 'block');
+                      $('.menu1Data').click(function(e){
+                        localStorage.setItem('moduleselected','Data Management Tool')
+                      })
+                    } else {
+                      $('.menu1Data').css('display', 'none');
+                    }
+                    if (mainModules.indexOf('Analytics Report') > -1) {
+                      this.isReports3 = true;
+                      this.isDataUpload3 = false;
+                      this.isCloudApi3 = false;
+                      $('.menu3Data').css('display', 'block');
+                      $('.menu3Data').click(function(e){
+                        localStorage.setItem('moduleselected','Analytics Report')
+                      })
+                    }
+                    else {
+                      $('.menu3Data').css('display', 'none');
+                    }
                   }
-                  else{
-                    $('.menu2Data').css('display', 'none');
-                  }
-                  if (mainModules.indexOf('Data Management Tool') > -1) {
-                    this.isDataUpload1 = true;
-                    this.isCloudApi1 = false;
-                    this.isReports1 = false;
-                    $('.menu1Data').css('display', 'block');
-                  }else{
-                    $('.menu1Data').css('display', 'none');
-                  }
-                  if (mainModules.indexOf('Analytics Report') > -1) {
-                    this.isReports3 = true;
-                    this.isDataUpload3 = false;
-                    this.isCloudApi3 = false;
-                    $('.menu3Data').css('display', 'block');
-                  }
-                  else{
-                    $('.menu3Data').css('display', 'none');
-                  }
-                }
-              });
+                });
             });
         }
       });
@@ -109,31 +121,60 @@ export class AppComponent {
           }
         }
       });
-    
+    let loginid = this.user['data'][0]['loginId'];
+    this.mainService.Notifications(2, null, null, null, null, loginid, null, null, null)
+      .then(value => {
+        this.notificationcount = value.data.length;
+        if (this.notificationcount === 0) {
+          this.message = "No notifications to display."
+          this.notificationdetails = [];
+          $('#showall').css('display', 'none')
+        }
+        else {
+          this.notificationdetails = value.data;
+          $('#showall').css('display', 'none')
+        }
+      })
+    this.mainService.Notifications(2, null, null, null, null, loginid, null, null, null)
+      .then(value => {
+        this.notificationcount = value.data.length;
+        if (this.notificationcount === 0) {
+          this.message = "No notifications to display."
+          this.previewNotification = [];
+          $('#showall').css('display', 'none')
+        }
+        else {
+          let preview = [];
+          preview = value.data;
+          preview.forEach(element => {
+            element['data'] = (JSON.parse(element.data))
+          });
+          this.previewNotification = preview
+          this.previewNotification.forEach(element => {
+            element['data'] = element.data['Datasection'] + ' Uploaded Successfully'
+          });
+          $('#showall').css('display', 'none')
+        }
+      })
     var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
     if (browserZoomLevel != 100) {
       this.zoomFunction();
     }
-    
+    var getUrl = this.router.url;
+    if ((getUrl != '/view_staging_data') && (getUrl != '/view_raw_capture')) {
+      localStorage.removeItem('RawStatus')
+      localStorage.removeItem('StagingStatus')
+    }
+
     $(document).ready(function () {
-      //$("#menu-toggle").click(function (e) {
-      //  e.preventDefault();
-      //  $("#wrapper").toggleClass("toggled");
-      //  var checkMenuclass = $('#wrapper').attr('class');
-      //  if (checkMenuclass == 'd-flex toggled') {
-      //    $('.sidebar-footer').css('position', 'relative');
-      //  } else {
-      //    $('.sidebar-footer').css('position', 'fixed');
-      //  }
-      //});
       $("#menu-toggle").click(function (e) {
         e.preventDefault();
         $('#sidebar-wrapper').toggleClass('show');
         var checkMenuclass = $('#sidebar-wrapper').attr('class');
       });
-      
+
       $(document).ready(function () {
-       
+
         $(window).resize(function () {
           var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
           if (browserZoomLevel == 90) {
@@ -178,7 +219,7 @@ export class AppComponent {
               dropdownContent.style.display = "block";
             }
           }
-          
+
         });
       }
 
@@ -222,6 +263,7 @@ export class AppComponent {
         }
       });
     });
+
   }
 
   zoomFunction() {
@@ -286,16 +328,16 @@ export class AppComponent {
   checkUrl() {
     this.router.navigate(['/dashboard']);
     var getUrl = this.router.url;
-  /**  if (getUrl == '/dashboard') {
-      $(".list-group a").first().removeClass('highlight');
-    }
-    if (getUrl == '/data-management') {
-      $(".list-group a").first().addClass('highlight');
-    }
-    if (getUrl == '/clients') {
-      $(".list-group a").first().addClass('highlight');
-    }
-    **/
+    /**  if (getUrl == '/dashboard') {
+        $(".list-group a").first().removeClass('highlight');
+      }
+      if (getUrl == '/data-management') {
+        $(".list-group a").first().addClass('highlight');
+      }
+      if (getUrl == '/clients') {
+        $(".list-group a").first().addClass('highlight');
+      }
+      **/
   }
 
   create() {
@@ -310,9 +352,9 @@ export class AppComponent {
       list == 'FeedBack' || list == 'Generic Log' || list == 'Latest DB Version' || list == 'Login' || list == 'Model Search' || list == 'Register' || list == 'ZIP Download') {
       localStorage.setItem('ApiMenuItem', list);
       this.router.navigate(['api-clients'])
-      .then(() => {
-        location.reload();
-      });
+        .then(() => {
+          location.reload();
+        });
     }
     if (list == 'Brand' || list == 'Brand Model' || list == 'BrandInfoCEC' || list == 'BrandInfoEDID' || list == 'CEC Only' ||
       list == 'CEC-EDID' || list == 'Codesets' || list == 'CrossReferenceBy Brands' || list == 'EDID Only') {
@@ -322,6 +364,112 @@ export class AppComponent {
           location.reload();
         });
     }
+  }
+
+  Notification(e) {
+    let val = [];
+    let filterdetails: any = this.notificationdetails.filter(u => u.notificationId === parseInt(e.target.id))
+    filterdetails.forEach(element => {
+      val = (JSON.parse(element.data));
+    })
+    let key = [];
+    for (let i = 0; i < Object.keys(val).length; i++) {
+      key.push(Object.keys(val)[i].charAt(0).toUpperCase() + Object.keys(val)[i].slice(1))
+    }
+    this.keys = key;
+    this.Values = Object.values(val);
+    this.markasreadNotifications(parseInt(e.target.id))
+  }
+
+  markasreadNotifications(id) {
+    let loginid = this.user['data'][0]['loginId'];
+    this.mainService.Notifications(4, null, null, null, null, loginid, null, null, id)
+      .then(value => {
+        let loginid = this.user['data'][0]['loginId'];
+        this.mainService.Notifications(2, null, null, null, null, loginid, null, null, null)
+          .then(value => {
+            this.notificationcount = value.data.length;
+            if (this.notificationcount === 0) {
+              this.message = "No notifications to display."
+              this.notificationdetails = [];
+              $('#showall').css('display', 'none')
+            }
+            else {
+              this.notificationdetails = value.data;
+              $('#showall').css('display', 'none')
+            }
+          })
+        this.mainService.Notifications(2, null, null, null, null, loginid, null, null, null)
+          .then(value => {
+            this.notificationcount = value.data.length;
+            if (this.notificationcount === 0) {
+              this.message = "No notifications to display."
+              this.previewNotification = [];
+              $('#showall').css('display', 'none')
+            }
+            else {
+              let preview = [];
+              preview = value.data;
+              preview.forEach(element => {
+                element['data'] = (JSON.parse(element.data))
+              });
+              this.previewNotification = preview
+              this.previewNotification.forEach(element => {
+                element['data'] = element.data['Datasection'] + ' Uploaded Successfully'
+              });
+              $('#showall').css('display', 'none')
+            }
+          })
+      })
+  }
+
+  allasread() {
+    let loginid = this.user['data'][0]['loginId'];
+    let allasread = this.notificationdetails;
+    let recordstodelete = []
+    allasread.forEach(element => {
+      recordstodelete.push(element.notificationId)
+    });
+    recordstodelete.forEach(element => {
+      this.mainService.Notifications(4, null, null, null, null, loginid, null, null, element)
+        .then(value => {
+
+        })
+    })
+    this.mainService.Notifications(2, null, null, null, null, loginid, null, null, null)
+      .then(value => {
+        this.notificationcount = value.data.length;
+        if (this.notificationcount === 0) {
+          this.message = "Notifications are not available"
+          this.notificationdetails = [];
+          $('#showall').css('display', 'none')
+        }
+        else {
+          this.notificationdetails = value.data;
+          $('#showall').css('display', 'none')
+        }
+      })
+    this.mainService.Notifications(2, null, null, null, null, loginid, null, null, null)
+      .then(value => {
+        this.notificationcount = value.data.length;
+        if (this.notificationcount === 0) {
+          this.message = "Notifications are not available"
+          this.previewNotification = [];
+          $('#showall').css('display', 'none')
+        }
+        else {
+          let preview = [];
+          preview = value.data;
+          preview.forEach(element => {
+            element['data'] = (JSON.parse(element.data))
+          });
+          this.previewNotification = preview
+          this.previewNotification.forEach(element => {
+            element['data'] = element.data['Datasection'] + ' Uploaded Successfully'
+          });
+          $('#showall').css('display', 'none')
+        }
+      })
   }
 
   dashBoard() {

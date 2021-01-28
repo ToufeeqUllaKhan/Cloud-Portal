@@ -1,11 +1,15 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+import { AgGridModule } from 'ag-grid-angular';
+
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ArchwizardModule } from 'angular-archwizard';
 import { routing } from '../app/app.route';
-import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule, MatNativeDateModule, MatIconModule, MatSidenavModule, MatListModule, MatToolbarModule } from '@angular/material';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -23,19 +27,16 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ToastrModule } from 'ngx-toastr';
 import { ProfileComponent } from './profile/profile.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
-// import { DataUploadComponent } from './data-upload/data-upload.component';
-import { AddProjectVersionComponent } from './add-project-version/add-project-version.component';
-import { Ng4LoadingSpinnerModule } from 'ng4-loading-spinner';
+import { NgxSpinnerModule } from 'ngx-spinner';
 import { DataConfigurationListComponent } from './data-configuration-list/data-configuration-list.component';
 import { BrandLibraryComponent } from './brand-library/brand-library.component';
 import { DataTablesModule } from 'angular-datatables';
 import { Data } from './model/data';
-import { Ng2TableModule } from 'ng2-table/ng2-table';
+// import { Ng2TableModule } from 'ng2-table/ng2-table';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { ClientLibraryComponent } from './client-library/client-library.component';
 import { UserLibraryComponent } from './user-library/user-library.component';
 import { CreateUsersComponent } from './create-users/create-users.component';
-import { SearchHistoryComponent } from './search-history/search-history.component';
 import { AdminClientsComponent } from './admin-clients/admin-clients.component';
 import { NgbModule, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { NgbDateCustomParserFormatter } from '../app/model/DateCustomParser';
@@ -55,14 +56,20 @@ import { ApiCongigurationComponent } from './api-congiguration/api-congiguration
 import { EditApiComponent } from './edit-api/edit-api.component';
 import { AngularResizedEventModule } from 'angular-resize-event';
 import { LogViewComponent } from './log-view/log-view.component';
-import { GenericLogsComponent } from './generic-logs/generic-logs.component';
 import { ReportConfigurationListComponent } from './report-configuration-list/report-configuration-list.component';
 import { ReportComponent } from './report/report.component';
 import { ChangehistoryComponent } from './changehistory/changehistory.component';
 import { ReportsClientComponent } from './reports-client/reports-client.component';
 import { RawdataComponent } from './rawdata/rawdata.component';
 import { StagingdataComponent } from './stagingdata/stagingdata.component';
-
+import { ClearDefaultBoxIdLogsComponent } from './clear-default-box-id-logs/clear-default-box-id-logs.component';
+import { ImportprojfromprodComponent } from './importprojfromprod/importprojfromprod.component';
+import { ProdCecEdidDataComponent } from './prod-cec-edid-data/prod-cec-edid-data.component';
+import { ProdCecEdidHistoryComponent } from './prod-cec-edid-history/prod-cec-edid-history.component';
+import { EditRoleModulePermissionComponent } from './edit-role-module-permission/edit-role-module-permission.component';
+// import { BtnCellRenderer } from './brand-library/btn-cell-renderer.component';
+// import { CodesetDownloadCellRenderer } from "./brand-library/codesetdownload-cell-renderer.component";
+// import { EdidviewCellRenderer } from './brand-library/edidview-cell-renderer.component';
 
 /**
  * Custom angular notifier options
@@ -108,7 +115,6 @@ const customNotifierOptions: NotifierOptions = {
   }
 };
 
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -119,15 +125,12 @@ const customNotifierOptions: NotifierOptions = {
     LoginComponent,
     ProfileComponent,
     ChangePasswordComponent,
-    // DataUploadComponent,
-    AddProjectVersionComponent,
     DataConfigurationListComponent,
     BrandLibraryComponent,
     AdminDashboardComponent,
     ClientLibraryComponent,
     UserLibraryComponent,
     CreateUsersComponent,
-    SearchHistoryComponent,
     AdminClientsComponent,
     ZipUploadComponent,
     ApiDbTestComponent,
@@ -141,13 +144,20 @@ const customNotifierOptions: NotifierOptions = {
     ApiCongigurationComponent,
     EditApiComponent,
     LogViewComponent,
-    GenericLogsComponent,
     ReportConfigurationListComponent,
     ReportComponent,
     ChangehistoryComponent,
     ReportsClientComponent,
     RawdataComponent,
-    StagingdataComponent
+    StagingdataComponent,
+    ClearDefaultBoxIdLogsComponent,
+    ImportprojfromprodComponent,
+    ProdCecEdidDataComponent,
+    ProdCecEdidHistoryComponent,
+    EditRoleModulePermissionComponent,
+    // BtnCellRenderer,
+    // CodesetDownloadCellRenderer,
+    // EdidviewCellRenderer
   ],
   imports: [
     BrowserModule,
@@ -156,23 +166,28 @@ const customNotifierOptions: NotifierOptions = {
     RouterModule,
     routing,
     DataTablesModule,
-    Ng2TableModule,
+    AppRoutingModule,
+    // Ng2TableModule,
     NgMultiSelectDropDownModule.forRoot(),
     BrowserAnimationsModule,
     HttpClientModule,
-    Ng4LoadingSpinnerModule.forRoot(),
+    NgxSpinnerModule,
     NgbModule,
     NotifierModule.withConfig(customNotifierOptions),
     CommonModule, MatButtonModule, MatToolbarModule, MatNativeDateModule, MatIconModule, MatSidenavModule, MatListModule,
     ToastrModule.forRoot({ timeOut: 1000, positionClass: 'toast-top-right' }),
     AngularSvgIconModule.forRoot(),
-    AngularResizedEventModule
+    AngularResizedEventModule,
+    ArchwizardModule,
+    // AgGridModule.withComponents([BtnCellRenderer,CodesetDownloadCellRenderer,EdidviewCellRenderer])
+    AgGridModule.withComponents([])
   ],
   providers: [AuthenticationService, Authguard, AlertService, Data, RoleGuardService,
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: NgbDateParserFormatter, useClass: NgbDateCustomParserFormatter },
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

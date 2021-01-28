@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import * as $ from 'jquery';
+declare var $: any;
 import { Router } from '@angular/router';
 import { MainService } from '../services/main-service';
 import { Title } from '@angular/platform-browser';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
-import { CommandName } from 'protractor';
 import { ResizedEvent } from 'angular-resize-event';
 
 
@@ -22,7 +21,7 @@ export class ClientsComponent implements OnInit {
   checkboxValue: Boolean;
   selectedClients = [];
   finalArr = []; ProjectData = [];
-  data = []; arr=[];
+  data = []; arr = [];
   isNextVisible: Boolean = false;
   filterClients = []; clientArrList = [];
   clientsData = []; RolelevelProjects = [];
@@ -31,7 +30,7 @@ export class ClientsComponent implements OnInit {
   width: number;
   height: number;
 
-  constructor(private router: Router, private mainService: MainService, private titleService: Title, private spinnerService: Ng4LoadingSpinnerService, private toastr: ToastrService) {
+  constructor(private router: Router, private mainService: MainService, private titleService: Title, private spinnerService: NgxSpinnerService, private toastr: ToastrService) {
     this.titleService.setTitle("Clients");
     this.checkboxValue = false;
   }
@@ -43,11 +42,11 @@ export class ClientsComponent implements OnInit {
       this.zoomFunction();
     }
     $(document).ready(function () {
-    /** added toggle class **/
+      /** added toggle class **/
       $(document).on("click", "button.check i", function () {
         $(this).toggleClass('fa-green');
       });
-    /** added zoom in functionality page responsive **/
+      /** added zoom in functionality page responsive **/
       $(window).resize(function () {
         var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
         if (browserZoomLevel == 100) {
@@ -94,7 +93,7 @@ export class ClientsComponent implements OnInit {
         }
       });
     });
-  /** client name, region, project list for dynamic cards **/
+    /** client name, region, project list for dynamic cards **/
     this.mainService.getRegionsperClient()
       .pipe()
       .subscribe(value => {
@@ -144,7 +143,7 @@ export class ClientsComponent implements OnInit {
         let clientArr = [];
         for (var j = 0; j < this.activeRegions.length; j++) {
           let filterClient: any = value.data.filter(u =>
-            u.clientRegion == this.activeRegions[j]);
+            (u.clientRegion == this.activeRegions[j]) && (u.statusFlag != 2 || u.statusFlag != '2'));
           this.clientsData.push(...filterClient);
           var uniqueArray1 = removeDuplicates(filterClient, "clientName");
           clientArr.push(uniqueArray1);
@@ -159,8 +158,8 @@ export class ClientsComponent implements OnInit {
         if (RoleLevel != 'Admin') {
           this.filterClients = this.clientsData;
           let userName = localStorage.getItem('userName');
-          this.mainService.getRoleModules(8, null, null, userName, null)
-            .subscribe(value => {
+          this.mainService.getRoleModule(8, null, null, userName, null)
+            .then(value => {
               for (var m = 0; m < value.data.length; m++) {
                 this.RolelevelProjects.push(value.data[m]['name']);
               }
@@ -188,7 +187,7 @@ export class ClientsComponent implements OnInit {
               this.activeRegionsList = uniqueRegions;
             });
         } else {
-          this.clientArrList.sort(this.sortOn("clientName")); 
+          this.clientArrList.sort(this.sortOn("clientName"));
           this.arrClients = this.clientArrList;
           this.arrClients.forEach(item => item["background"] = this.getRandomColor());
           for (var m = 0; m < this.clientArrList.length; m++) {
@@ -198,7 +197,7 @@ export class ClientsComponent implements OnInit {
           uniqueRegions.sort();
           this.activeRegionsList = uniqueRegions;
         }
-        
+
         this.isNextVisible = true;
       });
 
@@ -213,7 +212,7 @@ export class ClientsComponent implements OnInit {
     localStorage.removeItem('selectedBrand');
     localStorage.removeItem('updatebrandLibraryProjects');
     localStorage.removeItem('configureProjectNames');
-    
+
   }
 
   onResized(event: ResizedEvent) {
@@ -347,7 +346,7 @@ export class ClientsComponent implements OnInit {
     }
   }
 
-/** functionality to generate dynamic colors for cards  */
+  /** functionality to generate dynamic colors for cards  */
 
   getRandomColor2() {
     var length = 6;
@@ -357,24 +356,24 @@ export class ClientsComponent implements OnInit {
     return hex;
   }
 
-/** functionality to generate dynamic colors for cards  */
+  /** functionality to generate dynamic colors for cards  */
   getRandomColor() {
     var color,
       letters = '0123456789ABCDEF'.split('')
     function AddDigitToColor(limit) {
       color += letters[Math.round(Math.random() * limit)]
     }
-      color = '#'
-      AddDigitToColor(5)
-      for (var i = 0; i < 5; i++) {
-        AddDigitToColor(15)
-      }
-      return color;
+    color = '#'
+    AddDigitToColor(5)
+    for (var i = 0; i < 5; i++) {
+      AddDigitToColor(15)
+    }
+    return color;
     //var color = Math.floor(0x1000000 * Math.random()).toString(16);
     //return '#' + ('000000' + color).slice(-6);
   }
 
-/** selection of clients (multiple selection)  */
+  /** selection of clients (multiple selection)  */
 
   selectClient(project, clientname, region, event) {
     let projectCheckedData = [];
@@ -386,8 +385,10 @@ export class ClientsComponent implements OnInit {
           if (value) {
             if (this.selectedClients.indexOf(value) === -1) {
               this.selectedClients.push(value);
-              for (var i = 0; i < value.data.length; i++) {
-                projectCheckedData.push(value.data[i]['projectname']);
+              let filterProject: any = value.data.filter(u =>
+                (u.statusFlag != 2 || u.statusFlag != '2'));
+                for (var i = 0; i < filterProject.length; i++) {
+                projectCheckedData.push(filterProject[i]['projectname']);
               }
               var result = this.checkedItems.filter(function (n) {
                 return projectCheckedData.indexOf(n) > -1;
@@ -411,8 +412,10 @@ export class ClientsComponent implements OnInit {
         } else {
           event.target.classList.remove('highlighted');
           let removeArr = [];
-          for (var i = 0; i < value.data.length; i++) {
-            removeArr.push(value.data[i]['projectname']);
+          let filterProject: any = value.data.filter(u =>
+            (u.statusFlag != 2 || u.statusFlag != '2'));
+          for (var i = 0; i < filterProject.length; i++) {
+            removeArr.push(filterProject[i]['projectname']);
           }
           this.mainProjects = this.mainProjects.filter(function (el) {
             return removeArr.indexOf(el) < 0;
@@ -426,7 +429,7 @@ export class ClientsComponent implements OnInit {
 
   /** project selection and deselection of checkbox in onhover menulist   */
 
-  pushpopcategory(value, evt,client,region) {
+  pushpopcategory(value, evt, client, region) {
     if (evt.target.checked == false) {
       let index = this.mainProjects.indexOf(value);
       this.mainProjects.splice(index, 1);
@@ -462,7 +465,7 @@ export class ClientsComponent implements OnInit {
     return (this.checkedItems.indexOf(proj) != -1) ? true : false;
   }
 
-/** displaying list of checked items in onhover menu */
+  /** displaying list of checked items in onhover menu */
   chooseClient(name, region) {
     this.projects = [];
     let clientName = name; let dataType = 3; let Region = region;
@@ -472,9 +475,11 @@ export class ClientsComponent implements OnInit {
         this.finalArr = value.data;
         let RoleLevel = localStorage.getItem('AccessRole');
         if (RoleLevel != 'Admin') {
-              let projectArr = [];
-          for (var j = 0; j < this.finalArr.length; j++) {
-            projectArr.push(this.finalArr[j]['projectname']);
+          let projectArr = [];
+          let filterProject: any = this.finalArr.filter(u =>
+            (u.statusFlag != 2 || u.statusFlag != '2'));
+          for (var j = 0; j <filterProject.length; j++) {
+            projectArr.push(filterProject[j]['projectname']);
             var uniqueProjects = projectArr.filter((v, i, a) => a.indexOf(v) === i);
             // this.projects = uniqueProjects.reverse();
             let diffArr = uniqueProjects.filter(x => this.RolelevelProjects.includes(x));
@@ -483,8 +488,10 @@ export class ClientsComponent implements OnInit {
           }
         } else {
           let projectArr = [];
-          for (var i = 0; i < value.data.length; i++) {
-            projectArr.push(value.data[i]['projectname']);
+          let filterProject: any = this.finalArr.filter(u =>
+            (u.statusFlag != 2 || u.statusFlag != '2'));
+          for (var i = 0; i < filterProject.length; i++) {
+            projectArr.push(filterProject[i]['projectname']);
           }
           var uniqueProjects = projectArr.filter((v, i, a) => a.indexOf(v) === i);
           // this.projects = uniqueProjects.reverse();
@@ -518,7 +525,7 @@ export class ClientsComponent implements OnInit {
           this.getMenuItem = 'Cross Reference By Brands';
         }
         localStorage.setItem('selectedBrand', this.getMenuItem);
-         this.router.navigate(['/brand-library']);
+        this.router.navigate(['/brand-library']);
 
       } else {
         this.router.navigate(['/data-configuration-list']);
@@ -528,7 +535,7 @@ export class ClientsComponent implements OnInit {
     }
   }
 
-/** single client selection routing */
+  /** single client selection routing */
 
   selectSingleClient(clientName, regionName) {
     localStorage.removeItem('choosenProjects');
@@ -537,7 +544,9 @@ export class ClientsComponent implements OnInit {
     this.mainService.getProjectNames(clientName, regionName, null, null, null, dataType)
       .pipe()
       .subscribe(value => {
-        clientArr.push(value.data[0]['projectname']);
+        let filterProject: any = value.data.filter(u =>
+          (u.statusFlag != 2 || u.statusFlag != '2'));
+        clientArr.push(filterProject[0]['projectname']);
         localStorage.setItem('choosenProjects', JSON.stringify(clientArr));
         if (clientArr.length != 0) {
           if (this.getMenuItem != null && this.getMenuItem != undefined) {

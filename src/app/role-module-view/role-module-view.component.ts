@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MainService } from '../services/main-service';
 import { Router, NavigationStart } from '@angular/router';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -12,27 +12,27 @@ import { ToastrService } from 'ngx-toastr';
 export class RoleModuleViewComponent implements OnInit {
   modulesList = []; roles = [];
 
-  constructor(private mainService: MainService, private router: Router, private spinnerService: Ng4LoadingSpinnerService,
+  constructor(private mainService: MainService, private router: Router, private spinnerService: NgxSpinnerService,
     private toastr: ToastrService) { }
 
   ngOnInit() {
     this.spinnerService.show();
-  /** List of Roles */
+    /** List of Roles */
     let crudtype = 5;
     this.mainService.createUser(crudtype, null, null, null, null, null, null, null, null, null)
       .subscribe(value => {
         this.roles = value.data;
       });
-  /** List of Main Modules */
+    /** List of Main Modules */
     let crudType = 9;
-    this.mainService.getRoleModules(crudType, null, null, null, null)
-      .subscribe(value => {
+    this.mainService.getRoleModule(crudType, null, null, null, null)
+      .then(value => {
         let moduleData = [];
         for (var i = 0; i < value.data.length; i++) {
           moduleData.push(value.data[i]['mainModule']);
         }
         var uniqueModules = moduleData.filter((v, i, a) => a.indexOf(v) === i);
-      /** Profile module deletion since when role is created and saved without mapping module default profile module gets saved, since that module shouldnot be visible to anyone */
+        /** Profile module deletion since when role is created and saved without mapping module default profile module gets saved, since that module shouldnot be visible to anyone */
         let deleteValue = 'Profile Module';
         uniqueModules = uniqueModules.filter(item => item !== deleteValue);
         this.modulesList = uniqueModules;
@@ -40,7 +40,7 @@ export class RoleModuleViewComponent implements OnInit {
       });
   }
 
-/** To set the url for add role page */
+  /** To set the url for add role page */
   newRole() {
     localStorage.removeItem('previousUrl');
     this.router.events
@@ -52,7 +52,7 @@ export class RoleModuleViewComponent implements OnInit {
     this.router.navigate(['/add-roles']);
   }
 
-/** Url for edit role page for breadcrumbs modification*/
+  /** Url for edit role page for breadcrumbs modification*/
 
   EditRole(role) {
     localStorage.removeItem('prevEditUrl');

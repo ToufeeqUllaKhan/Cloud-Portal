@@ -171,10 +171,10 @@
     display:none;
   }
   
-  ::-webkit-scrollbar {
+  /* ::-webkit-scrollbar {
     width: 0.7em;
     height: 0.7em
-  }
+  } */
   
   .form-scroll {
     overflow-y: auto;

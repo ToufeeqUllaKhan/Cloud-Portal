@@ -1,37 +1,4 @@
 <div class="container-fluid main-scroll">
-  <!-- Bread crumb and right sidebar toggle -->
-  <!-- ============================================================== -->
-  <div class="wrapper d-flex align-items-stretch">
-    <nav id="sidebar">
-      <div class="">
-        <div class="gradientBlue">
-          <p class="text-center f-200">&nbsp;</p>
-          <div id="profile-container">
-            <!--<img id="profileImage" src="{{'data:image/jpg;base64,' + imagePath}}" />-->
-            <img id="profileImage" [src]="profilePicture" />
-          </div>
-          <input type="file" id="imageUpload" (change)="ValidateSize($event)" name="profile_photo" placeholder="Photo" required="" accept="image/*" capture>
-          <br/>
-          <p class="text-center f-200">{{username}}</p>
-          <p class="text-center">{{role}}</p>
-          <p class="text-center f-200">&nbsp;</p>
-        </div>
-        <div class="p-1">
-          <label class="label-item">Contact Details</label>
-          <p class="list-items"><i class="fa fa-envelope-o" aria-hidden="true"></i>&nbsp;&nbsp;<input type="text" [(ngModel)]='email' class="no-border" placeholder="Email" /></p>
-          <p class="list-items"><i class="fa fa-phone" aria-hidden="true"></i>&nbsp;&nbsp;<input type="text" [(ngModel)]="phonenumber" class="no-border" placeholder="Phone Number" /></p>
-        </div>
-        <div class="footer">
-          <p class="list-items">&nbsp;</p>
-          <p class="list-items">&nbsp;</p>
-          <p class="list-items">&nbsp;</p>
-          <p class="list-items">&nbsp;</p>
-          <p class="list-items">&nbsp;</p>
-          <p class="list-items">&nbsp;</p>
-        </div>
-      </div>
-    </nav>
-    <div id="content" class="col-md-12">
       <div class="row page-titles">
         <div class="col-md-12 col-12 align-self-center">
           <ol class="breadcrumb">
@@ -43,18 +10,6 @@
       </div>
 
       <div class="row">
-        <!--<div class="col-lg-4 col-xlg-3 col-md-3">
-          <div class="card">
-            <div class="card-block">
-              <div class="m-t-30">
-                <img src="assets/images/omni_logo1.png" class="img-circle" width="150">
-                <h4 class="card-title m-t-10">{{userSelected}}</h4>
-
-              </div>
-            </div>
-          </div>
-        </div>-->
-        <div class="col-lg-1 col-xlg-1 col-md-1">&nbsp;</div>
         <div class="col-lg-7 col-xlg-8 col-md-6">
           <div class="card">
             <div class="card-block">
@@ -63,12 +18,18 @@
                 <br />
                 <div class="row">
                   <div class="col-sm-12">
+                    <div class="gradientBlue">
+                      <div id="profile-container">
+                        <img id="profileImage" [src]="profilePicture" />
+                      </div>
+                      <input type="file" id="imageUpload" (change)="ValidateSize($event)" name="profile_photo" placeholder="Photo" required="" accept="image/*" capture>
+                      <br/>
+                    </div>
+                  </div>
+                  <div class="col-sm-12">
                     <div class="form-group form-inline">
                       <label class="labelsubSpan col-sm-5 col-form-label">Role</label>
-                      <select [(ngModel)]='role' formControlName="Role" [attr.disabled]="true" class="form-control form-control-line col-sm-7 disableField" [ngClass]="{ 'is-invalid': submitted && f.Role.errors }">
-                        <option [value]="">Select</option>
-                        <option *ngFor="let list of roles" [value]="list.name">{{list.name}}</option>
-                      </select>
+                      <input type="text" [(ngModel)]='role' formControlName="Role" class="form-control form-control-line col-sm-7 " [ngClass]="{ 'is-invalid': submitted && f.Role.errors }" [attr.disabled]="true" />
                       <div *ngIf="submitted && f.Role.errors" class="invalid-feedback">
                         <div *ngIf="f.Role.errors.required" class="error-defined">Role is required</div>
                       </div>
@@ -77,8 +38,7 @@
                   <div class="col-sm-12">
                     <div class="form-group form-inline">
                       <label class="labelsubSpan col-sm-5 col-form-label">Username</label>
-                      <input type="text" [(ngModel)]="username" formControlName="userName" class="form-control form-control-line col-sm-7 disableField" [ngClass]="{ 'is-invalid': submitted && f.userName.errors }" [attr.disabled]="true" />
-
+                      <input type="text" [(ngModel)]="username" formControlName="userName" class="form-control form-control-line col-sm-7 " [ngClass]="{ 'is-invalid': submitted && f.userName.errors }" [attr.disabled]="true" />
                       <div *ngIf="submitted && f.userName.errors" class="invalid-feedback">
                         <div *ngIf="f.userName.errors.required" class="error-defined">Username is required</div>
                       </div>
@@ -94,7 +54,6 @@
                       </div>
                     </div>
                   </div>
-
                   <div class="col-sm-12">
                     <div class="form-group form-inline">
                       <label class="labelsubSpan col-sm-5 col-form-label">Last Name</label>
@@ -105,7 +64,6 @@
                       </div>
                     </div>
                   </div>
-
                   <div class="col-sm-12">
                     <div class="form-group form-inline">
                       <label class="labelsubSpan col-sm-5 col-form-label">Email</label>
@@ -116,20 +74,16 @@
                       </div>
                     </div>
                   </div>
-
                   <div class="col-sm-12">
                     <div class="form-group form-inline">
                       <label class="labelsubSpan col-sm-5 col-form-label">Phone Number</label>
                       <input type="text" [(ngModel)]="phonenumber" formControlName="phoneNumber" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': submitted && f.phoneNumber.errors }" />
-
                       <div *ngIf="submitted && f.phoneNumber.errors" class="invalid-feedback">
                         <div *ngIf="f.phoneNumber.errors.required" class="error-defined">Phone Number is required</div>
                       </div>
                     </div>
                   </div>
-
                 </div>
-
                 <div class="form-group row text-right">
                   <div class="col-sm-12">
                     <button type="button" (click)="close()" class="btn btn-secondary">Close</button>&nbsp;
@@ -141,8 +95,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <ng4-loading-spinner [threshold]="2000" [timeout]="3000" [loadingText]="'Please wait...'" [zIndex]="9999"></ng4-loading-spinner>
+      <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
 
 </div>

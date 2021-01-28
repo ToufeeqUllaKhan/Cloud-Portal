@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 export class AdminDashboardComponent implements OnInit {
 
   constructor(private router: Router) {
-  /** removing storage items */
+    /** removing storage items */
     localStorage.removeItem('choosenAdminProjects');
     localStorage.removeItem('serachHistoryProj');
     localStorage.removeItem('clientUpdated');
@@ -26,7 +26,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    
+    localStorage.removeItem('TicketSelected');
   }
 
 
@@ -51,7 +51,28 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   changeHistory() {
+    localStorage.setItem('TicketSelected', 'Change History');
     this.router.navigate(['/admin-clients']);
   }
 
+  searchHistory() {
+    this.router.navigate(['/log-view']);
+  }
+
+  ClearDefaultBoxIdLogs() {
+    this.router.navigate(['/UpdateDefaultBoxIdLogs']);
+  }
+
+  importprojectfromprod(){
+    this.router.navigate(['/importfromprod']);
+  }
+
+  cec_ediddata(){
+    localStorage.setItem('TicketSelected', 'CEC-EDID Data');
+    this.router.navigate(['/admin-clients']);
+  }
+
+  cec_edidHistory(){
+    this.router.navigate(['/prod_CEC-EDID_History']);
+  }
 }

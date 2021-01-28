@@ -14,21 +14,21 @@ export class AuthenticationService {
 
   login(username: string, password: string) {
     ///users/authenticate
-    return this.http.post<any>(`${ environment.apiUrl }/api/Authentication/Login`, { Username: username, Password: password }).pipe(map(
+    return this.http.post<any>(`${environment.apiUrl}/api/Authentication/Login`, { Username: username, Password: password }).pipe(map(
       user => {
-       // alert(JSON.stringify(user.statusCode));
-       // alert(JSON.stringify(user.message));
-       // alert(JSON.stringify(user.data[0]['sessionToken']));
+        // alert(JSON.stringify(user.statusCode));
+        // alert(JSON.stringify(user.message));
+        // alert(JSON.stringify(user.data[0]['sessionToken']));
         if (user.statusCode == 500) {
-          this.toastr.error(user.message,'');
+          this.toastr.error(user.message, '');
         }
         if (user) {
           localStorage.setItem('userValidation', JSON.stringify(user));
         }
-          if (user && user.data[0].sessionToken) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
+        if (user && user.data[0].sessionToken) {
+          localStorage.setItem('currentUser', JSON.stringify(user));
         }
-        
+
         return user;
       }
     ))

@@ -31,11 +31,11 @@ export class CreateNewClientComponent implements OnInit {
   project_version: any; embed_version: any; db_version: any; sw_version: any;
   signature_key: any; setClientName: any;
   createProject: Boolean = true; isNextVisible: Boolean = false;
-  regions : Array<any> = [];
+  regions: Array<any> = [];
   dbinstance: Array<any> = [];
-  
-  NewDbInstance: Boolean = true; 
-  ClientNameChoosen: String; 
+
+  NewDbInstance: Boolean = true;
+  ClientNameChoosen: String;
   dbPageInstance: [];
   dbPageRegion: []; newRegName: String; finalItem = []; delItem = [];
 
@@ -50,21 +50,21 @@ export class CreateNewClientComponent implements OnInit {
 
 
   ngOnInit(): void {
-  /** List of Regions */
+    /** List of Regions */
     let Region = ''; let Regionlogopath = ''; let Statusflag = 1; let Crudtype = 4;
     this.mainService.getAllRegions(Region, Regionlogopath, Statusflag, Crudtype)
       .subscribe(value => {
         this.regions = value.data;
       });
-  /** List of DB Instance */
-    let Dbinstance = ''; 
+    /** List of DB Instance */
+    let Dbinstance = '';
     let ConnectionString = '';
     this.mainService.getAllDbInstance(Crudtype, Dbinstance, ConnectionString, Statusflag)
       .subscribe(value => {
         this.dbinstance = value.data;
       });
 
-  /** Validations for required fields for create client Form */
+    /** Validations for required fields for create client Form */
     this.createClientForm = this.fb.group({
       clientName: ['', Validators.required],
       regionName: ['', Validators.required],
@@ -92,7 +92,7 @@ export class CreateNewClientComponent implements OnInit {
       signatureKey: ['', Validators.required],
       allowDownload: ['', null]
     });
-    
+
   }
 
 
@@ -101,7 +101,7 @@ export class CreateNewClientComponent implements OnInit {
   get g() { return this.newdbInstanceForm.controls; }
   get p() { return this.createNewProjectForm.controls; }
 
-/** Trigger the new Region Div Form if New Region button is Clicked */
+  /** Trigger the new Region Div Form if New Region button is Clicked */
 
   newRegion() {
     this.NewRegion = false;
@@ -110,7 +110,7 @@ export class CreateNewClientComponent implements OnInit {
     this.isClientDivVisible = true;
   }
 
-/** Trigger the new DB Instance Div Form if New DB Instance button is Clicked */
+  /** Trigger the new DB Instance Div Form if New DB Instance button is Clicked */
 
   newDbInstances() {
     this.NewDbInstance = false;
@@ -119,7 +119,7 @@ export class CreateNewClientComponent implements OnInit {
     this.isClientDivVisible = true;
   }
 
-/** display of main create client page by hiding the new option div element */
+  /** display of main create client page by hiding the new option div element */
 
   regBack() {
     this.NewRegion = true;
@@ -127,7 +127,7 @@ export class CreateNewClientComponent implements OnInit {
     this.isClientDivVisible = false;
   }
 
-/** display of main create client page by hiding the new option div element */
+  /** display of main create client page by hiding the new option div element */
 
   dbBack() {
     this.NewDbInstance = true;
@@ -148,6 +148,11 @@ export class CreateNewClientComponent implements OnInit {
     if (this.newregionForm.invalid) {
       return;
     }
+    else if (this.newRegName.trim() === '') {
+      this.toastr.error('', 'Please enter Region');
+      this.newRegName = '';
+    }
+    else {
     let RegionLogoPath = '';
     let StatusFlag = '1';
     let Crudtype = '1';
@@ -170,23 +175,36 @@ export class CreateNewClientComponent implements OnInit {
             for (var i = 0; i < value.data.length; i++) {
               this.regions.push(value.data[i]);
             }
-            
+
           });
 
         this.isClientDivVisible = false;
       });
+    }
   }
 
-/** Create Client Submit Operation */
+  /** Create Client Submit Operation */
 
   oncreateClientSubmit() {
     this.submitted = true;
-    
+
     // stop here if form is invalid
     if (this.createClientForm.invalid) {
       return;
     }
-
+    else if (this.clientSelected.trim() === '') {
+      this.toastr.error('', 'Please enter Client');
+      this.clientSelected = '';
+    }
+    else if (this.project_name.trim() === '') {
+      this.toastr.error('', 'Please enter Projectname');
+      this.project_name = '';
+    }
+    else if (this.signature_key.trim() === '') {
+      this.toastr.error('', 'Please enter Signature Key');
+      this.signature_key = '';
+    }
+    else {
     let ConnectionString = "";
     let Statusflag = 1; let Crudtype = 1;
     let allowDownload;
@@ -206,7 +224,7 @@ export class CreateNewClientComponent implements OnInit {
             if (value.data == "1") {
               this.toastr.success('Project Created Successfully', '');
               this.isNextVisible = true;
-              this.formGroupDirective.resetForm();
+              // this.formGroupDirective.resetForm();
               this.checkboxes.forEach((element) => {
                 element.nativeElement.checked = false;
               });
@@ -215,12 +233,16 @@ export class CreateNewClientComponent implements OnInit {
               this.toastr.warning(value.message, '');
               this.submitted = false;
             }
-          }); 
+            this.mainService.CECEDID_NewProject(1, this.project_name, this.signature_key, this.db_instance, 1,null)
+            .then(value => {
+              this.formGroupDirective.resetForm();
+            }) 
+          });
       });
- 
+    }
   }
 
-/** New DB Instance Creation Submit Operation */
+  /** New DB Instance Creation Submit Operation */
   onNewDbInstanceSubmit() {
 
     this.dbNewsubmitted = true;
@@ -229,7 +251,13 @@ export class CreateNewClientComponent implements OnInit {
     if (this.newdbInstanceForm.invalid) {
       return;
     }
-    let Dbinstance = this.new_DB_Instance; let Statusflag = 1; let Crudtype = 1;
+    else if (this.new_DB_Instance.trim() === '') {
+      this.toastr.error('', 'Please enter DBInstance');
+      this.new_DB_Instance = '';
+    }
+    else {
+      let Dbinstance = this.new_DB_Instance.trim();
+      let Statusflag = 1; let Crudtype = 1;
     let ConnectionString = "";
     this.mainService.getAllDbInstance(Crudtype, Dbinstance, ConnectionString, Statusflag)
       .subscribe(value => {
@@ -251,6 +279,7 @@ export class CreateNewClientComponent implements OnInit {
         this.NewDbInstance = true;
         this.isClientDivVisible = false;
       });
+    }
   }
 
 }

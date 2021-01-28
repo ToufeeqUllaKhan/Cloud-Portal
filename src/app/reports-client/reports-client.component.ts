@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import * as $ from 'jquery';
+declare var $: any;
 import { Router } from '@angular/router';
 import { MainService } from '../services/main-service';
 import { Title } from '@angular/platform-browser';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -25,7 +25,7 @@ export class ReportsClientComponent implements OnInit {
   isNextVisible: Boolean = false;
   switchRoute: any;
 
-  constructor(private router: Router, private mainService: MainService, private titleService: Title, private spinnerService: Ng4LoadingSpinnerService, private toastr: ToastrService) {
+  constructor(private router: Router, private mainService: MainService, private titleService: Title, private spinnerService: NgxSpinnerService, private toastr: ToastrService) {
     this.titleService.setTitle("Admin Clients");
     this.checkboxValue = false;
   }
@@ -85,11 +85,11 @@ export class ReportsClientComponent implements OnInit {
         if (browserZoomLevel == 500) {
           $('.col-lg-3').css('max-width', '80%');
         }
-        
+
       });
     });
 
-  /** Region List based on clients, project list based on client and region */
+    /** Region List based on clients, project list based on client and region */
     this.mainService.getRegionsperClient()
       .pipe()
       .subscribe(value => {
@@ -144,8 +144,7 @@ export class ReportsClientComponent implements OnInit {
         let clientArr = [];
         for (var j = 0; j < this.activeRegions.length; j++) {
           let filterClient: any = value.data.filter(u =>
-            u.clientRegion == this.activeRegions[j]);
-
+            (u.clientRegion == this.activeRegions[j]));
           var uniqueArray1 = removeDuplicates(filterClient, "clientName");
           clientArr.push(uniqueArray1);
         }
@@ -154,7 +153,6 @@ export class ReportsClientComponent implements OnInit {
           result = result.concat(clientArr[k]);
         }
         result.sort(this.sortOn("clientName"));
-        console.log(result);
         this.arrClients = result;
         this.arrClients.forEach(item => item["background"] = this.getRandomColor());
         this.isNextVisible = true;
@@ -282,15 +280,15 @@ export class ReportsClientComponent implements OnInit {
       $('.navbar').css('padding', '.56rem 1rem');
     }
   }
-/** alphabetical order of clients sorting */
+  /** alphabetical order of clients sorting */
   sortOn(property) {
     return function (a, b) {
       if (a[property].toLowerCase() < b[property].toLowerCase()) return -1;
       if (a[property].toLowerCase() > b[property].toLowerCase()) return 1;
-        return 0;
-      }
+      return 0;
+    }
   }
-/** random colors generation for cards, right now this function is not in use, it itz required we can use it */
+  /** random colors generation for cards, right now this function is not in use, it itz required we can use it */
   getRandomColor2() {
     var length = 6;
     var chars = '0123456789ABCDEF';
@@ -323,7 +321,7 @@ export class ReportsClientComponent implements OnInit {
       });
   }
 
-/** Based on client selection  default project of the client will be traversed to next page  */
+  /** Based on client selection  default project of the client will be traversed to next page  */
 
   selectSingleClient(clientName, regionName) {
     localStorage.removeItem('choosenAdminProjects');
@@ -333,12 +331,15 @@ export class ReportsClientComponent implements OnInit {
     this.mainService.getProjectNames(clientName, regionName, null, null, null, dataType)
       .pipe()
       .subscribe(value => {
-        clientArr.push(value.data[0]['projectname']);
+        // let filterProject: any = value.data.filter(u =>
+        //   (u.statusFlag === 2 || u.statusFlag === '2'));
+          let filterProject: any = value.data;
+        clientArr.push(filterProject[0]['projectname']);
         localStorage.setItem('choosenAdminProjects', JSON.stringify(clientArr));
         if (clientArr.length != 0) {
-          if (this.switchRoute == 'SearchLog' ||this.switchRoute == 'GenericLog') {
+          if (this.switchRoute == 'SearchLog' || this.switchRoute == 'GenericLog') {
             this.router.navigate(['/Report-configuration-list']);
-          } 
+          }
           // if (this.switchRoute == 'SearchLog') {
           //   this.router.navigate(['/search-history']);
           // } if (this.switchRoute == 'GenericLog') {

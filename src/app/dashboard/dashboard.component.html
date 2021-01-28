@@ -32,7 +32,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-6 col-xl-4" *ngIf="isAnalytics" (click)="logview()">
+    <div class="col-md-6 col-xl-4" *ngIf="isAnalytics" (click)="reports()">
       <div class="mini-stat clearfix card-red">
         <span class="mini-stat-icon"><i class="fa fa-bar-chart" aria-hidden="true"></i></span>
         <div class="mini-stat-info text-right text-light">
@@ -55,5 +55,5 @@
     </div>-->
     <div class="col-md-12" *ngIf="isNone">Modules are not Available. Please contact Admin to access the Modules.</div>
   </div>
-    <ng4-loading-spinner [threshold]="2000" [timeout]="5000" [loadingText]="'Please wait...'" [zIndex]="9999"></ng4-loading-spinner>
+  <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
   </div>

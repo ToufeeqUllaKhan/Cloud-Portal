@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Router,CanActivate,ActivatedRouteSnapshot } from '@angular/router';
+import { Router, CanActivate, ActivatedRouteSnapshot } from '@angular/router';
 import { AuthenticationService } from '../services/authentication.service';
 
 @Injectable()
@@ -7,7 +7,7 @@ export class RoleGuardService implements CanActivate {
   constructor(public auth: AuthenticationService, public router: Router) { }
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
-    
+
     const role = route.data.role;
 
     if (localStorage.getItem('currentUser')) {

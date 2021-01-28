@@ -21,5 +21,8 @@ export class AccessibleModulesComponent implements OnInit {
   rolesView() {
     this.router.navigate(['/role-module-view']);
   }
-
+  
+  assignpermissionView(){
+    this.router.navigate(['/update-permission']);
+  }
 }

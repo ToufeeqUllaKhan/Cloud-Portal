@@ -22,18 +22,17 @@ export class UserLibraryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-  /** Datatable setting option to set page length */
+    /** Datatable setting option to set page length */
     this.dtOptions = {
-      pagingType: 'full_numbers',
-      pageLength: 5
+      pagingType: 'full_numbers'
     };
     var userName = localStorage.getItem('userName');
-  /** List of users and information */
+    /** List of users and information */
     this.mainService.getUserRoleModuleInfo(1, userName)
       .subscribe(value => {
         this.userDetails = value.data;
         this.dtTrigger.next();
-      }); 
+      });
 
     localStorage.removeItem('editUser');
   }
@@ -47,7 +46,7 @@ export class UserLibraryComponent implements OnInit {
     this.router.navigate(['/create-users']);
   }
 
-/** Edited user information to edit user details page */
+  /** Edited user information to edit user details page */
   editUser(user) {
     localStorage.setItem('editUser', user);
     this.router.navigate(['/edit-user-details']);

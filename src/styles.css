@@ -2,7 +2,7 @@
 @import '~bootstrap/dist/css/bootstrap.min.css';
 @import "~font-awesome/css/font-awesome.css";
 @import "~angular-notifier/styles";
-
+@import '../node_modules/angular-archwizard/archwizard.css';
 /*@font-face {
   font-family: var(--marutham-font-family) !important;
   font-size: var(--marutham-font-size) !important;
@@ -136,11 +136,11 @@ html, body { height: 100%; }
   border-bottom: none !important;
 }
 .main-scroll::-webkit-scrollbar {
-  background-color: #2dcdb4;
+  /* background-color: #2dcdb4; */
 }
 
   .main-scroll::-webkit-scrollbar-thumb {
-    background-color: #2dcdb4;
+    /* background-color: #2dcdb4; */
   }
 
 /* ::-webkit-scrollbar {
@@ -241,6 +241,10 @@ label {
 }
 .dropdown-menu {
   font-size:inherit;
+  width: 290px;
+  overflow: auto;
+  min-height: 10px;
+  max-height: 250px;
 }
 h3 {
   font-size:inherit;

@@ -27,8 +27,7 @@ export class NgbDateCustomParserFormatter extends NgbDateParserFormatter {
 
   format(date: NgbDateStruct): string {
     return date
-      ? `${isNumber(date.month) ? padNumber(date.month) : ""}-${isNumber(date.day) ? padNumber(date.day) : ""}-${
-      date.year
+      ? `${isNumber(date.month) ? padNumber(date.month) : ""}-${isNumber(date.day) ? padNumber(date.day) : ""}-${date.year
       }`
       : "";
   }

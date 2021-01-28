@@ -1,16 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MainService } from '../services/main-service';
-import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 declare var $: any;
 import 'datatables.net';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
-import { environment } from 'src/environments/environment.prod';
-import { templateJitUrl } from '@angular/compiler';
-import { stagger } from '@angular/animations';
+import { NgxSpinnerService } from 'ngx-spinner';
+import "ag-grid-community/dist/styles/ag-grid.css";
+import "ag-grid-community/dist/styles/ag-theme-balham.css";
+import { BtnCellRenderer } from './btn-cell-renderer.component';
+import { EdidviewCellRenderer } from '../brand-library/edidview-cell-renderer.component';
+import { RemarksViewCellRenderer } from './remarksview-cell-renderer.component ';
+import { SupportedRegionsViewCellRenderer } from './supportedregionsview-cell-renderer.component';
+
 @Component({
   selector: 'app-rawdata',
   templateUrl: './rawdata.component.html',
@@ -18,33 +21,99 @@ import { stagger } from '@angular/animations';
 })
 export class RawdataComponent implements OnInit {
 
+  saveEditRawData: FormGroup;
   usersName: any;
   projectNames: any; selectedItems: Array<any> = [];
-  dropdownSettings: any = {}; ShowFilter = false; tabslist = [];count: any = 0;oldValue: string; modalCount: any = 0;currentVal: any; 
+  dropdownSettings: any = {}; ShowFilter = false; tabslist = []; count: any = 0; oldValue: string; modalCount: any = 0; currentVal: any;
   limitSelection = false; mainArr = [];
   clientDetails = [];
   dtOptions: DataTables.Settings = {};
   dtTrigger: Subject<any> = new Subject<any>();
-  
-  resultProjArr: any =[];status:any;
-  rawdatacapture:any =[];
-  edidDataView: Boolean = false;
+
+  resultProjArr: any = []; status: any; filter_Device: any; filter_Subdevice: any; filter_Status: any;
+  rawdatacapture: any = []; device: any; subdevice: any;
+  edidDataView: Boolean = false; DecodeedidDataView: Boolean = false;
   RemarksView: boolean = false;
   SupportedregionsView: boolean = false;
   EdidData: any;
-  Metadata: any;CEC: any;EDID: any;Scandevice: any;
-  Supportedregions: any;data: any =[];
-  constructor(private mainService: MainService, private router: Router, private toastr: ToastrService, private spinnerService: Ng4LoadingSpinnerService, private fb: FormBuilder) { 
+  Metadata: any; CEC: any; EDID: any; Scandevice: any;
+  Supportedregions: any; data: any = [];
+
+  editedDevice: any; editedBrand: any; editedSubdevice: any; editedModel: any; editedVendor: any; editedOSD: any;
+  recordId: any; editedEDID128: any; editedSupportedRegion: any; editedVendorstr: any; editedRegion: any; editedCountry: any;
+  editYear: any; editcecPresent: any; editcecEnabled: any; editedCaptureCountry: any; editedCaptureRegion: any; editedRemoteModel: any;
+  Rawdatasubmitted: Boolean = false;
+  vendorError: Boolean = false; edidError: Boolean = false;
+  editedCEC_Device: any;
+  editedStatus: any;
+  showbutton: boolean = false;
+  sourcetype: any;
+  sourcename: any;
+  remarks: any;
+  Values: any = [];
+  keys: any = [];
+  regionlist: any[];
+  countrylist: any[];
+  singleUid: any; multipleuid: any = [];
+  successinsert = 0;
+
+  public gridApi;
+  public gridColumnApi;
+  public frameworkComponents;
+  public columnDefs;
+  public defaultColDef;
+  public rowData;
+  public paginationNumberFormatter;
+  public paginationPageSize;
+  public context;
+  public rowSelection;
+  searchValue: any;
+  rowselected: any;
+  failedinsert = 0;
+  loginid: any;
+
+  constructor(private mainService: MainService, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService, private fb: FormBuilder) {
+    localStorage.removeItem('StagingStatus')
     this.usersName = localStorage.getItem('userName');
-    this.status=null;
+    this.loginid = JSON.parse(localStorage.getItem('currentUser'));
+    this.status = null; this.device = null; this.subdevice = null;
+    this.paginationPageSize = 10;
+    this.rowSelection = 'multiple';
+    this.frameworkComponents = {
+      btnCellRenderer: BtnCellRenderer,
+      edidviewCellRenderer: EdidviewCellRenderer,
+      remarksviewCellRenderer: RemarksViewCellRenderer,
+      regionsviewCellRenderer: SupportedRegionsViewCellRenderer
+    };
+    this.defaultColDef = {
+      minWidth: 100,
+    };
+    this.paginationNumberFormatter = function (params) {
+      return '[' + params.value.toLocaleString() + ']';
+    };
+    this.context = { componentParent: this };
   }
 
   ngOnInit() {
-  // var self=this;
-    let dataType = 1;
-    let statusflag=this.status;
-    
-    this.rawdata(dataType,statusflag);
+    let dataType = 5;
+    let statusflag = this.status;
+    let device = this.device;
+    let subdevice = this.subdevice;
+    this.mainService.getProjectNames(null, null, null, null, 'DBEU01001', 18)
+      .subscribe(value => {
+        let region = []; let a = []; let country = [];
+        for (let i = 0; i < value.data.length; i++) {
+          region.push(value.data[i]['region'])
+        }
+        region = region.filter(u => (u != null) && (u != 'NULL') && (u != ''));
+        this.regionlist = region.filter((v, i, a) => a.indexOf(v) === i).sort();
+        for (var j = 0; j < value.data.length; j++) {
+          country.push(value.data[j]['country']);
+        }
+        country = country.filter(u => (u != null) && (u != 'NULL') && (u != ''));
+        this.countrylist = country.filter((v, i, a) => a.indexOf(v) === i).sort();
+      })
+    this.rawdata(dataType, device, subdevice, statusflag);
     $(document).ready(function () {
       $(".pop-menu").click(function () {
         $(this).toggleClass("transition");
@@ -52,13 +121,205 @@ export class RawdataComponent implements OnInit {
     });
     /** validation for not to accept space in input */
     $(document).ready(function () {
+
       $("input").on("keypress", function (e) {
         if (e.which === 32 && !this.value.length)
           e.preventDefault();
       });
+
+
+    });
+    var self = this;
+
+    $('#button').click(function () {
+      self.exporttostag(self.rowselected);
+    })
+
+    $('#single_download').click(function () {
+      self.onBtnExport();
+    })
+
+    $('#add').click(function (e) {
+      var model; var uid = []; let Regioncountrymodelconcat = []; let uidmodel = []; let region = []; let country = [];
+      $('#model').each(function (i, elem) {
+        model = ($(elem).val());
+        if (model === '') {
+          model = null
+        }
+      });
+
+      $('#region').each(function (i, elem) {
+        region = ($(elem).val());
+      });
+      $('#country').each(function (i, elem) {
+        country = ($(elem).val());
+      });
+      if (region === null && model === null && country === null) {
+        self.toastr.error('', 'Enter atleast Region or Country or Model');
+      }
+      else {
+        Regioncountrymodelconcat.push(region + ' : ' + country + ' : ' + model + '; ');
+        self.editedSupportedRegion = ((<HTMLInputElement>document.getElementById("myTextarea")).value + '\n' + Regioncountrymodelconcat).trim();
+      }
+
+
+    })
+
+    $('#edit').click(function () {
+      if ((<HTMLInputElement>document.getElementById("myTextarea")).disabled == true) {
+        (<HTMLInputElement>document.getElementById("myTextarea")).disabled = false;
+      }
+      else {
+        (<HTMLInputElement>document.getElementById("myTextarea")).disabled = true;
+      }
+    })
+
+    this.saveEditRawData = this.fb.group({
+      Device: ['', Validators.required],
+      Subdevice: ['', Validators.required],
+      Brand: ['', Validators.required],
+      TargetModel: ['', Validators.required],
+      TargetRegion: ['', null],
+      TargetCountry: ['', null],
+      RemoteModel: ['', null],
+      CaptureCountry: ['', null],
+      CaptureRegion: ['', null],
+      CEC_Device: ['', null],
+      VendorId: ['', null],
+      Vendoridstring: ['', null],
+      OSDString: ['', null],
+      Edid: ['', null],
+      Status: ['', null],
+      Year: ['', null],
+      Model: ['', null],
+      Region: ['', null],
+      Country: ['', null],
+      Region_Country_Model: ['', null],
     });
 
-    
+  }
+
+  edid(setEdid) {
+    this.viewEdidData(setEdid);
+  };
+
+  Remarks(setRemarks) {
+    var ret = setRemarks.split(",")
+    var str1 = ret[0];
+    var str2 = ret[1];
+    var str3 = ret[2];
+    var str4 = ret[3];
+    this.viewRemarks(str1, str2, str3, str4);
+  };
+
+  supportedregions(setEdid) {
+    this.viewSupportedregions(setEdid);
+  };
+
+
+  RawdataView(ret) {
+    let removespacetovendor = ret[14].split(" ");
+    let removespacetoosd = ret[17].split(" ");
+    let vendor = ''; let osd = '';
+
+    for (let i = 0; i < removespacetovendor.length; i++) {
+      vendor += removespacetovendor[i]
+    }
+    for (let i = 0; i < removespacetoosd.length; i++) {
+      osd += removespacetoosd[i]
+    }
+    var str = ret[0];
+    var str1 = ret[1];
+    var str2 = ret[2];
+    var str3 = ret[3];
+    var str4 = ret[4];
+    var str5 = ret[5];
+    var str6 = ret[6];
+    var str7 = ret[7];
+    var str8 = ret[8];
+    var str9 = ret[9];
+    var str10 = ret[10];
+    var str11 = ret[11];
+    var str12 = ret[12];
+    var str13 = ret[13];
+    var str14 = vendor;
+    var str15 = ret[15];
+    var str16 = ret[16];
+    var str17 = osd;
+    var str18 = ret[18];
+    var str19 = ret[19];
+    var str20 = ret[20];
+    var str21 = ret[21];
+    var str22 = ret[22];
+    var str23 = ret[23];
+    if (str1 == 'null') {
+      str1 = ''
+    }
+    if (str2 == 'null') {
+      str2 = ''
+    }
+    if (str3 == 'null') {
+      str3 = ''
+    }
+    if (str4 == 'null') {
+      str4 = ''
+    }
+    if (str5 == 'null') {
+      str5 = ''
+    }
+    if (str6 == 'null') {
+      str6 = ''
+    }
+    if (str7 == 'null') {
+      str7 = ''
+    }
+    if (str8 == 'null') {
+      str8 = ''
+    }
+    if (str9 == 'null') {
+      str9 = ''
+    }
+    if (str10 == 'null') {
+      str10 = ''
+    }
+    if (str11 == 'null') {
+      str11 = ''
+    }
+    if (str12 == 'null') {
+      str12 = ''
+    }
+    if (str13 == 'null') {
+      str13 = ''
+    }
+    if (str14 == 'null') {
+      str14 = ''
+    }
+    if (str15 == 'null') {
+      str15 = ''
+    }
+    if (str12 == 'Yes') {
+      str12 = '1'
+    }
+    if (str12 == 'No') {
+      str12 = '0'
+    }
+    if (str13 == 'Yes') {
+      str13 = '1'
+    }
+    if (str13 == 'No') {
+      str13 = '0'
+    }
+    if (str23 === 'Not Exported to Staging') {
+      str23 = 1
+    }
+    if (str23 === 'Inactive') {
+      str23 = 0
+    }
+    if (str23 === 'Exported to Staging') {
+      str23 = 2
+    }
+    this.viewRawData(str, str1, str2, str3, str4, str5, str6, str7, str8, str9, str10, str11, str12, str13, str14, str15, str16, str17, str18, str19, str20, str21, str22, str23);
+
   }
 
   viewEdidData(value) {
@@ -68,7 +329,15 @@ export class RawdataComponent implements OnInit {
     this.EdidData = value;
   }
 
-  viewRemarks(value1,value2,value3,value4) {
+  viewDecodeEdidData(value, value1) {
+    this.DecodeedidDataView = true;
+    this.RemarksView = false;
+    this.SupportedregionsView = false;
+    this.keys = value;
+    this.Values = value1;
+  }
+
+  viewRemarks(value1, value2, value3, value4) {
     this.RemarksView = true;
     this.edidDataView = false;
     this.SupportedregionsView = false;
@@ -86,36 +355,86 @@ export class RawdataComponent implements OnInit {
     this.Supportedregions = value;
   }
 
-  getTabResponseData(statusflag){
-    
-    let dataType = 1;
-    if (this.count == 1 && this.oldValue == undefined && this.modalCount != 1) {
-      $('#projectView').dataTable().fnClearTable();
-        $('#projectView').dataTable().fnDestroy();
-    }
-    var Table1 = $('#projectView').DataTable();
-        Table1.destroy();
-        Table1.clear();
-    // if (this.count == 1 && this.oldValue == undefined && this.modalCount != 1) {
-    //   $('#loadView').dataTable().fnClearTable();
-    //     $('#loadView').dataTable().fnDestroy();
-    // }
-    // var Table1 = $('#loadView').DataTable();
-    //     Table1.destroy();
-    //     Table1.clear();
-    this.rawdata(dataType,statusflag);
+  viewRawData(value, value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15, value16, value17, value18, value19, value20, value21, value22, value23) {
+    this.editedDevice = value1;
+    this.editedSubdevice = value2;
+    this.editedBrand = value3;
+    this.editedModel = value4;
+    this.editedRegion = value5;
+    this.editedCountry = value6;
+    this.editedRemoteModel = value8;
+    this.editedCaptureRegion = value9;
+    this.editedCaptureCountry = value10;
+    this.editYear = value7;
+    this.editedCEC_Device = value11;
+    this.editcecPresent = value12;
+    this.editcecEnabled = value13;
+    this.editedVendor = value14;
+    this.editedVendorstr = value15;
+    this.editedOSD = value16;
+    this.editedEDID128 = value18;
+    this.sourcetype = value20;
+    this.sourcename = value19;
+    this.editedSupportedRegion = value21;
+    this.remarks = value22;
+    this.editedStatus = value23;
+    this.recordId = value;
+  }
+
+  getTabResponseData(device, subdevice, statusflag) {
+    let dataType = 5;
+    this.rawdata(dataType, device, subdevice, statusflag);
 
   }
 
-  onchangestatus(){
-    let statusflag=this.status;
-    if(statusflag==null || statusflag=='null'){
-      statusflag=null;
+  keyPressHandler(e) {
+    if (e.keyCode === 32 && !e.target.value.length) {
+      return false;
     }
-    console.log(statusflag)
-    this.getTabResponseData(statusflag);    
   }
 
+  modalClose() {
+    this.Rawdatasubmitted = false;
+    this.vendorError = false;
+    this.edidError = false;
+    this.saveEditRawData.reset();
+  }
+
+  onchangestatus() {
+    let statusflag = this.status;
+    let device = this.device;
+    let subdevice = this.subdevice;
+    if (statusflag == null || statusflag == 'null') {
+      statusflag = null;
+    }
+    else {
+      statusflag = parseInt(this.status);
+    }
+    if (device == null || device == 'null') {
+      device = null;
+    }
+    else {
+      device = this.device;
+    }
+    if (subdevice == null || subdevice == 'null') {
+      subdevice = null;
+    }
+    else {
+      subdevice = this.subdevice;
+    }
+    this.getTabResponseData(device, subdevice, statusflag);
+  }
+
+  onchangedevice() {
+    let statusflag = this.status;
+    let device = this.device;
+    this.getTabResponseData(device, null, statusflag);
+  }
+
+  refreshScreen() {
+    this.status = null; this.device = null; this.subdevice = null;
+    this.getTabResponseData(this.device, this.subdevice, this.status);
+  }
 
   onModelChange(event) {
     if (event) {
@@ -128,318 +447,623 @@ export class RawdataComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
-  rawdata(dataType,statusflag){
-    var self=this;
-    var rows_selected = [];
-    this.dtOptions = {
-      pagingType: 'full_numbers',
-      pageLength: 10,
-      scrollY: '300px',
-      scrollX: true,
-      scrollCollapse: true,
-      ordering:true
-    //   'rowCallback': function(row, data, dataIndex){
-    //     // Get row ID
-    //     var rowId = data[0];
+  rawdata(dataType, Device, Subdevice, statusflag) {
+    localStorage.setItem('RawStatus', this.status)
+    this.mainService.RawToStaging(dataType, null, null, statusflag)
+      .then(value => {
+        let arr = []; let arr1 = []; let arr2 = []; let Remarks = []; let RegioncountryModel;
+        let Region = [];
+        if (value.data.length > 0 && value.data != '0' && value.data != null) {
 
-    //     // If row ID is in the list of selected row IDs
-    //     if($.inArray(rowId, rows_selected) !== -1){
-    //        $(row).find('input[type="checkbox"]').prop('checked', true);
-    //        $(row).addClass('selected');
-    //     }
-    //  }
-    };
+          //convert  string to Object
+          for (let i = 0, ien = value.data.length; i < ien; i++) {
+            arr.push(JSON.parse(value.data[i]['sourceDataCapture']));
+          }
 
-        this.mainService.MigrateRawToStaging(dataType, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, statusflag, null)
-      .subscribe(value => {
-        let arr=[]; let arr1=[]; let arr3=[];let arr2=[];let Remarks=[];let model=[];
-        let Region=[];
-            if (value.data.length > 0) {
+          //Detectionid and Status
+          for (let i = 0, ien = value.data.length; i < ien; i++) {
+            arr1.push({ Detectionid: value.data[i]['detectionId'], Status: value.data[i]['statusFlag'] });
+          }
 
-              //convert  string to Object
-              for (let i = 0, ien = value.data.length; i < ien; i++) {
-                arr.push(JSON.parse(value.data[i]['sourceDataCapture']));
-              }
-              
-              for (let i = 0, ien = value.data.length; i < ien; i++) {
-                arr1.push({Detectionid:value.data[i]['detectionId'],Status:value.data[i]['statusFlag']});
-              }
-              for(let i=0;i<arr.length;i++){
-              Remarks.push(arr[i]['Remarks']);
-              }
-              
-              arr.forEach(element => {
-                let RegionCountry = "";
-                element.Supportedregions.forEach(element1 => {
-                  let Countries = element1.Countries;
-                  Countries.forEach(element3 => {
-                    RegionCountry+=element1.Region+" : ";
-                    //console.log(Countries)
-                    RegionCountry+=element3.Country+" : "
-                    element3.Models.forEach(element4 => {
-                      RegionCountry+=element4+","
-                    });
-                    RegionCountry=RegionCountry.slice(0,-1)
-                  RegionCountry+=" ; "
-                  });
-                  RegionCountry=RegionCountry.slice(0,-1)
-                  // RegionCountry+=";"
+          //Remarks
+          for (let i = 0; i < arr.length; i++) {
+            Remarks.push(arr[i]['Remarks']);
+          }
+
+          //Supported Region Country Model
+          arr.forEach(element => {
+            let RegionCountry = "";
+            element.Supportedregions.forEach(element1 => {
+              let Countries = element1.Countries;
+              Countries.forEach(element3 => {
+                RegionCountry += element1.Region + " : ";
+                RegionCountry += element3.Country + " : "
+                element3.Models.forEach(element4 => {
+                  RegionCountry += element4 + ","
                 });
-                RegionCountry=RegionCountry.slice(0,-1)
-                
-                Region.push(RegionCountry)
-
-                // console.log(RegionCountry);
+                RegionCountry = RegionCountry.slice(0, -1)
+                RegionCountry += " ; "
               });
-              
-            
-              for(let i=0;i<arr1.length;i++){
-                if(arr[i]['Cecpresent']==='1'){
-                  arr[i]['Cecpresent']='Yes'
-                }
-                if(arr[i]['Cecpresent']==='0'){
-                  arr[i]['Cecpresent']='No'
-                }
-                if(arr[i]['Cecenabled']==='1'){
-                  arr[i]['Cecenabled']='Yes'
-                }
-                if(arr[i]['Cecenabled']==='0'){
-                  arr[i]['Cecenabled']='No'
-                }
-                arr2.push({Detectionid:arr1[i]['Detectionid'],Device:arr[i]['Device'],Subdevice:arr[i]['Subdevice'],Brand:arr[i]['Brand'],Targetmodel:arr[i]['Targetmodel'],TargetRegion:arr[i]['TargetRegion'],TargetCountry:arr[i]['TargetCountry'],
-                      Year: arr[i]['Year'],Remotemodel: arr[i]['Remotemodel'],Regionofcapture: arr[i]['Regionofcapture'],Countryofcapture: arr[i]['Countryofcapture'],
-                  CECDevice: arr[i]['CECDevice'],Cecpresent: arr[i]['Cecpresent'],Cecenabled: arr[i]['Cecenabled'],Vendoridhex: arr[i]['Vendoridhex'],Vendoridstring: arr[i]['Vendoridstring'],Osdstring: arr[i]['Osdstring'],Osdhex: arr[i]['Osdhex'],Edid: arr[i]['Edid'],
-                      Sourcename: arr[i]['Sourcename'],Sourcetype: arr[i]['Sourcetype'],
-                      Supportedregions:Region[i],
-                      Remarks:Remarks[i]['MetaData']+","+Remarks[i]['CEC']+"," +Remarks[i]['EDID']+","+Remarks[i]['Scan Device'],
-                      Status:arr1[i]['Status']});
-                    }
-                    console.log(arr2)
-          }
-          this.rawdatacapture=arr2;
-          this.dtTrigger.next();
-          
-      });
+              // RegionCountry=RegionCountry.slice(0,-1)
+              // RegionCountry+=";"
+            });
 
-      $('#projectView').on('click', '.btn-edid', function () {
-        
-        var setEdid = $(this).val();
-        self.viewEdidData(setEdid);
-      });
+            // RegionCountry+=element.TargetRegion+" : "+element.TargetCountry+" : "+element.Targetmodel+" ;"
+            RegionCountry=RegionCountry.trim().slice(0,-1)
 
-      $('#projectView').on('click', '.btn-remarks', function () {
-        
-        var setRemarks = $(this).val();
-        var ret = setRemarks.split(",");
-        var str1 = ret[0];
-        var str2 = ret[1];
-        var str3 = ret[2];
-        var str4 = ret[3];
-        self.viewRemarks(str1,str2,str3,str4);
-      });
+            Region.push(RegionCountry)
+          });
 
-      $('#projectView').on('click', '.btn-supportedregions', function () {
-        
-        var setEdid = $(this).val();
-        self.viewSupportedregions(setEdid);
-      });
-      
-      $('#projectView tbody').on( 'click', 'input[type="checkbox"]', function (e) {
-        var $row = $(this).closest('tr');
-        // Get row data
-        var data = $('#projectView').DataTable().row($row).data();
-        // Get row ID
-        var rowId = data[0];
-        // Determine whether row ID is in the list of selected row IDs 
-        var index = $.inArray(rowId, rows_selected);
-          // If checkbox is checked and row ID is not in list of selected row IDs
-          if(this.checked && index === -1){
-             rows_selected.push(rowId);
-    
-          // Otherwise, if checkbox is not checked and row ID is in list of selected row IDs
-          } else if (!this.checked && index !== -1){
-             rows_selected.splice(index, 1);
-          }
-    
-          if(this.checked){
-             $row.addClass('selected');
-          } else {
-             $row.removeClass('selected');
-          }
-         //  console.log(rows_selected);
-          let rows_selected_id=[];
-          for(let i=0;i<rows_selected.length;i++){
-           let e=$.parseHTML( rows_selected[i])
-           rows_selected_id.push(parseInt(e[0]['defaultValue']));
-          }
-          console.log(rows_selected_id)
-         //  $('#example-console-rows').text(rows_selected_id.join(","));
 
-         self.updateDataTableSelectAllCtrl($('#projectView').DataTable());
-         $('#button').click(function(){
-          self.exporttostaging(rows_selected_id,self.rawdatacapture);
-         })
-         // Prevent click event from propagating to parent
-          e.stopPropagation();
-      });
-      
-      // Handle click on "Select all" control
-      $('#projectView thead').on( 'click', 'input[name="select_all"]', function(e){
-        if(this.checked){
-           $('#projectView tbody input[type="checkbox"]:not(:checked)').trigger('click');
-        } else {
-           $('#projectView tbody input[type="checkbox"]:checked').trigger('click');
+          for (let i = 0; i < arr1.length; i++) {
+            if (arr[i]['Cecpresent'] === '1' || arr[i]['Cecpresent'] === 1) {
+              arr[i]['Cecpresent'] = 'Yes'
+            }
+            if (arr[i]['Cecpresent'] === '0' || arr[i]['Cecpresent'] === 0) {
+              arr[i]['Cecpresent'] = 'No'
+            }
+            if (arr[i]['Cecenabled'] === '1' || arr[i]['Cecenabled'] === 1) {
+              arr[i]['Cecenabled'] = 'Yes'
+            }
+            if (arr[i]['Cecenabled'] === '0' || arr[i]['Cecenabled'] === 0) {
+              arr[i]['Cecenabled'] = 'No'
+            }
+            if (arr1[i]['Status'] === '0' || arr1[i]['Status'] === 0) {
+              arr1[i]['Status'] = 'Inactive'
+            }
+            if (arr1[i]['Status'] === '1' || arr1[i]['Status'] === 1) {
+              arr1[i]['Status'] = 'Not Exported to Staging'
+            }
+            if (arr1[i]['Status'] === '2' || arr1[i]['Status'] === 2) {
+              arr1[i]['Status'] = 'Exported to Staging'
+            }
+            arr2.push({
+              Detectionid: arr1[i]['Detectionid'], Device: arr[i]['Device'].toUpperCase(), Subdevice: arr[i]['Subdevice'], Brand: arr[i]['Brand'], Targetmodel: arr[i]['Targetmodel'], TargetRegion: arr[i]['TargetRegion'], TargetCountry: arr[i]['TargetCountry'],
+              Year: arr[i]['Year'], Remotemodel: arr[i]['Remotemodel'], Regionofcapture: arr[i]['Regionofcapture'], Countryofcapture: arr[i]['Countryofcapture'],
+              CECDevice: arr[i]['CECDevice'], Cecpresent: arr[i]['Cecpresent'], Cecenabled: arr[i]['Cecenabled'], Vendoridhex: arr[i]['Vendoridhex'], Vendoridstring: arr[i]['Vendoridstring'], Osdstring: arr[i]['Osdstring'], Osdhex: arr[i]['Osdhex'], Edid: arr[i]['Edid'],
+              Sourcename: arr[i]['Sourcename'], Sourcetype: arr[i]['Sourcetype'],
+              Supportedregions: Region[i],
+              Remarks: Remarks[i]['MetaData'] + "," + Remarks[i]['CEC'] + "," + Remarks[i]['EDID'] + "," + Remarks[i]['Scan Device'],
+              Status: arr1[i]['Status']
+            });
+          }
+
+          arr2.forEach(element => {
+            let addspacetovendor = ''; let addspacetoosd = ''
+            for (let i = 0; i < element['Vendoridhex'].length; i = i + 2) {
+              addspacetovendor += element['Vendoridhex'].substr(i, 2) + " "
+            }
+            element['Vendoridhex'] = addspacetovendor.trim();
+            for (let i = 0; i < element['Osdhex'].length; i = i + 2) {
+              addspacetoosd += element['Osdhex'].substr(i, 2) + " "
+            }
+            element['Osdhex'] = addspacetoosd.trim();
+          });
+
+          let device = []; let subdevice = []; let Status = [];
+          for (let i = 0; i < arr2.length; i++) {
+            device.push(arr2[i]['Device']);
+          }
+          for (let i = 0; i < arr2.length; i++) {
+            Status.push(arr2[i]['Status']);
+          }
+          this.filter_Device = device.filter((v, i, a) => a.indexOf(v) === i);
+          this.filter_Status = Status.filter((v, i, a) => a.indexOf(v) === i);
+          subdevice = arr2.filter(u => u.Device === Device)
+          let subdevicefilter = [];
+          for (let i = 0; i < subdevice.length; i++) {
+            subdevicefilter.push(subdevice[i]['Subdevice']);
+          }
+          this.filter_Subdevice = subdevicefilter.filter((v, i, a) => a.indexOf(v) === i);
+
         }
-  
-        // Prevent click event from propagating to parent
-        e.stopPropagation();
-     });
+        if (Device === null && Subdevice === null) {
+          this.rawdatacapture = arr2;
+        }
+        else if (Device === null && Subdevice != null) {
+          this.rawdatacapture = arr2.filter(u => u.Subdevice === Subdevice);
+        }
+        else if (Device != null && Subdevice === null) {
+          this.rawdatacapture = arr2.filter(u => u.Device === Device);
+        }
+        else if (Device != null && Subdevice != null) {
+          this.rawdatacapture = arr2.filter(u => u.Device === Device && u.Subdevice === Subdevice);
+        }
+        this.viewdata();
 
-  //    $('#example-select-all').on('click', function(){
-  //     // Check/uncheck all checkboxes in the table
-  //     var rows = $('#projectView').DataTable().rows({ 'search': 'applied' }).nodes();
-  //     $('input[type="checkbox"]', rows).prop('checked', this.checked);
-  //  });
+      });
 
-    //  this.exporttostaging(self.rawdatacapture)
+
   }
 
-  updateDataTableSelectAllCtrl(table){
-    var $table             = table.table().node();
-    var $chkbox_all        = $('tbody input[type="checkbox"]', $table);
-    var $chkbox_checked    = $('tbody input[type="checkbox"]:checked', $table);
-    var chkbox_select_all  = $('thead input[name="select_all"]', $table).get(0);
- 
-    // If none of the checkboxes are checked
-    if($chkbox_checked.length === 0){
-       chkbox_select_all.checked = false;
-       if('indeterminate' in chkbox_select_all){
-          chkbox_select_all.indeterminate = false;
-       }
- 
-    // If all of the checkboxes are checked
-    } else if ($chkbox_checked.length === $chkbox_all.length){
-       chkbox_select_all.checked = true;
-       if('indeterminate' in chkbox_select_all){
-          chkbox_select_all.indeterminate = false;
-       }
- 
-    // If some of the checkboxes are checked
+  decodeedid() {
+    var edid = this.EdidData;
+    let key = [];
+    this.mainService.DecodeUrl(edid).then(value => {
+      for (let i = 0; i < Object.keys(value).length; i++) {
+        key.push(Object.keys(value)[i].charAt(0).toUpperCase() + Object.keys(value)[i].slice(1))
+      }
+      this.keys = key;
+      this.Values = Object.values(value);
+      this.viewDecodeEdidData(this.keys, this.Values);
+    });
+  }
+
+  get m() { return this.saveEditRawData.controls; }
+  onsaveEditRawSubmit() {
+    this.Rawdatasubmitted = true;
+    if (this.saveEditRawData.invalid) {
+      return;
+    }
+    let checkEdidData;
+    if (this.editedEDID128 != null && this.editedEDID128 != undefined) {
+      checkEdidData = ((this.editedEDID128.includes('00 FF FF FF FF FF FF 00') || this.editedEDID128.includes('00 ff ff ff ff ff ff 00')) && this.editedEDID128.length >= 383);
+    }
+    //let checkEdidData = this.ce_edid.includes('00 FF FF FF FF FF FF 00');
+    if (this.editedVendor != undefined || this.editedOSD != undefined || this.editedEDID128 != undefined) {
+      if (this.editedEDID128 != undefined && checkEdidData == true) {
+        $('#checkEdidValid').css('border', '1px solid #ced4da');
+        this.edidError = false;
+        this.cecEdidValidate();
+      } if (this.editedEDID128 != undefined && checkEdidData == false) {
+        this.edidError = true;
+        this.Rawdatasubmitted = false;
+      }
+      if (this.editedEDID128 == undefined) {
+        this.cecEdidValidate();
+      }
+
+    }
+  }
+
+  /** Vendor Validation in CEC EDID add Option start **/
+  vendorMod() {
+    if (this.editedVendor != undefined && this.editedVendor != null) {
+      this.vendorError = false;
+      $('#checkInputValid').css('border', '1px solid #ced4da');
+    }
+    if (this.editedOSD != undefined && this.editedOSD != null) {
+      this.vendorError = false;
+      $('#checkInputValid').css('border', '1px solid #ced4da');
+    }
+    if (this.editedEDID128 != undefined && this.editedEDID128 != null) {
+      this.vendorError = false;
+      $('#checkInputValid').css('border', '1px solid #ced4da');
+    }
+    if (this.editedEDID128 != undefined) {
+      let checkEdid = ((this.editedEDID128.includes('00 FF FF FF FF FF FF 00') || this.editedEDID128.includes('00 ff ff ff ff ff ff 00')) && this.editedEDID128.length >= 383);
+      if (checkEdid == true) {
+        $('#checkEdidValid').css('border', '1px solid #ced4da');
+        this.edidError = false;
+      } else {
+        this.edidError = true;
+      }
+    }
+    if (this.editedEDID128 == undefined && this.editedVendor != undefined || this.editedOSD != undefined) {
+      this.edidError = false;
+    }
+  }
+  /** Vendor Validation in CEC EDID add Option end **/
+
+  cecEdidValidate() {
+    let device = this.editedDevice; let brand = this.editedBrand; let model = this.editedModel;
+    let subdevice = this.editedSubdevice; let year = this.editYear;
+    let id = parseInt(this.recordId); let Region = this.editedRegion; let Country = this.editedCountry;
+    let Remotemodel = this.editedRemoteModel;
+    let CaptureRegion = this.editedCaptureRegion; let CaptureCountry = this.editedCaptureCountry;
+    let CEC_device = this.editedCEC_Device;
+    let vendoridHex = this.editedVendor; let Vendoridstring = this.editedVendorstr;
+
+    let status = parseInt(this.editedStatus); let Crudtype = 2;
+
+    if (this.editedVendor != undefined || this.editedOSD != undefined || this.editedEDID128 != undefined) {
+      let edid;
+      if (this.editedEDID128 == undefined) {
+        edid = null;
+      } else {
+        edid = this.editedEDID128;
+      }
+
+      let vendorid; let osdstr;
+      if (this.editedVendor == undefined) {
+        vendorid = null;
+      } else {
+        vendorid = this.editedVendor;
+      }
+
+      let iscecpresent = parseInt(this.editcecPresent);
+      let iscecenabled = parseInt(this.editcecEnabled);
+      let osd;
+      if (this.editedOSD != undefined && this.editedOSD != null) {
+        osd = this.convertHexa(this.editedOSD);
+      } else {
+        osd = null;
+      }
+      if (this.editedOSD == undefined || this.editedOSD == null) {
+        osdstr = null;
+      } else {
+        osdstr = this.editedOSD;
+      }
+
+
+      let r = this.editedSupportedRegion;
+      // let r1 = r.split(';').filter(u => u != " ");
+      let r1 = r.split(';').filter(u => (u.trim() != " " && u.trim() != ""));
+      let rcm2 = []; let rcm3 = []; let country1 = []; let Region1 = []; let Region2 = []; let Supportedregions = []; let reg = [];
+      if (r1.length === 1 && r1[0] === '') {
+        Supportedregions = [];
+      }
+      else {
+        for (let i = 0; i < r1.length; i++) {
+          rcm2.push(r1[i].split(':'));
+        }
+        for (let j = 0; j < rcm2.length; j++) {
+          if (rcm2[j][0] === undefined || rcm2[j][0] === '  ') {
+            Region1.push('');
+          } else {
+            Region1.push(rcm2[j][0].trim());
+          }
+        }
+        Region2 = Region1.filter((v, i, a) => a.indexOf(v) === i);
+        for (let j = 0; j < rcm2.length; j++) {
+          if (rcm2[j][1] === undefined || rcm2[j][1] === '  ') {
+            country1.push('');
+          } else {
+            country1.push(rcm2[j][1].trim());
+          }
+        }
+        for (let j = 0; j < rcm2.length; j++) {
+          if (rcm2[j][2] === undefined || rcm2[j][2] === '  ') {
+            rcm3.push('');
+          } else {
+            rcm3.push(rcm2[j][2].trim().split(',').filter((v, i, a) => a.indexOf(v) === i));
+          }
+        }
+
+        for (let i = 0; i < rcm2.length; i++) {
+          // reg.push({Region:rcm2[i][0].trim(),Country:rcm2[i][1].trim(),Models:rcm3[i]})
+          reg.push({ Region: rcm2[i][0].trim(), Country: country1[i], Models: rcm3[i] });
+        }
+        let groupBy = (array, key) => {
+          return array.reduce((result, currentValue) => {
+            (result[currentValue.Region] = result[currentValue.Region] || [])
+              .push({ "Country": currentValue.Country, "Models": currentValue.Models });
+            return result;
+          }, {});
+        };
+
+        let personGroupedByColor = groupBy(reg, "Region");
+        for (let i = 0; i < Region2.length; i++) {
+          Supportedregions.push({ Region: Region2[i], Countries: personGroupedByColor[Region2[i]] })
+        }
+      }
+      let Remarks = [];
+      let remarksplit = this.remarks.split(',');
+      Remarks.push({ MetaData: remarksplit[0], CEC: remarksplit[1], EDID: remarksplit[2], "Scan Device": remarksplit[3] })
+      let Json = {
+        "Device": device,
+        "Subdevice": subdevice,
+        "Brand": brand,
+        "Targetmodel": model,
+        "TargetRegion": Region,
+        "TargetCountry": Country,
+        "Year": year,
+        "Remotemodel": Remotemodel,
+        "Regionofcapture": CaptureRegion,
+        "Countryofcapture": CaptureCountry,
+        "Supportedregions": Supportedregions,
+        "Remarks": Remarks[0],
+        "CECDevice": CEC_device,
+        "Cecpresent": iscecpresent,
+        "Cecenabled": iscecenabled,
+        "Vendoridhex": vendoridHex,
+        "Vendoridstring": Vendoridstring,
+        "Osdstring": osdstr,
+        "Osdhex": osd,
+        "Edid": this.editedEDID128,
+        "Sourcename": this.sourcename,
+        "Sourcetype": this.sourcetype
+      };
+      this.mainService.LoadDetectionInJSON(CEC_device, device, brand, model, Json, status, id, Crudtype)
+        .then(value => {
+          if (value.statusCode == "200" && value.status == "success") {
+            this.toastr.success(value.message, '');
+            $("#edidRawModal .close").click();
+            let loginid = this.loginid['data'][0]['loginId'];
+            let log = '' + JSON.stringify(Json) + ':- Record updated successfully (Raw Data Capture)'
+            this.mainService.Genericlog(1, loginid, log).then(value => {
+
+            })
+            this.refreshScreen();
+          } else {
+            this.toastr.warning(value.message, '');
+          }
+        })
     } else {
-       chkbox_select_all.checked = true;
-       if('indeterminate' in chkbox_select_all){
-          chkbox_select_all.indeterminate = true;
-       }
+      $('#checkInputValid').css('border', '1px solid #bb2a38');
+      this.vendorError = true;
     }
- }
+  }
+  /** function to convert bits value to alphabet start **/
 
-exporttostaging(id,datacapture){
-  
-  let t1=[];
-  for(let i=0;i<id.length;i++){
-    let filterid: any =datacapture.filter( u => u.Detectionid == id[i] && u.Status == 1);
-      t1.push(filterid); 
+  convertAlpha(value) {
+    var resVal = '';
+    if (value == '00001') { resVal = 'A'; } if (value == '00010') { resVal = 'B'; } if (value == '00011') { resVal = 'C'; }
+    if (value == '00100') { resVal = 'D'; } if (value == '00101') { resVal = 'E'; } if (value == '00110') { resVal = 'F'; }
+    if (value == '00111') { resVal = 'G'; } if (value == '01000') { resVal = 'H'; } if (value == '01001') { resVal = 'I'; }
+    if (value == '01010') { resVal = 'J'; } if (value == '01011') { resVal = 'K'; } if (value == '01100') { resVal = 'L'; }
+    if (value == '01101') { resVal = 'M'; } if (value == '01110') { resVal = 'N'; } if (value == '01111') { resVal = 'O'; }
+    if (value == '10000') { resVal = 'P'; } if (value == '10001') { resVal = 'Q'; } if (value == '10010') { resVal = 'R'; }
+    if (value == '10011') { resVal = 'S'; } if (value == '10100') { resVal = 'T'; } if (value == '10101') { resVal = 'U'; }
+    if (value == '10110') { resVal = 'V'; } if (value == '10111') { resVal = 'W'; } if (value == '11000') { resVal = 'X'; }
+    if (value == '11001') { resVal = 'Y'; } if (value == '11010') { resVal = 'Z'; }
+    return resVal;
+  }
+  /** function to convert bits value to alphabet end **/
+
+  /** function to convert hexa value start **/
+  convertHexa(str) {
+    var result = '';
+    for (var i = 0; i < str.length; i++) {
+      result += str.charCodeAt(i).toString(16);
     }
-    if(t1.length>0){
-      for(let i=0;i<t1.length;i++){
-        if(t1[i][0]['Cecpresent']==='Yes'){
-          t1[i][0]['Cecpresent']=1
-        }
-        if(t1[i][0]['Cecpresent']==='No'){
-          t1[i][0]['Cecpresent']=0
-        }
-        if(t1[i][0]['Cecenabled']==='Yes'){
-          t1[i][0]['Cecenabled']=1
-        }
-        if(t1[i][0]['Cecenabled']==='No'){
-          t1[i][0]['Cecenabled']=0
-        }
-        let dataType=2;
-        let  Device= t1[i][0]['Device'], Subdevice= t1[i][0]['Subdevice'], Brand= t1[i][0]['Brand'], Model= t1[i][0]['Model']; 
-        let Regioncountry= t1[i][0]['Supportedregions'], Year= t1[i][0]['Year'], cecpresent= t1[i][0]['Cecpresent'];
-        let cecenabled= t1[i][0]['Cecenabled'], vendoridhex= t1[i][0]['Vendoridhex'], vendoridstring= t1[i][0]['Vendoridstring'];
-        let osdhex= t1[i][0]['Osdhex'], osdstring= t1[i][0]['Osdstring'], ediddata= t1[i][0]['Edid'];
-        let statusflag= t1[i][0]['Status'], Detectionid= t1[i][0]['Detectionid'];let uid=null;
-  this.mainService.MigrateRawToStaging(dataType, Detectionid, Device, Subdevice, Brand, Model, Regioncountry, Year, cecpresent, cecenabled, vendoridhex, vendoridstring, osdhex, osdstring, ediddata, uid, statusflag, null)
-  .subscribe(value => {
-  });
-  // console.log(stag)
-}
-}
-else{
-  this.toastr.warning('', 'Select valid records');
-}
+    return result;
+  }
+  /** function to convert hexa value end **/
 
-console.log(t1)
+  /** Validation to accept only hexa characters only **/
 
-  // .subscribe(value => {
-  //   let arr=[]; let arr1=[]; let arr3=[];let arr2=[];let Remarks=[];let model=[];
-  //   let Region=[];
-  //       if (value.data.length > 0) {
+  hexaOnly(event: any) {
 
-  //         //convert  string to Object
-  //         for (let i = 0, ien = value.data.length; i < ien; i++) {
-  //           arr.push(JSON.parse(value.data[i]['sourceDataCapture']));
-  //         }
-          
-  //         for (let i = 0, ien = value.data.length; i < ien; i++) {
-  //           arr1.push({Detectionid:value.data[i]['detectionId'],Status:value.data[i]['statusFlag']});
-  //         }
-  //         for(let i=0;i<arr.length;i++){
-  //         Remarks.push(arr[i]['Remarks']);
-  //         }
-          
-  //         arr.forEach(element => {
-  //           let RegionCountry = "";
-  //           element.Supportedregions.forEach(element1 => {
-  //             let Countries = element1.Countries;
-  //             Countries.forEach(element3 => {
-  //               RegionCountry+=element1.Region+" : ";
-  //               //console.log(Countries)
-  //               RegionCountry+=element3.Country+" : "
-  //               element3.Models.forEach(element4 => {
-  //                 RegionCountry+=element4+","
-  //               });
-  //               RegionCountry=RegionCountry.slice(0,-1)
-  //             RegionCountry+=" ; "
-  //             });
-  //             RegionCountry=RegionCountry.slice(0,-1)
-  //             // RegionCountry+=";"
-  //           });
-  //           RegionCountry=RegionCountry.slice(0,-1)
-            
-  //           Region.push(RegionCountry)
+    const pattern = /^[0-9A-Fa-f]+$/;
 
-  //           // console.log(RegionCountry);
-  //         });
-          
-        
-  //         for(let i=0;i<arr1.length;i++){
-  //           if(arr[i]['Cecpresent']==='1'){
-  //             arr[i]['Cecpresent']='Yes'
-  //           }
-  //           if(arr[i]['Cecpresent']==='0'){
-  //             arr[i]['Cecpresent']='No'
-  //           }
-  //           if(arr[i]['Cecenabled']==='1'){
-  //             arr[i]['Cecenabled']='Yes'
-  //           }
-  //           if(arr[i]['Cecenabled']==='0'){
-  //             arr[i]['Cecenabled']='No'
-  //           }
-  //           arr2.push({Detectionid:arr1[i]['Detectionid'],Device:arr[i]['Device'],Subdevice:arr[i]['Subdevice'],Brand:arr[i]['Brand'],Targetmodel:arr[i]['Targetmodel'],TargetRegion:arr[i]['TargetRegion'],TargetCountry:arr[i]['TargetCountry'],
-  //                 Year: arr[i]['Year'],Remotemodel: arr[i]['Remotemodel'],Regionofcapture: arr[i]['Regionofcapture'],Countryofcapture: arr[i]['Countryofcapture'],
-  //             CECDevice: arr[i]['CECDevice'],Cecpresent: arr[i]['Cecpresent'],Cecenabled: arr[i]['Cecenabled'],Vendoridhex: arr[i]['Vendoridhex'],Vendoridstring: arr[i]['Vendoridstring'],Osdstring: arr[i]['Osdstring'],Osdhex: arr[i]['Osdhex'],Edid: arr[i]['Edid'],
-  //                 Sourcename: arr[i]['Sourcename'],Sourcetype: arr[i]['Sourcetype'],
-  //                 Supportedregions:Region[i],
-  //                 Remarks:Remarks[i]['MetaData']+","+Remarks[i]['CEC']+"," +Remarks[i]['EDID']+","+Remarks[i]['Scan Device'],
-  //                 Status:arr1[i]['Status']});
-  //               }
-  //               console.log(arr2)
-  //     }
-  //     this.rawdatacapture=arr2;
-  //     this.dtTrigger.next();
-      
-  // });
-}
+    let inputChar = String.fromCharCode(event.charCode);
+    if (event.keyCode != 8 && !pattern.test(inputChar)) {
+      event.preventDefault();
+    }
+  }
+
+  /** Validation to accept only alphanumeric characters only **/
+
+  alphaOnly(event: any) {
+
+    const pattern = /^[A-Za-z]+$/;
+
+    let inputChar = String.fromCharCode(event.charCode);
+    if (event.keyCode != 8 && !pattern.test(inputChar)) {
+      event.preventDefault();
+    }
+  }
+
+  onRowClicked() {
+    let selectedNodes = this.gridApi.getSelectedNodes();
+    let selectedData = selectedNodes.map(node => node.data);
+    this.rowselected = selectedData;
+  }
+
+  onPageSizeChanged() {
+    var value = (<HTMLInputElement>document.getElementById('page-size')).value;
+    // this.paginationPageSize = Number(value);
+    // this.viewdata();
+    this.gridApi.paginationSetPageSize(Number(value));
+  }
+
+  onGridReady(params) {
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+  }
+
+
+  viewdata() {
+    this.searchValue = null
+    this.columnDefs = [
+      { field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Subdevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Targetmodel", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "TargetRegion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "TargetCountry", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Year", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Remotemodel", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Regionofcapture", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Countryofcapture", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "CECDevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Cecpresent", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Cecenabled", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Vendoridhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Vendoridstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Osdstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Osdhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
+      { field: "Sourcename", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Sourcetype", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Supportedregions", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "regionsviewCellRenderer" },
+      { field: "Remarks", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "remarksviewCellRenderer" },
+      { field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true },
+      {
+        field: "Action", resizable: true,
+        cellRenderer: "btnCellRenderer"
+      }
+    ];
+    this.rowData = this.rawdatacapture;
+    this.gridApi.setQuickFilter(this.searchValue)
+
+
+  }
+
+  search() {
+    this.gridApi.setQuickFilter(this.searchValue);
+  }
+
+  exporttostag(selectedrecords) {
+    this.spinnerService.show();
+    let RegioncountryModel; let Region = []; let arr2 = []; let split = [];
+    if (selectedrecords === undefined || selectedrecords.length === 0) {
+      this.spinnerService.hide();
+      this.toastr.warning('', 'No records Selected');
+    }
+    else {
+      let t1 = []; let stagingdatawithsingleuid: any;
+      selectedrecords.forEach(element => {
+        if (element['Cecpresent'] === 'Yes') {
+          element['Cecpresent'] = 1
+        }
+        if (element['Cecpresent'] === 'No') {
+          element['Cecpresent'] = 0
+        }
+        if (element['Cecenabled'] === 'Yes') {
+          element['Cecenabled'] = 1
+        }
+        if (element['Cecenabled'] === 'No') {
+          element['Cecenabled'] = 0
+        }
+        if (element['Status'] === 'Not Exported to Staging') {
+          element['Status'] = 1
+        }
+        if (element['Status'] === 'Inactive') {
+          element['Status'] = 0
+        }
+        if (element['Status'] === 'Exported to Staging') {
+          element['Status'] = 2
+        }
+      });
+      t1 = selectedrecords.filter(u => u['Status'] === 1);
+      if (t1.length === 0) {
+        this.spinnerService.hide();
+        this.toastr.warning('', 'Select valid records');
+        location.reload();
+      }
+      else {
+        for (let i = 0; i < t1.length; i++) {
+          RegioncountryModel = '';
+          if (t1[i]["Supportedregions"].length === 0) {
+            RegioncountryModel += t1[i].TargetRegion + " : " + t1[i].TargetCountry + " : " + t1[i].Targetmodel + " : " + t1[i].Detectionid + ";"
+            RegioncountryModel = RegioncountryModel.slice(0, -1);
+            Region.push(RegioncountryModel)
+          }
+          else {
+            split = t1[i]["Supportedregions"].split(';');
+            for (let j = 0; j < split.length; j++) {
+              RegioncountryModel += split[j];
+              RegioncountryModel += ' : ';
+              RegioncountryModel += t1[i]['Detectionid'];
+              RegioncountryModel += '; ';
+            }
+            // RegioncountryModel = RegioncountryModel.slice(0, -5);
+            if (RegioncountryModel === undefined || RegioncountryModel === ' : ' + t1[i]['Detectionid'] + '; ') {
+              RegioncountryModel = '' + ';';
+            }
+            RegioncountryModel = RegioncountryModel.slice(0, -1);
+            RegioncountryModel += t1[i].TargetRegion + " : " + t1[i].TargetCountry + " : " + t1[i].Targetmodel + " : " + t1[i].Detectionid + ";"
+            RegioncountryModel = RegioncountryModel.slice(0, -1);
+            Region.push(RegioncountryModel)
+          }
+        }
+
+        for (let i = 0; i < t1.length; i++) {
+          arr2.push({
+            Detectionid: t1[i]['Detectionid'], Device: t1[i]['Device'], Subdevice: t1[i]['Subdevice'], Brand: t1[i]['Brand'], Targetmodel: t1[i]['Targetmodel'], TargetRegion: t1[i]['TargetRegion'], TargetCountry: t1[i]['TargetCountry'],
+            Year: t1[i]['Year'], Remotemodel: t1[i]['Remotemodel'], Regionofcapture: t1[i]['Regionofcapture'], Countryofcapture: t1[i]['Countryofcapture'],
+            CECDevice: t1[i]['CECDevice'], Cecpresent: t1[i]['Cecpresent'], Cecenabled: t1[i]['Cecenabled'], Vendoridhex: t1[i]['Vendoridhex'], Vendoridstring: t1[i]['Vendoridstring'], Osdstring: t1[i]['Osdstring'], Osdhex: t1[i]['Osdhex'], Edid: t1[i]['Edid'],
+            Sourcename: t1[i]['Sourcename'], Sourcetype: t1[i]['Sourcetype'],
+            Supportedregions: Region[i], Status: t1[i]['Status']
+          });
+        }
+
+        for (let i = 0; i < arr2.length; i++) {
+          this.mainService.getRemoteUID(arr2[i]['Brand'], arr2[i]['Targetmodel'], arr2[i]['Device'])
+            .subscribe(value => {
+              let UpdatedUID = []; let UpdatedUIDs = '';
+              if (value.data != [] || value.data != '[]') {
+
+                let Uid = JSON.parse(value.data);
+                Uid.forEach(element => {
+                  UpdatedUID.push({ RemoteModel: element.remoteModel, UID: element.UID })
+                });
+                UpdatedUID = UpdatedUID.filter((v, i, a) => a.indexOf(v) === i);
+                for (let n = 0; n < UpdatedUID.length; n++) {
+                  UpdatedUIDs += UpdatedUID[n]['UID'] + ';'
+                }
+                this.singleUid = UpdatedUIDs.toString();
+              }
+              stagingdatawithsingleuid = {
+                device: arr2[i]['Device'], subdevice: arr2[i]['Subdevice'], brand: arr2[i]['Brand'], model: arr2[i]['Targetmodel'],
+                year: arr2[i]['Year'] + ':' + arr2[i]['Detectionid'], cecpresent: arr2[i]['Cecpresent'],
+                cecenabled: arr2[i]['Cecenabled'], vendoridhex: arr2[i]['Vendoridhex'], vendorid: arr2[i]['Vendoridstring'],
+                osdhex: arr2[i]['Osdhex'], osd: arr2[i]['Osdstring'], edid: arr2[i]['Edid'], regioncountrymodelref: arr2[i]['Supportedregions'],
+                detectionid: arr2[i]['Detectionid'], stagingid: 0, uid: this.singleUid
+              };
+              let dataType = 1
+              let jsondata = [];
+              jsondata.push(stagingdatawithsingleuid)
+              this.mainService.RawToStaging(dataType, jsondata, null, null)
+                .then(value => {
+                  if (value.message === 'SUCCESS' && value.data != '' && value.data != '0') {
+                    this.successinsert++;
+                  }
+                  else {
+                    this.failedinsert++;
+                  }
+                  let loginid = this.loginid['data'][0]['loginId'];
+                  let log = '' + JSON.stringify(stagingdatawithsingleuid) + ':-' + ' Record inserted from Raw to Staging '
+                  this.mainService.Genericlog(1, loginid, log).then(value => {
+                  })
+                  if (arr2.length === this.successinsert + this.failedinsert) {
+                    this.spinnerService.hide();
+                    if (this.successinsert != 0) {
+                      this.toastr.success('', this.successinsert + ' ' + 'Records inserted Successfully');
+                      this.toastr.error('', this.failedinsert + ' ' + 'Records failed to insert');
+                      location.reload();
+                    }
+                  }
+                });
+            })
+
+        }
+      }
+
+
+
+    }
+
+  }
+
+  methodFromParent(cell) {
+    let values = Object.values(cell);
+    this.RawdataView(values)
+    $('#editRawdata').click();
+  }
+
+  methodFromParent_viewSupportedRegion(cell) {
+    let values = Object.values(cell);
+    this.supportedregions(values[21])
+  }
+
+  methodFromParent_viewRemarks(cell) {
+    let values = Object.values(cell);
+    this.Remarks(values[22]);
+  }
+
+  methodFromParent_viewEdid(cell) {
+    let values = Object.values(cell);
+    this.edid(values[18]);
+  }
+
+  onBtnExport() {
+    let columndefs = this.gridApi.columnController.columnDefs; let columns = []; let filteredcolumns = [];
+    columndefs.forEach(element => {
+      columns.push(element['field'])
+    });
+    for (let i = 0; i < columns.length - 2; i++) {
+      filteredcolumns.push(columns[i])
+    }
+    var excelParams = {
+      columnKeys: filteredcolumns,
+      allColumns: false,
+      fileName: "Raw Capture Data",
+      skipHeader: false
+    }
+    this.gridApi.exportDataAsCsv(excelParams);
+  }
 }

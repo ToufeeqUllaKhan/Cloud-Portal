@@ -6,13 +6,13 @@
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active"><a [routerLink]="['/dashboard']">Analytical Reports</a></li>
+          <li class="breadcrumb-item active"><a [routerLink]="['/dashboard']">Reports</a></li>
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
           <li class="breadcrumb-item active"><a [routerLink]="['/log-view']">Log View</a></li>
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
           <li class="breadcrumb-item active"><a [routerLink]="" (click)="prev()">Clients</a></li>
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active">Report configuration List</li>
+          <li class="breadcrumb-item active">{{switchRoute}}</li>
         </ol>
       </div>
     </div>

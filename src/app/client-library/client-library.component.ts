@@ -7,6 +7,7 @@ declare var $: any;
 import 'datatables.net';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { filter } from 'jszip';
 
 @Component({
   selector: 'app-client-library',
@@ -21,27 +22,36 @@ export class ClientLibraryComponent implements OnInit {
   dtTrigger: Subject<any> = new Subject<any>();
   editedSignature: any;
   editSignatureData: FormGroup; signatureDetails = [];
+  projectName: any = [];
+  status: any;
+  count: number;
+  oldValue: any;
+  modalCount: number; showunlinkbutton: Boolean = false; showeditbutton: Boolean = false;
+  loginid: string;
+  usersName: string;
 
 
-  constructor(private router: Router, private mainService: MainService, private fb: FormBuilder, private toastr: ToastrService) { }
+  constructor(private router: Router, private mainService: MainService, private fb: FormBuilder, private toastr: ToastrService) {
+    this.status = 1;
+    this.loginid = JSON.parse(localStorage.getItem('currentUser'));
+    this.usersName = localStorage.getItem('userName');
+  }
 
   ngOnInit(): void {
-  /** Datatable setting option to display default rows */
+    /** Datatable setting option to display default rows */
     this.dtOptions = {
       pagingType: 'full_numbers',
-      pageLength: 5
     };
-  /** List of Client Details and Overall Projects available in the portal */
-    this.mainService.getClientViewProjects()
-      .subscribe(value => {
-        this.clientDetails = value.data;
-        this.dtTrigger.next();
-      });
+    let statusflag = this.status; let crudtype = 1;
+    let loginid = this.loginid['data'][0]['loginId'];
+    this.details(statusflag);
+
     $(document).ready(function () {
       $(".pop-menu").click(function () {
         $(this).toggleClass("transition");
       });
     });
+
     /** validation for not to accept space in input */
     $(document).ready(function () {
       $("input").on("keypress", function (e) {
@@ -49,11 +59,46 @@ export class ClientLibraryComponent implements OnInit {
           e.preventDefault();
       });
     });
-  /** Validation for updating Signature Key */
+
+    var self = this;
+    $('#projectView').on('click', '#delete', function () {
+      let rowid = parseInt($(this).val());
+      let Filterrow: any = self.clientDetails.filter(u => (u.projectId === rowid) && (u.statusFlag === 2 || u.statusFlag === '2'))
+      if (Filterrow.length === 1) {
+        self.projectName = Filterrow[0]['projectName'];
+      }
+      else {
+        self.projectName = null;
+      }
+
+    })
+
+    $('#ModuleSubmit').click(function () {
+      let Projectname = self.projectName.replace("PROD_", '')
+      self.mainService.Unlinkanddeletetheproject(Projectname)
+        .subscribe(value => {
+          if ((value.data[0]['status'] === 1 || value.data[0]['status'] === "1") && value.statusCode === "200") {
+            self.toastr.success('', value.data[0]['message']);
+            let log = 'LoginID:- ' + loginid + ' , Project:- ' + self.projectName + ' has unlink successfully ';
+            self.mainService.Genericlog(crudtype, loginid, log)
+              .then(value => {
+                setTimeout(() => {
+                  location.reload();
+                }, 1000);
+              })
+          }
+          else {
+            self.toastr.error('', value.data[0]['message']);
+          }
+          $('.close').click();
+        });
+    })
+
+    /** Validation for updating Signature Key */
     this.editSignatureData = this.fb.group({
       editSignatureKey: ['', Validators.required]
     })
-    
+
   }
 
   get f() { return this.editSignatureData.controls; }
@@ -62,9 +107,9 @@ export class ClientLibraryComponent implements OnInit {
     this.router.navigate(['/create-new-client']);
   }
 
-/** Popup trigger if edit is clicked in Client Library screen and appending the signature key and allow download status of its available Information */
+  /** Popup trigger if edit is clicked in Client Library screen and appending the signature key and allow download status of its available Information */
 
-  editSignatureKey(details,allowDownload) {
+  editSignatureKey(details, allowDownload) {
     this.submitted = false;
     this.editSignatureData.reset();
     $('#btn-active').click();
@@ -77,13 +122,13 @@ export class ClientLibraryComponent implements OnInit {
     this.signatureDetails = [];
     this.signatureDetails.push(details);
   }
-/** Resetting the popup data if close is triggered */
+  /** Resetting the popup data if close is triggered */
   modalClose() {
     this.submitted = false;
     this.editSignatureData.reset();
   }
 
-/** Updating Signature Key Operation */
+  /** Updating Signature Key Operation */
 
   onsaveUpdateSignatureSubmit() {
     this.submitted = true;
@@ -100,7 +145,7 @@ export class ClientLibraryComponent implements OnInit {
     let Dbname = this.signatureDetails[0]['dbPath']; let Client = this.signatureDetails[0]['client'];
     let Region = this.signatureDetails[0]['region']; let Projectname = this.signatureDetails[0]['projectName'];
     let Signaturekey = this.editedSignature; let Dbpath = this.signatureDetails[0]['dbPath']; let Statusflag = 1; let Flagtype = 2;
-    this.mainService.createNewProjectDef(Dbname, Client, Region, Projectname, Signaturekey, Dbpath, Statusflag, Flagtype,allowDownload)
+    this.mainService.createNewProjectDef(Dbname, Client, Region, Projectname, Signaturekey, Dbpath, Statusflag, Flagtype, allowDownload)
       .subscribe(value => {
         $("#editDataModal .close").click();
         if (value.data == "1") {
@@ -112,4 +157,80 @@ export class ClientLibraryComponent implements OnInit {
       });
   }
 
+  // (change)="onchangestatus()" (ngModelChange)="onModelChange($event)"
+  onchangestatus() {
+    let statusflag = this.status;
+    if (statusflag == null || statusflag == 'null') {
+      statusflag = null;
+    }
+    else {
+      statusflag = parseInt(this.status);
+    }
+    this.getTabResponseData(statusflag);
+  }
+
+  getTabResponseData(statusflag) {
+
+    if (this.count == 1 && this.oldValue == undefined && this.modalCount != 1) {
+      $('#projectView').dataTable().fnClearTable();
+      $('#projectView').dataTable().fnDestroy();
+    }
+    var Table1 = $('#projectView').DataTable();
+    Table1.destroy();
+    Table1.clear();
+    this.details(statusflag);
+
+  }
+
+  details(status) {
+    let arr = [];
+    /** List of Client Details and Overall Projects available in the portal */
+    this.mainService.getClientViewProjects()
+      .subscribe(value => {
+        let filterProjectwithstatus2 = value.data.filter(u => u.statusFlag === 2);
+        let filterProjectwithstatus = value.data.filter(u => u.statusFlag != 2);
+        filterProjectwithstatus2.forEach(element => {
+          arr.push({
+            projectId: element.projectId,
+            region: element.region,
+            client: element.client,
+            projectName: "PROD_" + element.projectName,
+            dbPath: element.dbPath,
+            signatureKey: element.signatureKey,
+            allowDownload: element.allowDownload,
+            createdDate: element.createdDate,
+            modifiedDate: element.modifiedDate,
+            statusFlag: element.statusFlag
+          })
+        });
+
+        filterProjectwithstatus.forEach(element => {
+          arr.push(element)
+        });
+
+        if (status === null) {
+          this.clientDetails = arr;
+        }
+        else {
+          this.clientDetails = arr.filter(u => u.statusFlag === status);
+        }
+
+        for (let i = 0; i < this.clientDetails.length; i++) {
+          if (this.clientDetails[i]['statusFlag'] === 1) {
+            this.showeditbutton = true;
+            this.showunlinkbutton = false;
+          }
+          if (this.clientDetails[i]['statusFlag'] === 2) {
+            this.showeditbutton = false;
+            this.showunlinkbutton = true;
+          }
+          if (status === null) {
+            this.showeditbutton = false;
+            this.showunlinkbutton = false;
+          }
+        }
+
+        this.dtTrigger.next();
+      });
+  }
 }

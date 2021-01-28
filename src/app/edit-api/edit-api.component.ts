@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChildren, QueryList, ElementRef } from '@angular
 import { MainService } from '../services/main-service';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 declare var $: any;
 
@@ -42,11 +42,11 @@ export class EditApiComponent implements OnInit {
 
   @ViewChildren("checkboxes") checkboxes: QueryList<ElementRef>;
 
-  constructor(private mainService: MainService, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private spinnerService: Ng4LoadingSpinnerService) { }
+  constructor(private mainService: MainService, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService) { }
 
   ngOnInit() {
     this.spinnerService.show();
-  /** List of Projects */
+    /** List of Projects */
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
@@ -58,7 +58,7 @@ export class EditApiComponent implements OnInit {
           u.projectname == this.projects[0]);
         let project = this.projects[0]; let signaturekey = filterProject[0]['signatureKey'];
         let dbName = filterProject[0]['dbinstance']; let fetchModule = [];
-      /** List of Api Modules */
+        /** List of Api Modules */
         this.mainService.crudApiList(dbName, 2, project, signaturekey, null, null, null, null, 1, null)
           .then(apiList => {
             this.apimodulesList = apiList.data;
@@ -80,7 +80,7 @@ export class EditApiComponent implements OnInit {
           });
         this.spinnerService.hide();
       });
-  /** Form Validations */
+    /** Form Validations */
     this.addModules = this.fb.group({
       Address: ['', Validators.required]
     });
@@ -92,7 +92,7 @@ export class EditApiComponent implements OnInit {
     });
   }
 
-/** Space Validation for Inputs */
+  /** Space Validation for Inputs */
 
   keyDownHandler(event) {
     if (event.keyCode === 32) {
@@ -100,7 +100,7 @@ export class EditApiComponent implements OnInit {
     }
   }
 
-/** checking all checked input Url is filled or not before submit in add modules */
+  /** checking all checked input Url is filled or not before submit in add modules */
 
   checkPathValidation() {
     this.checkValidUrl = [];
@@ -172,7 +172,7 @@ export class EditApiComponent implements OnInit {
   get g() { return this.editApiData.controls; }
   get h() { return this.editAddressData.controls; }
 
-/** Add Modules save functionality */
+  /** Add Modules save functionality */
 
   async onsaveModules() {
     this.spinnerService.show();
@@ -187,209 +187,209 @@ export class EditApiComponent implements OnInit {
     this.addressValid();
     this.checkUrlValidation();
     if (this.invalidUrl == false && this.address != '' && this.address != undefined) {
-     if (this.selectedItems.length == 0) {
+      if (this.selectedItems.length == 0) {
         this.toastr.warning('', 'Please select one or more modules to proceed further');
-    } else {
-    let crudType = 1;
-    let filterProject: any = this.filterProjects.filter(u =>
-      u.projectname == this.projectNames);
-    let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
-    let dbName = filterProject[0]['dbinstance']; let status = 1; let pid = null;
-    let apiAddress = this.address; let apiName;
-       let uri; let description;
-       
-       for (var j = 0; j < this.selectedItems.length; j++) {
-         if ($('#isIndex' + this.selectedItems[j]['indexInp'] + 'Url').attr('class') == 'invalid-feedback disabled') {
-           console.log(this.selectedItems.length);
-           console.log(this.checkValidUrl);
-           console.log(this.checkValidUrl.length);
-           if (this.selectedItems.length == this.checkValidUrl.length) {
-            if (this.selectedItems[j].key == 'REGISTRATION') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+      } else {
+        let crudType = 1;
+        let filterProject: any = this.filterProjects.filter(u =>
+          u.projectname == this.projectNames);
+        let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
+        let dbName = filterProject[0]['dbinstance']; let status = 1; let pid = null;
+        let apiAddress = this.address; let apiName;
+        let uri; let description;
+
+        for (var j = 0; j < this.selectedItems.length; j++) {
+          if ($('#isIndex' + this.selectedItems[j]['indexInp'] + 'Url').attr('class') == 'invalid-feedback disabled') {
+            console.log(this.selectedItems.length);
+            console.log(this.checkValidUrl);
+            console.log(this.checkValidUrl.length);
+            if (this.selectedItems.length == this.checkValidUrl.length) {
+              if (this.selectedItems[j].key == 'REGISTRATION') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-             if (this.selectedItems[j].key == 'LOGIN') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'LOGIN') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-            if (this.selectedItems[j].key == 'CURRENTDBVERSION') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'CURRENTDBVERSION') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-            if (this.selectedItems[j].key == 'LATESTDBVERSION') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'LATESTDBVERSION') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-            if (this.selectedItems[j].key == 'DOWNLOAD BIN') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'DOWNLOAD BIN') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-            if (this.selectedItems[j].key == 'DOWNLOAD ZIP') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'DOWNLOAD ZIP') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-            if (this.selectedItems[j].key == 'AUTOSEARCH') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'AUTOSEARCH') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-            if (this.selectedItems[j].key == 'MODELSEARCH') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'MODELSEARCH') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-            if (this.selectedItems[j].key == 'DELTASEARCH') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'DELTASEARCH') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-            if (this.selectedItems[j].key == 'FEEDBACK') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'FEEDBACK') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
-            }
-            if (this.selectedItems[j].key == 'DOWNLOADDBUPDATES') {
-              apiName = this.selectedItems[j].key;
-              uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
-              description = this.selectedItems[j].value;
-              await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-                .then(value => {
-                  if (value.data.length > 0) {
-                    if (value.data[0]['result'] == "0") {
-                      this.failedData.push(value.data[0]['message']);
-                      this.failCount++;
-                    } else {
-                      this.successData.push(value.data[0]['message']);
-                      this.successCount++;
+                  });
+              }
+              if (this.selectedItems[j].key == 'DOWNLOADDBUPDATES') {
+                apiName = this.selectedItems[j].key;
+                uri = $('#input_' + this.selectedItems[j].indexInp + '').val();
+                description = this.selectedItems[j].value;
+                await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+                  .then(value => {
+                    if (value.data.length > 0) {
+                      if (value.data[0]['result'] == "0") {
+                        this.failedData.push(value.data[0]['message']);
+                        this.failCount++;
+                      } else {
+                        this.successData.push(value.data[0]['message']);
+                        this.successCount++;
+                      }
                     }
-                  }
-                });
+                  });
               }
               if (this.selectedItems[j].key == 'GENERICLOG') {
                 apiName = this.selectedItems[j].key;
@@ -410,72 +410,72 @@ export class EditApiComponent implements OnInit {
               }
               if (this.selectedItems.length == j + 1) {
                 if (this.successData.length > 0) {
-                  this.toastr.success('', this.successCount+' '+this.successData[0]);
+                  this.toastr.success('', this.successCount + ' ' + this.successData[0]);
                 }
                 if (this.failedData.length > 0) {
                   this.toastr.warning('', this.failCount + ' ' + this.failedData[0]);
                 }
-              $("#editDataModal .close").click();
-              let filterProject: any = this.filterProjects.filter(u =>
-                u.projectname == this.projectNames);
-              let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
-              let dbName = filterProject[0]['dbinstance']; let fetchModule = [];
-              this.mainService.crudApiList(dbName, 2, project, signaturekey, null, null, null, null, 1, null)
-                .then(apiList => {
-                  this.apimodulesList = apiList.data;
-                  if (apiList.data.length > 0) {
-                    this.isApiModules = true;
-                    this.NoData = false;
-                  } else {
-                    this.NoData = true;
-                    this.isApiModules = false;
-                  }
-                  for (var i = 0; i < apiList.data.length; i++) {
-                    fetchModule.push(apiList.data[i]['name']);
-                  }
-                  this.arr = fetchModule;
-                });
-             }
-         }
+                $("#editDataModal .close").click();
+                let filterProject: any = this.filterProjects.filter(u =>
+                  u.projectname == this.projectNames);
+                let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
+                let dbName = filterProject[0]['dbinstance']; let fetchModule = [];
+                this.mainService.crudApiList(dbName, 2, project, signaturekey, null, null, null, null, 1, null)
+                  .then(apiList => {
+                    this.apimodulesList = apiList.data;
+                    if (apiList.data.length > 0) {
+                      this.isApiModules = true;
+                      this.NoData = false;
+                    } else {
+                      this.NoData = true;
+                      this.isApiModules = false;
+                    }
+                    for (var i = 0; i < apiList.data.length; i++) {
+                      fetchModule.push(apiList.data[i]['name']);
+                    }
+                    this.arr = fetchModule;
+                  });
+              }
+            }
+          }
+        }
+        this.spinnerService.hide();
       }
-      }  
-      this.spinnerService.hide();
-  }
- }
+    }
   }
 
   /** Edit API Path */
-  editApi(apiId, api, description,address,url,status) {
+  editApi(apiId, api, description, address, url, status) {
     $('#editApis').click();
     this.upd_addr = address;
     this.updatedUrl = url;
     this.editArray = [];
-    this.editArray.push({ id: apiId, name: api, desc: description,statusFlag: status });
+    this.editArray.push({ id: apiId, name: api, desc: description, statusFlag: status });
   }
 
-/** Path Updation Submit Operation */
+  /** Path Updation Submit Operation */
   onsaveUpdateApiSubmit() {
     this.editsubmitted = true;
     if (this.editApiData.invalid) {
       return;
     }
-      let filterProject: any = this.filterProjects.filter(u =>
-        u.projectname == this.projectNames);
-      let crudType = 3; let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
-      let dbName = filterProject[0]['dbinstance']; let status = this.editArray[0]['statusFlag'];
-      let apiName = this.editArray[0]['name']; let apiAddress = this.address; let uri = this.updatedUrl; let description = this.editArray[0]['desc']; let pid = this.editArray[0]['id'];
-      this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-        .then(value => {
-          if (value.data.length > 0) {
-            if (value.data[0]['result'] == "1") {
-              this.toastr.success('', value.data[0]['message']);
-            } else {
-              this.toastr.warning('', value.data[0]['message']);
-            }
+    let filterProject: any = this.filterProjects.filter(u =>
+      u.projectname == this.projectNames);
+    let crudType = 3; let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
+    let dbName = filterProject[0]['dbinstance']; let status = this.editArray[0]['statusFlag'];
+    let apiName = this.editArray[0]['name']; let apiAddress = this.address; let uri = this.updatedUrl; let description = this.editArray[0]['desc']; let pid = this.editArray[0]['id'];
+    this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+      .then(value => {
+        if (value.data.length > 0) {
+          if (value.data[0]['result'] == "1") {
+            this.toastr.success('', value.data[0]['message']);
+          } else {
+            this.toastr.warning('', value.data[0]['message']);
           }
-          $("#editApiModal .close").click();
-          this.changeProject();
-        });
+        }
+        $("#editApiModal .close").click();
+        this.changeProject();
+      });
   }
 
   /** change of project update Modules*/
@@ -534,7 +534,7 @@ export class EditApiComponent implements OnInit {
       }
     }
   }
-/** Path Validation */
+  /** Path Validation */
   editaddressValid() {
     if (this.upd_addr != '') {
       if (/^(http|https|ftp):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i.test(this.upd_addr)) {
@@ -544,7 +544,7 @@ export class EditApiComponent implements OnInit {
       }
     }
   }
-/** removed Check List items */
+  /** removed Check List items */
   removedItems(value, status: boolean, description, address, uri, apiId) {
     if (this.uncheckedArr.indexOf(value) === -1 && status == false) {
       this.uncheckedArr.push({ key: value, value: description, addr: address, url: uri, id: apiId });
@@ -556,11 +556,11 @@ export class EditApiComponent implements OnInit {
     if (status == true) {
       if (this.arrModules.find(x => x.name === value && x.statusFlag == 0)) {
         this.recheckItems.push({ key: value, value: description, addr: address, url: uri, id: apiId })
-      } 
+      }
     }
   }
 
-/** Default check login if register is checked and vice versa */
+  /** Default check login if register is checked and vice versa */
 
   checkRegisterLogin(value) {
     let registerCheck = $('#check_0').prop('checked');
@@ -575,7 +575,7 @@ export class EditApiComponent implements OnInit {
     }
   }
 
-/** default uncheck login if register is unchecked and vice versa */
+  /** default uncheck login if register is unchecked and vice versa */
 
   uncheckRegisterLogin(value) {
     let registerCheck = $('#check_0').prop('checked');
@@ -590,7 +590,7 @@ export class EditApiComponent implements OnInit {
     }
   }
 
-/** Checked List Items */
+  /** Checked List Items */
   checkedItems(value, status: boolean, description, idata) {
     this.checkRegisterLogin(value);
     if (value == 'REGISTRATION' && status == false || value == 'LOGIN' && status == false) {
@@ -598,74 +598,74 @@ export class EditApiComponent implements OnInit {
     }
     if (this.checkedArr.indexOf(value) === -1 && status) {
       this.checkedArr.push(value);
-      this.selectedItems.push({ key: value, value: description,indexInp: idata });
+      this.selectedItems.push({ key: value, value: description, indexInp: idata });
     }
     else if (!status) {
       let index = this.checkedArr.indexOf(value, description);
       this.checkedArr.splice(index, 1);
       this.selectedItems.splice(index, 1);
     }
-     if (status == false) {
-       if (value == 'REGISTRATION') {
-         $('#isIndex'+idata+'Url').addClass('disabled');
-         $('#input_'+idata+'').val('');
+    if (status == false) {
+      if (value == 'REGISTRATION') {
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'LOGIN') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'CURRENTDBVERSION') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'LATESTDBVERSION') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'DOWNLOAD BIN') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'DOWNLOAD ZIP') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'AUTOSEARCH') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'MODELSEARCH') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'DELTASEARCH') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'FEEDBACK') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
       }
       if (value == 'DOWNLOADDBUPDATES') {
-        $('#isIndex' + idata +'Url').addClass('disabled');
-        $('#input_' + idata +'').val('');
-       }
-       if (value == 'GENERICLOG') {
-         $('#isIndex' + idata + 'Url').addClass('disabled');
-         $('#input_' + idata + '').val('');
-       }
-    } 
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
+      }
+      if (value == 'GENERICLOG') {
+        $('#isIndex' + idata + 'Url').addClass('disabled');
+        $('#input_' + idata + '').val('');
+      }
+    }
     this.checkUrlValidation();
   }
 
-/** Reset checkboxes */
+  /** Reset checkboxes */
   uncheckAll() {
     this.checkboxes.forEach((element) => {
       element.nativeElement.checked = false;
     });
   }
 
-/** Url Required Validation in add Modules */
+  /** Url Required Validation in add Modules */
 
   checkUrlValidation() {
     for (var i = 0; i < this.selectedItems.length; i++) {
@@ -756,7 +756,7 @@ export class EditApiComponent implements OnInit {
     }
   }
 
-/** Add Modules Popup and list of Api Modules  */
+  /** Add Modules Popup and list of Api Modules  */
 
   AddModules() {
     this.spinnerService.show();
@@ -787,10 +787,10 @@ export class EditApiComponent implements OnInit {
         }
         this.spinnerService.hide();
       });
-    
+
   }
 
-/** Edit API Modules status flag checks   */
+  /** Edit API Modules status flag checks   */
 
   async ModuleSubmit() {
     this.successData = [];
@@ -1051,248 +1051,248 @@ export class EditApiComponent implements OnInit {
       status = 0;
       this.successData = []; this.failedData = [];
       this.successCount = 0; this.failCount = 0;
-    for (var i = 0; i < this.uncheckedArr.length; i++) {
-      if (this.uncheckedArr[i].key == 'REGISTRATION') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
+      for (var i = 0; i < this.uncheckedArr.length; i++) {
+        if (this.uncheckedArr[i].key == 'REGISTRATION') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
               }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'LOGIN') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'CURRENTDBVERSION') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'LATESTDBVERSION') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'DOWNLOAD BIN') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'DOWNLOAD ZIP') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'AUTOSEARCH') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'MODELSEARCH') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'DELTASEARCH') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'FEEDBACK') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'DOWNLOADDBUPDATES') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr[i].key == 'GENERICLOG') {
-        apiName = this.uncheckedArr[i].key;
-        uri = this.uncheckedArr[i].url;
-        description = this.uncheckedArr[i].value;
-        apiAddress = this.uncheckedArr[i].addr;
-        pid = this.uncheckedArr[i].id;
-        await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-              if (value.data[0]['result'] == "0") {
-                this.failedData.push(value.data[0]['message']);
-                this.failCount++;
-              } else {
-                this.successData.push(value.data[0]['message']);
-                this.successCount++;
-              }
-            }
-          });
-      }
-      if (this.uncheckedArr.length == i + 1) {
-        if (this.successData.length > 0) {
-          this.toastr.success('', this.successCount + ' ' + this.successData[0]);
+            });
         }
-        if (this.failedData.length > 0) {
-          this.toastr.warning('', this.failCount + ' ' + this.successData[0]);
+        if (this.uncheckedArr[i].key == 'LOGIN') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
         }
-        this.uncheckedArr = [];
+        if (this.uncheckedArr[i].key == 'CURRENTDBVERSION') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr[i].key == 'LATESTDBVERSION') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr[i].key == 'DOWNLOAD BIN') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr[i].key == 'DOWNLOAD ZIP') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr[i].key == 'AUTOSEARCH') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr[i].key == 'MODELSEARCH') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr[i].key == 'DELTASEARCH') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr[i].key == 'FEEDBACK') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr[i].key == 'DOWNLOADDBUPDATES') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr[i].key == 'GENERICLOG') {
+          apiName = this.uncheckedArr[i].key;
+          uri = this.uncheckedArr[i].url;
+          description = this.uncheckedArr[i].value;
+          apiAddress = this.uncheckedArr[i].addr;
+          pid = this.uncheckedArr[i].id;
+          await this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+                if (value.data[0]['result'] == "0") {
+                  this.failedData.push(value.data[0]['message']);
+                  this.failCount++;
+                } else {
+                  this.successData.push(value.data[0]['message']);
+                  this.successCount++;
+                }
+              }
+            });
+        }
+        if (this.uncheckedArr.length == i + 1) {
+          if (this.successData.length > 0) {
+            this.toastr.success('', this.successCount + ' ' + this.successData[0]);
+          }
+          if (this.failedData.length > 0) {
+            this.toastr.warning('', this.failCount + ' ' + this.successData[0]);
+          }
+          this.uncheckedArr = [];
+        }
       }
-    }
     }
     this.changeProject();
-   // this.spinnerService.hide();
+    // this.spinnerService.hide();
   }
 
   /** Edit Path popup */
@@ -1302,7 +1302,7 @@ export class EditApiComponent implements OnInit {
     this.editaddressValid();
   }
 
-/** Modal Close popup */
+  /** Modal Close popup */
   modalClose() {
     $("#editDataModal .close").click();
     $("#editApiModal .close").click();
@@ -1312,7 +1312,7 @@ export class EditApiComponent implements OnInit {
     this.checkedArr.length = 0;
   }
 
-/** Update Path Submit Operation */
+  /** Update Path Submit Operation */
   onsaveUpdateAddressSubmit() {
     this.spinnerService.show();
     this.addrsubmitted = true;
@@ -1321,33 +1321,33 @@ export class EditApiComponent implements OnInit {
     }
     this.editaddressValid();
     if (this.editinvalidUrl == false) {
-    if (this.apimodulesList.length > 0) {
-      let filterProject: any = this.filterProjects.filter(u =>
-        u.projectname == this.projectNames);
-      let dbName = filterProject[0]['dbinstance']; let crudType = 3; let project = this.projectNames;
-      let signaturekey = filterProject[0]['signatureKey']; let apiAddress = this.upd_addr;
-      let apiName; let uri; let description;
-      let status; let pid;
-      for (var i = 0; i < this.apimodulesList.length; i++) {
-        apiName = this.apimodulesList[i]['name'];
-        uri = this.apimodulesList[i]['uri'];
-        description = this.apimodulesList[i]['description'];
-        status = this.apimodulesList[i]['statusFlag']; pid = this.apimodulesList[i]['apiId'];
-        this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
-          .then(value => {
-            if (value.data.length > 0) {
-            }
-          });
-        if (this.apimodulesList.length == i + 1) {
-          $("#editAddressModal .close").click();
-          this.toastr.success('', 'Url Updated Successfully');
-          this.address = this.upd_addr;
-          this.changeProject();
+      if (this.apimodulesList.length > 0) {
+        let filterProject: any = this.filterProjects.filter(u =>
+          u.projectname == this.projectNames);
+        let dbName = filterProject[0]['dbinstance']; let crudType = 3; let project = this.projectNames;
+        let signaturekey = filterProject[0]['signatureKey']; let apiAddress = this.upd_addr;
+        let apiName; let uri; let description;
+        let status; let pid;
+        for (var i = 0; i < this.apimodulesList.length; i++) {
+          apiName = this.apimodulesList[i]['name'];
+          uri = this.apimodulesList[i]['uri'];
+          description = this.apimodulesList[i]['description'];
+          status = this.apimodulesList[i]['statusFlag']; pid = this.apimodulesList[i]['apiId'];
+          this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
+            .then(value => {
+              if (value.data.length > 0) {
+              }
+            });
+          if (this.apimodulesList.length == i + 1) {
+            $("#editAddressModal .close").click();
+            this.toastr.success('', 'Url Updated Successfully');
+            this.address = this.upd_addr;
+            this.changeProject();
+          }
         }
-      }
-    } else {
-      $("#editAddressModal .close").click();
-      this.toastr.warning('', 'Modules are not avialable to update the path');
+      } else {
+        $("#editAddressModal .close").click();
+        this.toastr.warning('', 'Modules are not avialable to update the path');
       }
     }
     this.spinnerService.hide();

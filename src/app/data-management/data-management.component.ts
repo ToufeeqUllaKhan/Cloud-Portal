@@ -24,7 +24,7 @@ export class DataManagementComponent implements OnInit {
   viewData() {
     this.router.navigate(['/clients'])
       .then(() => {
-      window.location.reload();
-    });
+        window.location.reload();
+      });
   }
 }

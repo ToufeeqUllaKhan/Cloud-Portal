@@ -13,7 +13,7 @@ import * as alertify from 'alertify.js';
 @Injectable({ providedIn: 'root' })
 export class MainService {
 
-  
+
   unzipFile: any; deleteDir: any;
   listZip: any; memStream: any;
 
@@ -22,6 +22,7 @@ export class MainService {
 
   getPortalSpecificUrlforZip() {
 
+    /** sscloudportal.azurewebsites.net*/
     this.unzipFile = '/api/UnzipFile?code=NKrYd88jKdQuChXJX4XivotLL/fHC5YpjBD08dMWFOMl6NFTG9268Q==';
     this.deleteDir = '/api/DeleteDirectory?code=fWcoRNCBxIaZLvSe1YqHZ1BThrwueErsRhrzJlmA4Hgv7IMhWxilZw==';
     this.listZip = '/api/GetListOfZipFiles?code=fYWa6wb7qiWet6qRPhVa35RePhsuHvsIp50eXjoX4gXKGdy/6k8yKQ==';
@@ -41,7 +42,7 @@ export class MainService {
 
   logout(user: User): Observable<any> {
 
-    return this.http.post<any>('https://ssportalservices.azurewebsites.netapi/Authentication/Logout',
+    return this.http.post<any>(`${environment.apiUrl}/api/Authentication/Logout`,
       { "sessionToken": user.data[0]['sessionToken'] })
       .pipe(
         retry(1),
@@ -50,11 +51,11 @@ export class MainService {
   }
 
   getProfileInfo(user: User): Observable<any> {
-   
+
     //let headers = new HttpHeaders();
     //this.createAuthorizationHeader(headers);
     return this.http.post<any>(`${environment.apiUrl}/api/Authentication/GetUserProfile`,
-      { "sessionToken": user.data[0]['sessionToken']})
+      { "sessionToken": user.data[0]['sessionToken'] })
       .pipe(
         retry(1),
         catchError(this.handleEventerror)
@@ -64,7 +65,7 @@ export class MainService {
   updateUserInfo(user: User, Firstname: String, Lastname: String, EMail: any, Mobile: Number, Role: any): Observable<any> {
     //alert(user.data[0]['sessionToken']);
     return this.http.post<any>(`${environment.apiUrl}/api/Authentication/UpdateUserProfile`,
-      { "sessionToken": user.data[0]['sessionToken'], "Firstname": Firstname, "Lastname": Lastname, "EMail": EMail, "Mobile": Mobile, "Role": Role})
+      { "sessionToken": user.data[0]['sessionToken'], "Firstname": Firstname, "Lastname": Lastname, "EMail": EMail, "Mobile": Mobile, "Role": Role })
       .pipe(
         retry(1),
         catchError(this.handleEventerror)
@@ -72,10 +73,11 @@ export class MainService {
   }
 
   createUser(crudtype: any, username: any, password: any, role: any, firstname: any, lastname: any, email: any,
-    mobile: any, profilepic: any, fileextension: any): Observable<any>{
+    mobile: any, profilepic: any, fileextension: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/CRUD_User`,
-      { "crudtype": crudtype, "username": username, "password": password, "role": role, "firstname": firstname,
+      {
+        "crudtype": crudtype, "username": username, "password": password, "role": role, "firstname": firstname,
         "lastname": lastname, "email": email, "mobile": mobile, "profilepic": profilepic, "fileextension": fileextension
       })
       .pipe(
@@ -94,24 +96,15 @@ export class MainService {
       ).toPromise();
   }
 
-  getRoleModules(crudtype: any, role: any, module: any, user: any, project: any): Observable<any> {
+  getRoleModules(crudtype: any, role: any, module: any, user: any, project: any, readpermission: any,writepermission: any,downloadpermission: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/CRUD_RoleModuleMapping`,
-      { "crudtype": crudtype, "role": role, "module": module, "user": user, "project": project })
+      { "crudtype": crudtype, "role": role, "module": module, "user": user, "project": project, 
+      "readpermission":readpermission, "writepermission":writepermission, "downloadpermission":downloadpermission })
       .pipe(
         retry(1),
         catchError(this.handleError)
       );
-  }
-
-  getRoleModulesAccess(crudtype: any, role: any, module: any, user: any, project: any): Promise<any> {
-
-    return this.http.post<any>(`${environment.apiUrl}/api/Admin/CRUD_RoleModuleMapping`,
-      { "crudtype": crudtype, "role": role, "module": module, "user": user, "project": project })
-      .pipe(
-        retry(1),
-        catchError(this.handleEventerror)
-      ).toPromise();
   }
 
   userProjectLinkingScenario(crudtype: any, role: any, module: any, user: any, project: any): Promise<any> {
@@ -126,21 +119,11 @@ export class MainService {
       ).toPromise();
   }
 
-  userProjectLinking(crudtype: any, role: any, module: any, user: any, project: any): Observable<any> {
 
-    return this.http.post<any>(`${environment.apiUrl}/api/Admin/CRUD_RoleModuleMapping`,
-      { "crudtype": crudtype, "role": role, "module": module,"user": user, "project": project
-      })
-      .pipe(
-        retry(1),
-        catchError(this.handleError)
-      );
-  }
-
-  saveCreatedUsers(user: User,Role: String, Firstname: String, Lastname: String, EMail: String, Mobile: Number, Username: String, Password: String) {
+  saveCreatedUsers(user: User, Role: String, Firstname: String, Lastname: String, EMail: String, Mobile: Number, Username: String, Password: String) {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Authentication/CreateNewUser`,
-      { "sessionToken": user.data[0]['sessionToken'], Role, Firstname, Lastname, EMail, Mobile, Username, Password})
+      { "sessionToken": user.data[0]['sessionToken'], Role, Firstname, Lastname, EMail, Mobile, Username, Password })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -170,7 +153,7 @@ export class MainService {
       );
   }
 
-  getDevicesList(dbInstance:any,user: User, projectName: String, Dbversion: String) {
+  getDevicesList(dbInstance: any, user: User, projectName: String, Dbversion: String) {
     let headers = new HttpHeaders();
     this.createAuthorizationHeader(headers);
     return this.http.post<any>(`${environment.apiUrl}/api/UI/GetDevices`,
@@ -185,7 +168,7 @@ export class MainService {
     let headers = new HttpHeaders();
     this.createAuthorizationHeader(headers);
     return this.http.post<any>(`${environment.apiUrl}/api/Config/GetAllClients`,
-      { "sessionToken": user.data[0]['sessionToken']})
+      { "sessionToken": user.data[0]['sessionToken'] })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -217,7 +200,7 @@ export class MainService {
   getRegisteredDevice(user: User, Region: any, Client: any, Dbname: any, Dbversion: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Config/GetRegisteredDevice`,
-      { "sessionToken": user.data[0]['sessionToken'], Region, Client, Dbname, Dbversion})
+      { "sessionToken": user.data[0]['sessionToken'], Region, Client, Dbname, Dbversion })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -236,18 +219,18 @@ export class MainService {
       ).toPromise();
   }
 
-  getAPIList(sessionToken:any, Dbname: any, Project: any): Observable<any> {
+  getAPIList(sessionToken: any, Dbname: any, Project: any): Observable<any> {
     let headers = new HttpHeaders();
     this.createAuthorizationHeader(headers);
 
     return this.http.post<any>(`${environment.apiUrl}/api/Config/GetAPIList`,
-      { "sessionToken": sessionToken, "Dbname": Dbname,"Project": Project })
+      { "sessionToken": sessionToken, "Dbname": Dbname, "Project": Project })
       .pipe(
         retry(1),
         catchError(this.handleError)
       );
   }
-  
+
   getDbVersion(user: User, Dbname: any, Projectname: any): Observable<any> {
 
     let headers = new HttpHeaders();
@@ -265,14 +248,14 @@ export class MainService {
     let headers = new HttpHeaders();
     this.createAuthorizationHeader(headers);
     return this.http.post<any>(eventUrl,
-      { "Signaturekey": Signaturekey, "DeviceID": DeviceID, "Dbversion": Dbversion, "Countrycode": Countrycode})
+      { "Signaturekey": Signaturekey, "DeviceID": DeviceID, "Dbversion": Dbversion, "Countrycode": Countrycode })
       .pipe(
         retry(1),
         catchError(this.handleError)
       );
   }
 
-  getTestApiLogin(eventUrl,guid: any): Observable<any> {
+  getTestApiLogin(eventUrl, guid: any): Observable<any> {
     let headers = new HttpHeaders();
     this.createAuthorizationHeader(headers);
     return this.http.post<any>(eventUrl,
@@ -280,10 +263,10 @@ export class MainService {
       .pipe(
         retry(1),
         catchError(this.handleError)
-    );
+      );
   }
 
-  getTestApiCurrentDbVersion(eventUrl,Datatype: Number): Observable<any> {
+  getTestApiCurrentDbVersion(eventUrl, Datatype: Number): Observable<any> {
 
     this.logintoken = JSON.parse(localStorage.getItem('token'));
     if (this.logintoken == null) {
@@ -303,7 +286,7 @@ export class MainService {
   }
 
 
-  getTestApiLatestDbVersion(eventUrl,Datatype: any): Observable<any> {
+  getTestApiLatestDbVersion(eventUrl, Datatype: any): Observable<any> {
 
     this.logintoken = JSON.parse(localStorage.getItem('token'));
     if (this.logintoken == null) {
@@ -322,7 +305,7 @@ export class MainService {
       );
   }
 
-  getTestApiDownloadStats(eventUrl, downloadstatus: Number, dbversion:any): Observable<any> {
+  getTestApiDownloadStats(eventUrl, downloadstatus: Number, dbversion: any): Observable<any> {
     this.logintoken = JSON.parse(localStorage.getItem('token'));
     if (this.logintoken == null) {
       alertify.alert("Invalid Token!! Please Login and try again!!");
@@ -356,7 +339,7 @@ export class MainService {
       );
   }
 
-  getUpdateGenericLog(eventUrl, apiname: any, input: any, output: any, result:any): Observable<any> {
+  getUpdateGenericLog(eventUrl, apiname: any, input: any, output: any, result: any): Observable<any> {
     this.logintoken = JSON.parse(localStorage.getItem('token'));
     if (this.logintoken == null) {
       alertify.alert("Invalid Token!! Please Login and try again!!");
@@ -373,7 +356,7 @@ export class MainService {
       );
   }
 
-  getTestAutoSearch(eventUrl,Device: any, Edid: any, Vendorid: any, Osd: any): Observable<any> {
+  getTestAutoSearch(eventUrl, Device: any, Edid: any, Vendorid: any, Osd: any): Observable<any> {
 
     this.logintoken = JSON.parse(localStorage.getItem('token'));
     if (this.logintoken == null) {
@@ -391,7 +374,7 @@ export class MainService {
       );
   }
 
-  getTestModelSearch(eventUrl,Device: any, Brand: any, Model: any): Observable<any> {
+  getTestModelSearch(eventUrl, Device: any, Brand: any, Model: any): Observable<any> {
 
     this.logintoken = JSON.parse(localStorage.getItem('token'));
     if (this.logintoken == null) {
@@ -402,7 +385,7 @@ export class MainService {
       headers: headers
     }
     return this.http.post<any>(eventUrl,
-      { "device": Device, "brand": Brand, "model": Model}, options)
+      { "device": Device, "brand": Brand, "model": Model }, options)
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -428,7 +411,7 @@ export class MainService {
   }
 
   getTestFeedbackSearch(eventUrl, Device: any, Brand: any, model: any, vendorid: any, osd: any, edid: any,
-    codeset: any, searchtype: any, message: any, statusflag:any): Observable<any> {
+    codeset: any, searchtype: any, message: any, statusflag: any): Observable<any> {
 
     this.logintoken = JSON.parse(localStorage.getItem('token'));
     if (this.logintoken == null) {
@@ -441,17 +424,18 @@ export class MainService {
     return this.http.post<any>(eventUrl,
       {
         "device": Device, "Brand": Brand, "model": model, "vendorid": vendorid, "osd": osd, "edid": edid,
-        "codeset": codeset, "searchtype": searchtype, "message": message, "statusflag": statusflag}, options)
+        "codeset": codeset, "searchtype": searchtype, "message": message, "statusflag": statusflag
+      }, options)
       .pipe(
         retry(1),
         catchError(this.handleError)
       );
   }
 
-  getBoxId(crudtype: any, project: any, signaturekey: any, boxid: any): Observable<any> {
+  getBoxId(crudtype: any, project: any, signaturekey: any, boxid: any, dbname: any, dbversion: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/CRUD_BoxIdInfo`,
-      { "crudtype": crudtype, "project": project, "signaturekey": signaturekey, "boxid": boxid })
+      { "crudtype": crudtype, "project": project, "signaturekey": signaturekey, "boxid": boxid, "dbname": dbname, "dbversion": dbversion })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -461,7 +445,16 @@ export class MainService {
   getAllBrands(user: User, Dbname: any, Projectname: any, Dbversion: any, Device: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/UI/GetBrands`,
-      { "sessionToken": user.data[0]['sessionToken'], "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Device": Device})
+      { "sessionToken": user.data[0]['sessionToken'], "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Device": Device })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+
+  getAllprojectdetails(dbname: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/Admin/GetAllProjectDetails`,
+      { dbinstance: dbname })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -518,7 +511,7 @@ export class MainService {
       );
   }
 
-  createDbInstance(Client: any, Region: any, Dbinstance: any, Connectionstring: any, Statusflag: any, Crudtype:any): Observable<any> {
+  createDbInstance(Client: any, Region: any, Dbinstance: any, Connectionstring: any, Statusflag: any, Crudtype: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Operations/NewDbInstance`,
       { "Client": Client, "Region": Region, "Dbinstance": Dbinstance, "Connectionstring": Connectionstring, "Statusflag": Statusflag, "Crudtype": Crudtype })
@@ -551,22 +544,24 @@ export class MainService {
 
   createNewProject(Dbname: any, Client: any, Region: any, Projectname: any, Signaturekey: any, Dbpath: any, Embeddeddbversion: any,
     Dbversion: any, Statusflag: any, Flagtype: any, Projectversion: any, Swversion: any, Allowdownload: any,
-  Binfile: any, Binfilechecksum: any, Zipfile: any, Zipfilechecksum:any): Observable<any> {
+    Binfile: any, Binfilechecksum: any, Zipfile: any, Zipfilechecksum: any): Observable<any> {
 
-   
+
     return this.http.post<any>(`${environment.apiUrl}/api/Operations/CreateNewProject`,
-      { "Dbname": Dbname, "Client": Client, "Region": Region, "Projectname": Projectname, "Signaturekey": Signaturekey, "Dbpath": Dbpath,
+      {
+        "Dbname": Dbname, "Client": Client, "Region": Region, "Projectname": Projectname, "Signaturekey": Signaturekey, "Dbpath": Dbpath,
         "Embeddeddbversion": Embeddeddbversion, "Dbversion": Dbversion, "Statusflag": Statusflag, "Flagtype": Flagtype,
         "Projectversion": Projectversion, "Swversion": Swversion, "Allowdownload": Allowdownload, "Binfile": Binfile,
-        "Binfilechecksum": Binfilechecksum, "Zipfile": Zipfile, "Zipfilechecksum": Zipfilechecksum })
+        "Binfilechecksum": Binfilechecksum, "Zipfile": Zipfile, "Zipfilechecksum": Zipfilechecksum
+      })
       .pipe(
         retry(1),
         catchError(this.handleError)
-      ); 
+      );
   }
 
   changePasswordRequest(Username: String, OldPassword: String, NewPassword: String): Observable<any> {
-   
+
     return this.http.post<any>(`${environment.apiUrl}/api/Authentication/ChangePassword`,
       { "Username": Username, "OldPassword": OldPassword, "NewPassword": NewPassword })
       .pipe(
@@ -623,7 +618,7 @@ export class MainService {
       .pipe(
         retry(1),
         catchError(this.handleEventerror)
-    ).toPromise();
+      ).toPromise();
   }
 
   dataUploadloadCodesets(Dbname: String, Projectname: String, Embeddeddbversion: String, Jsoncodeset: any): Promise<any> {
@@ -643,30 +638,30 @@ export class MainService {
       .pipe(
         retry(1),
         catchError(this.handleEventerror)
-    ).toPromise();
+      ).toPromise();
   }
 
   dataUploadloadCecEdidData(Dbname: String, Projectname: any, Dbversion: any, JsonCecEdidtype: any): Promise<any> {
-    
+
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/LoadCecEdidData`,
       { "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "JsonCecEdidtype": JsonCecEdidtype })
       .pipe(
         retry(1),
         catchError(this.handleEventerror)
-    ).toPromise();
+      ).toPromise();
   }
-  
-  dataUploadLoadCountryCodeData(dbname: any,JsonCountrycodes: any): Promise<any> {
+
+  dataUploadLoadCountryCodeData(crudtype: any, dbname: any, JsonCountrycodes: any): Promise<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/LoadCountryCodeData`,
-      { "Dbname": dbname,"JsonCountrycodes": JsonCountrycodes })
+      { "Crudtype": crudtype, "Dbname": dbname, "JsonCountrycodes": JsonCountrycodes })
       .pipe(
         retry(1),
         catchError(this.handleEventerror)
       ).toPromise();
 
   }
-  insertCecEdidData(Dbname: String, Projectname:any, Dbversion:any, JsonCecEdidtype: any): Observable<any> {
+  insertCecEdidData(Dbname: String, Projectname: any, Dbversion: any, JsonCecEdidtype: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/LoadCecEdidData`,
       { "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "JsonCecEdidtype": JsonCecEdidtype })
@@ -707,12 +702,14 @@ export class MainService {
       );
   }
 
-  DBUpdates(Username: String, Projectname: String, Dbversion: any, Datasection: any, Recordcount: any, Updatedescription: any,Operation: any,
-    Ipaddress:any, Updatestatus:any): Observable<any> {
+  DBUpdates(Username: String, Projectname: String, Dbversion: any, Datasection: any, Recordcount: any, Updatedescription: any, Operation: any,
+    Ipaddress: any, Updatestatus: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/DataUpdates`,
-      { "Username": Username, "Projectname": Projectname, "Dbversion": Dbversion, "Datasection": Datasection, "Recordcount": Recordcount, "Updatedescription": Updatedescription,
-      "Operation": Operation, "Ipaddress": Ipaddress,"Updatestatus": Updatestatus })
+      {
+        "Username": Username, "Projectname": Projectname, "Dbversion": Dbversion, "Datasection": Datasection, "Recordcount": Recordcount, "Updatedescription": Updatedescription,
+        "Operation": Operation, "Ipaddress": Ipaddress, "Updatestatus": Updatestatus
+      })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -720,14 +717,16 @@ export class MainService {
   }
 
   DataDBUpdates(Username: String, Projectname: String, Dbversion: any, Datasection: any, Totalinsertedrecords: any,
-    Totalfailedrecords: any, Totalupdatedrecords:any, Recordcount: any, Updatedescription: any, Operation: any, Systemuser: any,
-    Ipaddress:any,Updatestatus: any): Observable<any> {
+    Totalfailedrecords: any, Totalupdatedrecords: any, Recordcount: any, Updatedescription: any, Operation: any, Systemuser: any,
+    Ipaddress: any, Updatestatus: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/DataUpdates`,
-      { "Username": Username, "Projectname": Projectname, "Dbversion": Dbversion, "Datasection": Datasection,
+      {
+        "Username": Username, "Projectname": Projectname, "Dbversion": Dbversion, "Datasection": Datasection,
         "Totalinsertedrecords": Totalinsertedrecords, "Totalfailedrecords": Totalfailedrecords, "Totalupdatedrecords": Totalupdatedrecords,
         "Recordcount": Recordcount, "Updatedescription": Updatedescription, "Operation": Operation, "Systemuser": Systemuser,
-        "Ipaddress": Ipaddress,"Updatestatus": Updatestatus })
+        "Ipaddress": Ipaddress, "Updatestatus": Updatestatus
+      })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -753,7 +752,7 @@ export class MainService {
   }
 
   getProjectNames(Client: any, Region: any, Projectname: any, Dbversion: any, Dbinstance: any, Datatype: any): Observable<any> {
-    
+
     return this.http.post<any>(`${environment.apiUrl}/api/Config/UIData`,
       { "Client": Client, "Region": Region, "Projectname": Projectname, "Dbversion": Dbversion, "Dbinstance": Dbinstance, "Datatype": Datatype })
       .pipe(
@@ -771,8 +770,8 @@ export class MainService {
         catchError(this.handleEventerror)
       ).toPromise();
   }
-  
-  getPaginatedRecords(Dbname: any, Projectname: any, Dbversion: any, Startrow: any, Endrow: any,search:any ,order:any [], Datatype: any): Observable<any> {
+
+  getPaginatedRecords(Dbname: any, Projectname: any, Dbversion: any, Startrow: any, Endrow: any, search: any, order: any[], Datatype: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/UI/GetPaginatedData`,
       { "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Start": Startrow, "length": Endrow, "search": search, "order": order, "Datatype": Datatype })
@@ -781,11 +780,11 @@ export class MainService {
         catchError(this.handleError)
       );
   }
-  
-  GetPaginatedProductionDBStats(dbname: any, Projectname: any, Startdate: any,Enddate: any, Startrow: any, Endrow: any,search:any ,order:any [], Datatype: any): Observable<any> {
+
+  GetPaginatedProductionDBStats(dbname: any, Projectname: any, Startdate: any, Enddate: any, Startrow: any, Endrow: any, search: any, order: any[], Datatype: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Stats/GetPaginatedProductionDBStats`,
-      { "Dbname": dbname, "Projectname": Projectname, "Startdate": Startdate,"Enddate": Enddate,  "Start": Startrow, "length": Endrow, "search": search, "order": order, "Datatype": Datatype })
+      { "Dbname": dbname, "Projectname": Projectname, "Startdate": Startdate, "Enddate": Enddate, "Start": Startrow, "length": Endrow, "search": search, "order": order, "Datatype": Datatype })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -794,7 +793,7 @@ export class MainService {
 
   getSaveEditBrandDetailsInfo(Dbname: any, Projectname: any, Dbversion: any, Device: any, Brand: any, Brandcode: any, Model: any, Modelx: any, Codeset: any,
     Codesetdata: any, Cschecksum: any, Region: any, Regioncode: any, Country: any, Countrycode: any, Csrank: any, Vendorid: any, Osd: any, Edidbrand: any,
-    Datatype: any, Optype: any, recordid:any): Observable<any> {
+    Datatype: any, Optype: any, recordid: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/InsertDelete`,
       {
@@ -808,16 +807,17 @@ export class MainService {
         catchError(this.handleError)
       );
   }
+
   getSaveEditCECEDIDdataInfo(Dbname: any, Projectname: any, Dbversion: any, Device: any, Brand: any, Brandcode: any, Model: any, Modelx: any, Codeset: any,
-    Codesetdata: any, Cschecksum: any, Region: any, Regioncode: any, Country: any, Countrycode: any, Csrank: any, Vendorid: any, Osd: any,osdstr: any, 
-    Edidraw: any, edid128: any, Edidbrand: any, Datatype: any, Optype: any, recordid:any): Observable<any> {
+    Codesetdata: any, Cschecksum: any, Region: any, Regioncode: any, Country: any, Countrycode: any, Csrank: any, Vendorid: any, Osd: any, osdstr: any,
+    Edidraw: any, edid128: any, Edidbrand: any, Datatype: any, Optype: any, recordid: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/InsertDelete`,
       {
         "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Device": Device, "Brand": Brand, "Brandcode": Brandcode,
         "Model": Model, "Modelx": Modelx, "Codeset": Codeset, "Codesetdata": Codesetdata, "Cschecksum": Cschecksum, "Region": Region,
         "Regioncode": Regioncode, "Country": Country, "Countrycode": Countrycode, "Csrank": Csrank, "Vendorid": Vendorid, "Osd": Osd,
-        "osdstring": osdstr,"edidraw": Edidraw, "edid128": edid128,"Edidbrand": Edidbrand, "Datatype": Datatype, "Optype": Optype,
+        "osdstring": osdstr, "edidraw": Edidraw, "edid128": edid128, "Edidbrand": Edidbrand, "Datatype": Datatype, "Optype": Optype,
         "recordid": recordid
       })
       .pipe(
@@ -825,16 +825,18 @@ export class MainService {
         catchError(this.handleError)
       );
   }
-  
+
   getSavebrandDetailsInfo(Dbname: any, Projectname: any, Dbversion: any, Device: any, Brand: any, Brandcode: any, Model: any, Modelx: any, Codeset: any,
     Codesetdata: any, Cschecksum: any, Region: any, Regioncode: any, Country: any, Countrycode: any, Csrank: any, Vendorid: any, Osd: any, Edidbrand: any,
     Datatype: any, Optype: any): Observable<any> {
-   
+
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/InsertDelete`,
-      { "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Device": Device, "Brand": Brand, "Brandcode": Brandcode,
+      {
+        "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Device": Device, "Brand": Brand, "Brandcode": Brandcode,
         "Model": Model, "Modelx": Modelx, "Codeset": Codeset, "Codesetdata": Codesetdata, "Cschecksum": Cschecksum, "Region": Region,
         "Regioncode": Regioncode, "Country": Country, "Countrycode": Countrycode, "Csrank": Csrank, "Vendorid": Vendorid, "Osd": Osd,
-        "Edidbrand": Edidbrand, "Datatype": Datatype, "Optype": Optype })
+        "Edidbrand": Edidbrand, "Datatype": Datatype, "Optype": Optype
+      })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -850,11 +852,38 @@ export class MainService {
       );
   }
 
-  createNewProjectDef(Dbname: any, Client: any, Region: any, Projectname: any, Signaturekey: any, Dbpath: any, Statusflag: any, Flagtype: any, allowdownload:any): Observable<any> {
+  createNewProjectDef(Dbname: any, Client: any, Region: any, Projectname: any, Signaturekey: any, Dbpath: any, Statusflag: any, Flagtype: any, allowdownload: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/CreateNewProjectDefinition`,
-      { "Dbname": Dbname, "Client": Client, "Region": Region, "Projectname": Projectname, "Signaturekey": Signaturekey,
-        "Dbpath": Dbpath, "Statusflag": Statusflag, "Flagtype": Flagtype, "allowdownload": allowdownload })
+      {
+        "Dbname": Dbname, "Client": Client, "Region": Region, "Projectname": Projectname, "Signaturekey": Signaturekey,
+        "Dbpath": Dbpath, "Statusflag": Statusflag, "Flagtype": Flagtype, "allowdownload": allowdownload
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+
+  CreateNewProjectWithVersion(Dbname: any, Client: any, Region: any, Projectname: any, Signaturekey: any, Dbpath: any, Embeddeddbversion: any,
+    Dbversion: any, Statusflag: any, Flagtype: any, Projectversion: any, Swversion: any, Allowdownload: any,
+    Binfile: any, Binfilechecksum: any, Zipfile: any, Zipfilechecksum: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/Admin/CreateNewProjectWithVersion`,
+      {
+        "Dbname": Dbname, "Client": Client, "Region": Region, "Projectname": Projectname, "Signaturekey": Signaturekey, "Dbpath": Dbpath,
+        "Embeddeddbversion": Embeddeddbversion, "Dbversion": Dbversion, "Statusflag": Statusflag, "Flagtype": Flagtype,
+        "Projectversion": Projectversion, "Swversion": Swversion, "Allowdownload": Allowdownload, "Binfile": Binfile,
+        "Binfilechecksum": Binfilechecksum, "Zipfile": Zipfile, "Zipfilechecksum": Zipfilechecksum
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+
+  Unlinkanddeletetheproject(Projectname: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/Admin/UnlinkAndDeleteProject`,
+      { "projectname": Projectname })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -871,7 +900,7 @@ export class MainService {
   }
 
   searchHistory(Dbname: any, Apiname: any, Projectname: any, Dbversion: any, Boxid: any, Startdate: any, Enddate: any): Observable<any> {
-   
+
     return this.http.post<any>(`${environment.apiUrl}/api/Report/SearchHistory`,
       { "Dbname": Dbname, "Apiname": Apiname, "Projectname": Projectname, "Dbversion": Dbversion, "Boxid": Boxid, "Startdate": Startdate, "Enddate": Enddate })
       .pipe(
@@ -889,8 +918,8 @@ export class MainService {
       );
   }
 
-  viewDetailedData(dbname: any, apiname: any, boxid: any, recordeddate: any, device: any, brand: any, model: any, recordid:any): Observable<any> {
-    
+  viewDetailedData(dbname: any, apiname: any, boxid: any, recordeddate: any, device: any, brand: any, model: any, recordid: any): Observable<any> {
+
     return this.http.post<any>(`${environment.apiUrl}/api/UI/ViewDetailedData`,
       { "dbname": dbname, "apiname": apiname, "boxid": boxid, "recordeddate": recordeddate, "device": device, "brand": brand, "model": model, "recordid": recordid })
       .pipe(
@@ -900,9 +929,15 @@ export class MainService {
   }
 
   getListofZipFiles(): Observable<any> {
-    this.getPortalSpecificUrlforZip();
+    // this.getPortalSpecificUrlforZip();
     let zipurl = `${environment.zipUrl}`;
-    if (zipurl != 'https://sscportalazurefunctions.azurewebsites.net') {
+    if (zipurl === 'https://sscportalazurefunctions.azurewebsites.net') {
+      this.listZip = '/api/GetListOfZipFiles?code=fYWa6wb7qiWet6qRPhVa35RePhsuHvsIp50eXjoX4gXKGdy/6k8yKQ==';
+    }
+    else if (zipurl === 'https://sscazurefunctionsdev.azurewebsites.net') {
+      this.listZip = '/api/GetListOfZipFiles?code=kM1WickwooGRnQLYGtT1ev1tjdd2jt5y4vRaTELj87bbl2XoaPApsQ==';
+    }
+    else if (zipurl === 'https://zipprocessing.azurewebsites.net') {
       this.listZip = '/api/GetListOfZipFiles?code=Fk5s14t8lPNmniS4NRQi/T2EDKai6tI8s0pPtZC6buOa9rR5RmWWow==';
     }
     return this.http.post<any>(`${environment.zipUrl}${this.listZip}`, {})
@@ -913,13 +948,19 @@ export class MainService {
   }
 
   fileUnzipData(url: any): Observable<any> {
-    this.getPortalSpecificUrlforZip();
+    // this.getPortalSpecificUrlforZip();
     let zipurl = `${environment.zipUrl}`;
-    if (zipurl != 'https://sscportalazurefunctions.azurewebsites.net') {
+    if (zipurl === 'https://sscportalazurefunctions.azurewebsites.net') {
+      this.unzipFile = '/api/UnzipFile?code=NKrYd88jKdQuChXJX4XivotLL/fHC5YpjBD08dMWFOMl6NFTG9268Q==';
+    }
+    if (zipurl === 'https://sscazurefunctionsdev.azurewebsites.net') {
+      this.unzipFile = '/api/UnzipFile?code=mY7ESySYMv0pgqwaaEWz2/9AAA1SWqwjrRABi7JletOsa1aSNnPJcQ==';
+    }
+    if (zipurl === 'https://zipprocessing.azurewebsites.net') {
       this.unzipFile = '/api/UnzipFile?code=9pCaBiclLRo89t807YAKVMW6yDrizwC3ggJC2YeaEq6HKs/gDkywnQ==';
     }
     return this.http.post<any>(`${environment.zipUrl}${this.unzipFile}`,
-      {"zipfile":url})
+      { "zipfile": url })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -927,9 +968,15 @@ export class MainService {
   }
 
   getMemoryStream(url: any): Observable<any> {
-    this.getPortalSpecificUrlforZip();
+    // this.getPortalSpecificUrlforZip();
     let zipurl = `${environment.zipUrl}`;
-    if (zipurl != 'https://sscportalazurefunctions.azurewebsites.net') {
+    if (zipurl === 'https://sscportalazurefunctions.azurewebsites.net') {
+      this.memStream = '/api/GetMemoryStream?code=QsFvvR7iP/iXKpZAO0YcsvIR6PAY9mOtETT6oTT7UcDa6QKs9YD1FA==';
+    }
+    if (zipurl === 'https://sscazurefunctionsdev.azurewebsites.net') {
+      this.memStream = '/api/GetMemoryStream?code=BrPSbj8hRXNKAihXR91dUQBxyDCAKoMiAcaVBePb9sj5qdQPMRuOyw==';
+    }
+    if (zipurl === 'https://zipprocessing.azurewebsites.net') {
       this.memStream = '/api/GetMemoryStream?code=8ua2iLhT0vQ1qf1dffuQ51Ll9d33QflFhQ/UaOUl7YqAPs3KBaK8EA==';
     }
     return this.http.post<any>(`${environment.zipUrl}${this.memStream}`,
@@ -941,9 +988,15 @@ export class MainService {
   }
 
   getCodesetMemoryStream(url: any): Promise<any> {
-    this.getPortalSpecificUrlforZip();
+    // this.getPortalSpecificUrlforZip();
     let zipurl = `${environment.zipUrl}`;
-    if (zipurl != 'https://sscportalazurefunctions.azurewebsites.net') {
+    if (zipurl === 'https://sscportalazurefunctions.azurewebsites.net') {
+      this.memStream = '/api/GetMemoryStream?code=QsFvvR7iP/iXKpZAO0YcsvIR6PAY9mOtETT6oTT7UcDa6QKs9YD1FA==';
+    }
+    if (zipurl === 'https://sscazurefunctionsdev.azurewebsites.net') {
+      this.memStream = '/api/GetMemoryStream?code=BrPSbj8hRXNKAihXR91dUQBxyDCAKoMiAcaVBePb9sj5qdQPMRuOyw==';
+    }
+    if (zipurl === 'https://zipprocessing.azurewebsites.net') {
       this.memStream = '/api/GetMemoryStream?code=8ua2iLhT0vQ1qf1dffuQ51Ll9d33QflFhQ/UaOUl7YqAPs3KBaK8EA==';
     }
     return this.http.post<any>(`${environment.zipUrl}${this.memStream}`,
@@ -954,11 +1007,13 @@ export class MainService {
       ).toPromise();
   }
 
-  loadBinZip(dbname: any, projectname: any, dbversion: any, projectversion: any, swversion: any, binfile: any, binchecksum: any, zipfile: any, zipchecksum: any, statusflag:any): Observable<any> {
+  loadBinZip(dbname: any, projectname: any, dbversion: any, projectversion: any, swversion: any, binfile: any, binchecksum: any, zipfile: any, zipchecksum: any, statusflag: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/LoadBinAndZip`,
-      { "dbname": dbname, "projectname": projectname, "dbversion": dbversion, "projectversion": projectversion,
-        "swversion": swversion, "binfile": binfile, "binchecksum": binchecksum, "zipfile": zipfile, "zipchecksum": zipchecksum, "statusflag": statusflag})
+      {
+        "dbname": dbname, "projectname": projectname, "dbversion": dbversion, "projectversion": projectversion,
+        "swversion": swversion, "binfile": binfile, "binchecksum": binchecksum, "zipfile": zipfile, "zipchecksum": zipchecksum, "statusflag": statusflag
+      })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -974,15 +1029,15 @@ export class MainService {
         catchError(this.handleEventerror)
       ).toPromise();
   }
-  
+
   deleteZipFile(Dbname: any, Projectname: any, Embeddedversion: any, Contenttype: any): Promise<any> {
-    
+
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/DeleteContents`,
       { "Dbname": Dbname, "Projectname": Projectname, "Embeddedversion": Embeddedversion, "Contenttype": Contenttype })
       .pipe(
         retry(1),
         catchError(this.handleEventerror)
-    ).toPromise();
+      ).toPromise();
 
   }
 
@@ -990,10 +1045,10 @@ export class MainService {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Stats/GetProductionDBStats`,
       { "dbname": dbname, "projectname": projectname, "startdate": startdate, "enddate": enddate, "datatype": datatype })
-     .pipe(
-      retry(1),
-      catchError(this.handleError)
-    ).toPromise();
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
   }
 
   crudApiList(dbname: any, crudtype: any, project: any, signaturekey: any, apiname: any, address: any, uri: any, description: any, status: any, pid: any): Promise<any> {
@@ -1003,7 +1058,7 @@ export class MainService {
       .pipe(
         retry(1),
         catchError(this.handleError)
-    ).toPromise();
+      ).toPromise();
   }
 
   hdmiData(dbname: any, projectName: any): Observable<any> {
@@ -1019,21 +1074,132 @@ export class MainService {
   }
 
 
-  MigrateRawToStaging(Crudtype: any, Detectionid: any,Device: any, Subdevice: any, Brand: any,Model: any,Regioncountry: any,Year: any,cecpresent:any,
-    cecenabled:any,vendoridhex: any, vendoridstring: any,osdhex: any, osdstring: any, ediddata: any,uid: any,statusflag: any,
-    recordid:any): Observable<any> {
+  MigrateRawToStaging(Crudtype: any, Detectionid: any, Device: any, Subdevice: any, Brand: any, Model: any, Regioncountry: any, Year: any, cecpresent: any,
+    cecenabled: any, vendoridhex: any, vendoridstring: any, osdhex: any, osdstring: any, ediddata: any, uid: any, statusflag: any,
+    recordid: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/CecEdid/MigrateRawToStaging`,
-      { 
-          "crudtype": Crudtype, "detectionid":Detectionid,"device":Device, "subdevice":Subdevice, "brand":Brand, "model":Model, 
-          "regioncountry":Regioncountry, "year":Year, "cecpresent":cecpresent, "cecenabled":cecenabled, "vendoridhex":vendoridhex,
-          "vendoridstring":vendoridstring, "osdhex":osdhex, "osdstring":osdstring, "ediddata":ediddata, "uid":uid, "statusflag":statusflag,
-          "recordid":recordid
-     })
+      {
+        "crudtype": Crudtype, "detectionid": Detectionid, "device": Device, "subdevice": Subdevice, "brand": Brand, "model": Model,
+        "regioncountry": Regioncountry, "year": Year, "cecpresent": cecpresent, "cecenabled": cecenabled, "vendoridhex": vendoridhex,
+        "vendoridstring": vendoridstring, "osdhex": osdhex, "osdstring": osdstring, "ediddata": ediddata, "uid": uid, "statusflag": statusflag,
+        "recordid": recordid
+      })
       .pipe(
         retry(1),
         catchError(this.handleError)
       );
+  }
+
+  RawToStaging(Crudtype: any, Jsondata: any, detectionid: any, statusflag: any): Promise<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/Detection/RawToStaging`,
+      { "crudtype": Crudtype, "jsondata": Jsondata, "detectionid": detectionid, "statusflag": statusflag })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
+  }
+
+  LoadDetectionInJSON(CECDevice: any, device: any, brand: any, model: any, Jsondata: any, Statusflag: any, Recordid: any, Crudtype: any): Promise<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/Detection/LoadDetectionInJSON`,
+      {
+        "CECDevice": CECDevice, "Device": device, "Brand": brand, "Model": model, "Jsondata": Jsondata,
+        "Statusflag": Statusflag, "Recordid": Recordid, "Crudtype": Crudtype
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
+  }
+
+  DecodeUrl(EDID: any): Promise<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/EDID`,
+      { "Edid": EDID })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
+  }
+
+  ClearDefaultBoxIdLogs(dbname: any, boxid: any): Promise<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/Admin/ClearDefaultBoxIdLogs`,
+      {
+        "dbname": dbname, "boxid": boxid
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
+  }
+
+  getRemoteUID(brand: any, componentModel: any, deviceCategory: any): Observable<any> {
+    let token = "WittSSUPortalConnector2020"
+    let headers = new HttpHeaders().append('Authorization', `Bearer ${token}`);
+    let options = {
+      headers: headers
+    }
+    return this.http.post<any>(`${environment.getuidurl}/api/WittSSUPortal/getRemoteUID`,
+      { "brand": brand, "componentModel": componentModel, "deviceCategory": deviceCategory }, options)
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+
+  Genericlog(crudtype: any, id: any, log: any): Promise<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/Admin/GenericLog`,
+      {
+        "crudtype": crudtype,
+        "loginid": id,
+        "log": log
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
+  }
+
+  StagingToProd(Crudtype: any, Projectname: any, Device: any, Subdevice: any, Brand: any, Model: any, Region: any, country: any, cecpresent: any,
+    cecenabled: any, vendorid: any, osd: any, ediddata: any, codeset: any, recordid: any): Promise<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/Detection//StagingToProd`,
+      {
+        "crudtype": Crudtype, "Projectname": Projectname, "device": Device, "subdevice": Subdevice, "brand": Brand, "model": Model,
+        "region": Region, "country": country, "iscecpresent": cecpresent, "iscecenabled": cecenabled, "vendorid": vendorid,
+        "osd": osd, "edid": ediddata, "codeset": codeset, "recordid": recordid
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
+  }
+
+  CECEDID_NewProject(Crudtype: any, Projectname: any, signaturekey: any, dbpath: any, statusflag: any, recordid: any): Promise<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/Admin/CECEDID_NewProject`,
+      {
+        "crudtype": Crudtype, "projectname": Projectname, "signaturekey": signaturekey, "dbpath": dbpath, "statusflag": statusflag, "recordid": recordid
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
+  }
+
+  Notifications(Crudtype: any, Projectname: any, dbversion: any, dbpath: any, data: any, loginid: any, notificationid: any, statusflag: any, recordid: any): Promise<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/Admin/Notifications`,
+      {
+        "crudtype": Crudtype, "projectname": Projectname, "dbversion": dbversion, "dbpath": dbpath, "data": data, "loginid": loginid, "recordid": recordid, "notificationid": notificationid, "statusflag": statusflag
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
   }
 
   handleError(error) {
@@ -1043,13 +1209,13 @@ export class MainService {
       errorMessage = `Error: ${error.error.message}`;
     } else {
       // server-side error
-     // alert(errorMessage);
+      // alert(errorMessage);
       if (errorMessage != '') {
         errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}\nErrorStatus: ${error.error.errormessage}`;
       } else {
         errorMessage = `Error Message: ${error}`;
       }
-      
+
     }
     if (!navigator.onLine) {
       // Handle offline error
@@ -1058,7 +1224,7 @@ export class MainService {
           location.reload();
         }
       });
-      
+
     } else {
       if (error.status != undefined || error.message != undefined) {
         // Handle Http Error (error.status === 403, 404...)
@@ -1067,8 +1233,8 @@ export class MainService {
         return alertify.alert(`${error}`);
       }
     }
-   // alertify.alert(error);
-   // return throwError(errorMessage);
+    // alertify.alert(error);
+    // return throwError(errorMessage);
   }
 
   handleEventerror(error) {
@@ -1095,9 +1261,9 @@ export class MainService {
         return alertify.alert(`${error}`);
       }
     }
-   // alertify.alert(error);
-   // return throwError(errorMessage);
+    // alertify.alert(error);
+    // return throwError(errorMessage);
   }
 
 
-  }
+}

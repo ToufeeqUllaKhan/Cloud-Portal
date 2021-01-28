@@ -30,7 +30,7 @@ export class LoginComponent implements OnInit {
     this.titleService.setTitle("Login - SSC");
   }
 
-	
+
 
   ngOnInit() {
     this.loginForm = this.fb.group({
@@ -129,7 +129,7 @@ export class LoginComponent implements OnInit {
     //  //this.toastr.error(getValidation['message'], 'SSC Says..');
     //}
 
-    
+
   }
 
 }

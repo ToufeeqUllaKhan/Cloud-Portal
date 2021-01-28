@@ -18,7 +18,7 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "aot": false,
+            "aot": true,
             "assets": [
               "src/assets",
               "src/web.config",
@@ -37,15 +37,28 @@
               "node_modules/alertifyjs/build/css/alertify.min.css",
               "node_modules/font-awesome/css/font-awesome.css",
               "node_modules/datatables.net-dt/css/jquery.dataTables.css",
-              "node_modules/roboto-fontface/css/roboto/roboto-fontface.css"
+              "node_modules/roboto-fontface/css/roboto/roboto-fontface.css",
+              "node_modules/angular-archwizard/archwizard.css",
+              "node_modules/ag-grid-community/dist/styles/ag-grid.css",
+              "node_modules/ag-grid-community/dist/styles/ag-theme-balham-dark.min.css"
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
               "node_modules/materialize-css/dist/js/materialize.min.js",
               "node_modules/alertifyjs/build/alertify.min.js",
               "node_modules/jquery/dist/jquery.js",
-              "node_modules/datatables.net/js/jquery.dataTables.js"
-            ]
+              "node_modules/datatables.net/js/jquery.dataTables.js",
+              "node_modules/apexcharts/dist/apexcharts.min.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "lodash",
+              "datatables.net",
+              "xml2js",
+              "xlsx",
+              "jquery",
+              "hammerjs",
+              "css-element-queries"
+           ]
           },
           "configurations": {
             "production": {
@@ -58,17 +71,15 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5mb"
+                  "maximumWarning": "5mb",
+                  "maximumError": "10mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -141,5 +152,8 @@
       }
     }
   },
-  "defaultProject": "ssc-app-ver1"
+  "defaultProject": "ssc-app-ver1",
+  "cli": {
+    "analytics": false
+  }
 }

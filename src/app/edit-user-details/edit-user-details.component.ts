@@ -3,7 +3,8 @@ import { MainService } from '../services/main-service';
 import { FormGroup, FormBuilder, Validators, FormGroupDirective } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Router, NavigationStart } from '@angular/router';
-import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
+import { NgxSpinnerService } from 'ngx-spinner';
+declare var $: any;
 
 @Component({
   selector: 'app-edit-user-details',
@@ -15,7 +16,7 @@ export class EditUserDetailsComponent implements OnInit {
   updateUserForm: FormGroup;
   submitted: Boolean = false;
   roles = [];
-  role: any= null; username: any; firstname: any; lastname: any;
+  role: any = null; username: any; firstname: any; lastname: any;
   email: any; phonenumber: any; password: any; selectedproject: any;
   projects: Array<any> = [];
   dropdownSettings: any = {}; ShowFilter = false;
@@ -24,12 +25,12 @@ export class EditUserDetailsComponent implements OnInit {
   hidePassword: Boolean = true;
   showPassword: Boolean = false;
   typeInput: any;
-  prevProjects = [];public checkLength: any;
+  prevProjects = []; public checkLength: any;
 
   @ViewChild(FormGroupDirective, { static: false }) formGroupDirective: FormGroupDirective;
 
   constructor(private mainService: MainService, private fb: FormBuilder, private toastr: ToastrService, private router: Router,
-    private spinnerService: Ng4LoadingSpinnerService) {
+    private spinnerService: NgxSpinnerService) {
     this.checkLength = 0;
   }
 
@@ -40,23 +41,25 @@ export class EditUserDetailsComponent implements OnInit {
       $('.dropdown-list ul').css('max-height', '97px');
     });
     let userName = localStorage.getItem('editUser');
-  /** List of projects */
+    /** List of projects */
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        const unique = [...new Set(value.data.map(item => item.projectname))];
+        let FilterProject = value.data.filter(u =>
+          (u.statusFlag != 2 || u.statusFlag != '2'));
+        const unique = [...new Set(FilterProject.map(item => item.projectname))];
         let arrData = [];
         for (var i = 0; i < unique.length; i++) {
           arrData.push({ item_id: i, item_text: unique[i] });
         }
         this.projects = arrData;
-      /** List of roles */
+        /** List of roles */
         let crudType = 5;
         this.mainService.createUser(crudType, null, null, null, null, null, null, null, null, null)
           .subscribe(value => {
             this.roles = value.data;
           });
-      /** User Information to append in form */
+        /** User Information to append in form */
         let crudtype = 4;
         this.mainService.createUser(crudtype, userName, null, null, null, null, null, null, null, null)
           .subscribe(value => {
@@ -69,7 +72,7 @@ export class EditUserDetailsComponent implements OnInit {
               this.mobileNumber = value.data[0]['mobile'];
               this.role = value.data[0]['roleName'];
             }
-          /** Role based default selection of projects */
+            /** Role based default selection of projects */
             if (this.role == 'Admin') {
               for (var i = 0; i < this.projects.length; i++) {
 
@@ -81,8 +84,8 @@ export class EditUserDetailsComponent implements OnInit {
               this.prevProjects = this.projectNames;
               $('.projectAccess').css('pointer-events', 'none');
             } else {
-              this.mainService.getRoleModules(8, null, null, userName, null)
-                .subscribe(value => {
+              this.mainService.getRoleModule(8, null, null, userName, null)
+                .then(value => {
                   for (var i = 0; i < value.data.length; i++) {
                     var setIndex = this.projects.findIndex(p => p.item_text == value.data[i]['name']);
 
@@ -92,10 +95,10 @@ export class EditUserDetailsComponent implements OnInit {
                   this.prevProjects = this.projectNames;
                 });
             }
-        
+
           });
       });
-  /** Validation for edit user */
+    /** Validation for edit user */
     this.updateUserForm = this.fb.group({
       Role: ['', Validators.required],
       userName: ['', Validators.required],
@@ -103,10 +106,10 @@ export class EditUserDetailsComponent implements OnInit {
       lastName: ['', Validators.required],
       passWord: ['', [Validators.required, Validators.minLength(6)]],
       eMail: ['', Validators.required],
-      mobileNo: ['', [Validators, Validators.maxLength(10)]]
+      mobileNo: ['', [Validators.required, Validators.maxLength(10)]]
     });
 
-  /** Multiselect dropdown settings */
+    /** Multiselect dropdown settings */
 
     this.dropdownSettings = {
       singleSelection: false,
@@ -120,7 +123,7 @@ export class EditUserDetailsComponent implements OnInit {
   }
 
   onInstanceSelect(item: any) {
-   // console.log('onItemSelect', item);
+    // console.log('onItemSelect', item);
   }
 
   onDeSelectAll(items: any) {
@@ -151,13 +154,13 @@ export class EditUserDetailsComponent implements OnInit {
     // console.log(this.projectNames);
   }
 
-/** Role base deafult selection of projects */
+  /** Role base deafult selection of projects */
 
   roleChange() {
     if (this.role == 'Admin') {
       this.projectNames = [];
       this.selectedItems = [];
-       for (var i = 0; i < this.projects.length; i++) {
+      for (var i = 0; i < this.projects.length; i++) {
         var setIndex = this.projects.findIndex(p => p.item_text == this.projects[i]['item_text']);
         this.selectedItems.push({ item_id: setIndex, item_text: this.projects[i]['item_text'] });
       }
@@ -170,7 +173,7 @@ export class EditUserDetailsComponent implements OnInit {
 
   get f() { return this.updateUserForm.controls; }
 
-/** Update user information submit operation */
+  /** Update user information submit operation */
 
   onUpdateUserSubmit() {
     if (this.password.length < 4) {
@@ -202,7 +205,7 @@ export class EditUserDetailsComponent implements OnInit {
                       });
                   }
                   this.spinnerService.hide();
-                 this.router.navigate(['/user-library']);
+                  this.router.navigate(['/user-library']);
                 }
               });
           }
@@ -223,7 +226,7 @@ export class EditUserDetailsComponent implements OnInit {
       });
   }
 
-/** New Role is clicked to handle new role page breadcrumbs list in add role page */
+  /** New Role is clicked to handle new role page breadcrumbs list in add role page */
 
   newRole() {
     localStorage.removeItem('previousUrl');
@@ -236,12 +239,12 @@ export class EditUserDetailsComponent implements OnInit {
     this.router.navigate(['/add-roles']);
   }
 
-/** Eye icon visiblity function to show and hide password */
+  /** Eye icon visiblity function to show and hide password */
   show() {
     this.typeInput = 'text';
     this.showPassword = true;
     this.hidePassword = false;
-    
+
   }
 
   hide() {

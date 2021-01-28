@@ -19,7 +19,9 @@
     <div class="col-lg-12 col-xlg-12 col-md-12">
       <div class="card">
         <div class="card-block">
-          <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'" [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)" (onSelect)="onProjectSelect($event)" style="pointer-events:none;"></ng-multiselect-dropdown>
+          <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'"
+            [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)"
+            (onSelect)="onProjectSelect($event)" style="pointer-events:none;"></ng-multiselect-dropdown>
         </div>
       </div>
     </div>
@@ -43,7 +45,9 @@
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-4 col-form-label">Version</label>
-                  <select [(ngModel)]='version_list' (change)="changeVersion()" formControlName="VersionData" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': submitted && f.VersionData.errors }">
+                  <select [(ngModel)]='version_list' (change)="changeVersion()" formControlName="VersionData"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': submitted && f.VersionData.errors }">
                     <option [value]=null>Select</option>
                     <option *ngFor="let list of versions" value={{list}}>{{list}}</option>
                   </select>
@@ -65,8 +69,11 @@
                   <label></label>
                   <label *ngIf="versionAvail">File Already Exists!!</label>
                   <label *ngIf="versionUpdate" class="dark-blue">Click here to Update</label>
-                  <input formControlName="zipUpload" id="file-upload" (change)="uploadFileData($event)" name='upload_cont_img' type="file" style="display:none;" class="form-control" accept="application/zip">
-                  <button id="openModalButton" [hidden]="true" data-toggle="modal" data-target="#updateModal" data-backdrop="static" data-keyboard="false"></button>
+                  <input formControlName="zipUpload" id="file-upload" (change)="uploadFileData($event)"
+                    name='upload_cont_img' type="file" style="display:none;" class="form-control"
+                    accept="application/zip">
+                  <button id="openModalButton" [hidden]="true" data-toggle="modal" data-target="#updateModal"
+                    data-backdrop="static" data-keyboard="false"></button>
 
                 </div>
               </div>
@@ -81,13 +88,26 @@
         <div class="card-block">
           <h6 class="text-muted text-uppercase font-size-md opacity-7 mb-3 font-weight-normal">Highlights</h6>
           <ul style="list-style:none;" *ngFor="let count of countDetails;">
-            <li class="list-group-item light-purple">Brand Count <span class="float-right">{{count.brandCount}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
-            <li class="list-group-item light-yellow">Brand Info CeC <span class="float-right">{{count.brandInfoCEC}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
-            <li class="list-group-item light-purple">Brand Info Edid <span class="float-right">{{count.brandInfoEdid}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
-            <li class="list-group-item light-yellow">Codeset Count <span class="float-right">{{count.codesetCount}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
-            <li class="list-group-item light-purple">Cross Reference Count <span class="float-right">{{count.crossReferenceCount}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
-            <li class="list-group-item light-yellow">Brand Model Count <span class="float-right">{{count.brandModelCount}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
-            <li class="list-group-item light-purple">CEC-EDID <span class="float-right">{{count.ceC_EDID_Data}} &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-purple">Brand Count <span class="float-right">{{count.brandCount}} &nbsp;<i
+                  class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-yellow">Brand Info CeC <span class="float-right">{{count.brandInfoCEC}}
+                &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-purple">Brand Info Edid <span class="float-right">{{count.brandInfoEdid}}
+                &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-yellow">Codeset Count <span class="float-right">{{count.codesetCount}}
+                &nbsp;<i class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-purple">Cross Reference Count <span
+                class="float-right">{{count.crossReferenceCount}} &nbsp;<i class="fa fa-check-circle-o"
+                  aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-yellow">Brand Model Count <span
+                class="float-right">{{count.brandModelCount}} &nbsp;<i class="fa fa-check-circle-o"
+                  aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-purple">CEC-EDID <span class="float-right">{{count.ceC_EDID_Data}} &nbsp;<i
+                  class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-yellow">CEC-Only <span class="float-right">{{count.cecOnly}} &nbsp;<i
+                  class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
+            <li class="list-group-item light-purple">EDID-Only <span class="float-right">{{count.edidOnly}} &nbsp;<i
+                  class="fa fa-check-circle-o" aria-hidden="true"></i></span></li>
           </ul>
         </div>
       </div>
@@ -137,27 +157,35 @@
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-6 col-form-label">Project Version</label>
-                  <input type="text" [(ngModel)]="project_version" formControlName="projectVersion" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': newDataSubmitted && g.projectVersion.errors }" />
+                  <input type="number" [(ngModel)]="project_version" min="0" formControlName="projectVersion"
+                    class="form-control form-control-line col-sm-6"
+                    [ngClass]="{ 'is-invalid': newDataSubmitted && g.projectVersion.errors }" />
 
                   <div *ngIf="newDataSubmitted && g.projectVersion.errors" class="invalid-feedback">
-                    <div *ngIf="g.projectVersion.errors.required" class="error-defined">Project Version is required</div>
+                    <div *ngIf="g.projectVersion.errors.required" class="error-defined">Project Version is required
+                    </div>
                   </div>
                 </div>
               </div>
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-6 col-form-label">Embedded dbversion</label>
-                  <input type="text" [(ngModel)]="embed_version" formControlName="embeddedDBversion" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': newDataSubmitted && g.embeddedDBversion.errors }" />
+                  <input type="text" [(ngModel)]="embed_version" formControlName="embeddedDBversion"
+                    class="form-control form-control-line col-sm-6"
+                    [ngClass]="{ 'is-invalid': newDataSubmitted && g.embeddedDBversion.errors }" />
 
                   <div *ngIf="newDataSubmitted && g.embeddedDBversion.errors" class="invalid-feedback">
-                    <div *ngIf="g.embeddedDBversion.errors.required" class="error-defined">Embedded dbversion is required</div>
+                    <div *ngIf="g.embeddedDBversion.errors.required" class="error-defined">Embedded dbversion is
+                      required</div>
                   </div>
                 </div>
               </div>
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-6 col-form-label">DB Version</label>
-                  <input type="text" [(ngModel)]="db_version" formControlName="dbversion" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': newDataSubmitted && g.dbversion.errors }" />
+                  <input type="text" [(ngModel)]="db_version" formControlName="dbversion"
+                    class="form-control form-control-line col-sm-6"
+                    [ngClass]="{ 'is-invalid': newDataSubmitted && g.dbversion.errors }" />
 
                   <div *ngIf="newDataSubmitted && g.dbversion.errors" class="invalid-feedback">
                     <div *ngIf="g.dbversion.errors.required" class="error-defined">DB Version is required</div>
@@ -167,7 +195,9 @@
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-6 col-form-label">SW Version</label>
-                  <input type="text" [(ngModel)]="sw_version" formControlName="swversion" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': newDataSubmitted && g.swversion.errors }" />
+                  <input type="number" [(ngModel)]="sw_version" min="0" formControlName="swversion"
+                    class="form-control form-control-line col-sm-6"
+                    [ngClass]="{ 'is-invalid': newDataSubmitted && g.swversion.errors }" />
 
                   <div *ngIf="newDataSubmitted && g.swversion.errors" class="invalid-feedback">
                     <div *ngIf="g.swversion.errors.required" class="error-defined">SW Version is required</div>
@@ -194,7 +224,8 @@
           <div class="row">
             <div class="col-sm-12 float-right" style="display:none;">
               <span style="color: #1e88e5;">Cancel &nbsp;</span>
-              <button class="reset" title="Click here to Cancel Zip Uploads" data-toggle="modal" data-target="#deleteModal" data-backdrop="static" data-keyboard="false">
+              <button class="reset" title="Click here to Cancel Zip Uploads" data-toggle="modal"
+                data-target="#deleteModal" data-backdrop="static" data-keyboard="false">
                 <i class="fa fa-stop" aria-hidden="true"></i>
               </button>
             </div>
@@ -203,7 +234,8 @@
             <br />
             <p class="blue-bold">{{progressName}}</p>
             <div class="progress" *ngIf="isProgreessVisible">
-              <div class="progress-bar progress-bar-striped progress-bar-animated active bg-info" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width.%':progressWidth}">
+              <div class="progress-bar progress-bar-striped progress-bar-animated active bg-info" role="progressbar"
+                aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width.%':progressWidth}">
                 {{progressWidth}}%
               </div>
             </div>
@@ -217,7 +249,8 @@
                   </label>
                   &nbsp;&nbsp;
                   <label></label>
-                  <input formControlName="zipFileUpload" (change)="zipUpload($event)" accept="application/zip" id="zip-upload" name='upload_cont_img' type="file" style="display:none;" class="form-control" />
+                  <input formControlName="zipFileUpload" (change)="zipUpload($event)" accept="application/zip"
+                    id="zip-upload" name='upload_cont_img' type="file" style="display:none;" class="form-control" />
                 </div>
               </div>
               <div class="col-sm-2">
@@ -247,7 +280,8 @@
             </thead>
             <tbody class="form-scroll">
               <tr *ngFor="let data of Listitems;let i=index;" class="addDataAttr">
-                <td class="checkGreen" style="text-align:center;width:80px;"><i class="fa fa-check-circle-o green" aria-hidden="true"></i></td>
+                <td class="checkGreen" style="text-align:center;width:80px;"><i class="fa fa-check-circle-o green"
+                    aria-hidden="true"></i></td>
                 <td class="purple" style="width: 222px;">{{data}}</td>
                 <td class="red" attr.data-val="data-{{data}}">pending</td>
               </tr>
@@ -256,10 +290,13 @@
         </div>
       </div>
     </div>
-    <div class="col-xs-12 col-sm-6" *ngIf="isdataUploaded">
+    <div class="col-xs-12 col-sm-12" *ngIf="isdataUploaded" style="margin-top: 20px;">
       <div class="card" style="height:372px;">
-        <h5 class="h5-color">Overview</h5>
+        <h5 class="h5-color">Overview</h5>&nbsp;
         <span class="bb-grey">&nbsp;</span>
+        <span style="margin-left:880px;"><b> StartTime: </b>{{Starttime}} </span>
+        <span style="margin-left:880px;" *ngIf="show"><b> EndTime: </b>{{Endtime}}</span>
+
         <div class="card-block">
           <table class="table table-bordered table-data">
             <thead>
@@ -267,9 +304,12 @@
                 <th style="width:217px;">
                   <span><i class="fa fa-star blue" aria-hidden="true"></i></span>
                 </th>
-                <th class="colorGreen" style="width:90px;">Inserted</th>
-                <th class="colorOrange" style="width: 90px;">Exists</th>
+                <th class="colorGreen">Inserted</th>
+                <th class="colorOrange">Exists</th>
                 <th class="colorRed">Failed</th>
+                <th class="colorRed">Time Consumed</th>
+                <th class="colorGreen">Valid Records</th>
+                <th class="colorRed">Invalid Records</th>
               </tr>
             </thead>
             <tbody class="form-scroll">
@@ -277,43 +317,100 @@
                 <th class="blueHeader width-align">{{dataName}}</th>
                 <td class="colorGreen">{{InsertCount}}</td>
                 <td class="colorOrange">{{ExistsCount}}</td>
-                <td class="colorRed">{{FailedCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_1"><u>{{FailedCount}}</u></a></td>
+                <td class="colorRed">{{timer}}min</td>
+                <td class="colorGreen">{{valid}}</td>
+                <td class="colorRed">{{invalid}}</td>
               </tr>
               <tr *ngIf="codeVisible">
                 <th class="blueHeader width-align">{{dataCodeName}}</th>
                 <td class="colorGreen">{{InsertCodeCount}}</td>
                 <td class="colorOrange">{{ExistsCodeCount}}</td>
-                <td class="colorRed">{{FailedCodeCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_2"><u>{{FailedCodeCount}}</u></a></td>
+                <td class="colorRed">{{timer1}}min</td>
+                <td class="colorGreen">{{valid_1}}</td>
+                <td class="colorRed">{{invalid_1}}</td>
               </tr>
               <tr *ngIf="crossDataVisible">
                 <th class="blueHeader width-align">{{dataCrossName}}</th>
                 <td class="colorGreen">{{InsertCrossCount}}</td>
                 <td class="colorOrange">{{ExistsCrossCount}}</td>
-                <td class="colorRed">{{FailedCrossCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_3"><u>{{FailedCrossCount}}</u></a></td>
+                <td class="colorRed">{{timer3}}min</td>
+                <td class="colorGreen">{{valid_3}}</td>
+                <td class="colorRed">{{invalid_3}}</td>
               </tr>
               <tr *ngIf="brandVisible">
                 <th class="blueHeader width-align">{{dataBrandName}}</th>
                 <td class="colorGreen">{{InsertBrandCount}}</td>
                 <td class="colorOrange">{{ExistsBrandCount}}</td>
-                <td class="colorRed">{{FailedBrandCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_4"><u>{{FailedBrandCount}}</u></a></td>
+                <td class="colorRed">{{timer4}}min</td>
+                <td class="colorGreen">{{valid_4}}</td>
+                <td class="colorRed">{{invalid_4}}</td>
               </tr>
               <tr *ngIf="cecDataVisible">
                 <th class="blueHeader width-align">{{dataCecName}}</th>
                 <td class="colorGreen">{{InsertCecCount}}</td>
                 <td class="colorOrange">{{ExistsCecCount}}</td>
-                <td class="colorRed">{{FailedCecCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_5"><u>{{FailedCecCount}}</u></a></td>
+                <td class="colorRed">{{timer5}}min</td>
+                <td class="colorGreen">{{valid_5}}</td>
+                <td class="colorRed">{{invalid_5}}</td>
               </tr>
               <tr *ngIf="edidDataVisible">
                 <th class="blueHeader width-align">{{dataEdidName}}</th>
                 <td class="colorGreen">{{InsertEdidCount}}</td>
                 <td class="colorOrange">{{ExistsEdidCount}}</td>
-                <td class="colorRed">{{FailedEdidCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_6"><u>{{FailedEdidCount}}</u></a></td>
+                <td class="colorRed">{{timer6}}min</td>
+                <td class="colorGreen">{{valid_6}}</td>
+                <td class="colorRed">{{invalid_6}}</td>
               </tr>
               <tr *ngIf="cecEdidDataVisible">
                 <th class="blueHeader width-align">{{dataCecEdidName}}</th>
                 <td class="colorGreen">{{InsertCecEdidCount}}</td>
                 <td class="colorOrange">{{ExistsCecEdidCount}}</td>
-                <td class="colorRed">{{FailedCecEdidCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_7"><u>{{FailedCecEdidCount}}</u></a></td>
+                <td class="colorRed">{{timer7}}min</td>
+                <td class="colorGreen">{{valid_7}}</td>
+                <td class="colorRed">{{invalid_7}}</td>
+              </tr>
+              <tr *ngIf="cecEdidDataVisible">
+                <th class="blueHeader width-align" style="text-align: center;color: blueviolet;">{{dataCeconly}}</th>
+                <td class="colorGreen">{{InsertCeconlyCount}}</td>
+                <td class="colorOrange">0</td>
+                <td class="colorRed">-</td>
+                <td class="colorRed">-</td>
+                <td class="colorGreen">{{valid_8}}</td>
+                <td class="colorRed" title="Out of {{valid_7}} Valid records, for {{invalid_8}} records CEC data is absent" style="cursor:pointer"><u>{{invalid_8}}</u></td>
+              </tr>
+              <tr *ngIf="cecEdidDataVisible">
+                <th class="blueHeader width-align" style="text-align: center;color: blueviolet;">{{dataEdidonly}}</th>
+                <td class="colorGreen">{{InsertEdidonlyCount}}</td>
+                <td class="colorOrange">0</td>
+                <td class="colorRed">-</td>
+                <td class="colorRed">-</td>
+                <td class="colorGreen">{{valid_9}}</td>
+                <td class="colorRed" title="Out of {{valid_7}} Valid records, for {{invalid_9}} records EDID data is absent" style="cursor:pointer"><u>{{invalid_9}}</u></td>
+              </tr>
+              <tr *ngIf="show">
+                <td>
+                  <div style="float: right;">
+                    <b>Total Time: </b>
+                    <b>{{timercount}} min</b>&nbsp;&nbsp;
+                    <button class="btn btn-info float-right" title="Download CEC-EDID data"
+                      (click)="SingleexcelDownload()">
+                      <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -331,7 +428,8 @@
             <br />
             <p class="blue-bold">{{progressName}}</p>
             <div class="progress" *ngIf="isProgreessVisible">
-              <div class="progress-bar progress-bar-striped progress-bar-animated active bg-info" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width.%':progressWidth}">
+              <div class="progress-bar progress-bar-striped progress-bar-animated active bg-info" role="progressbar"
+                aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" [ngStyle]="{'width.%':progressWidth}">
                 {{progressWidth}}%
               </div>
             </div>
@@ -345,9 +443,12 @@
                   </label>
                   &nbsp;&nbsp;
                   <label></label>
-                  <input formControlName="zipFileUpdate" (change)="UpdatezipFiles($event)" accept="application/zip" id="zip-update" name='upload_cont_img' type="file" style="display:none;" class="form-control" />
-                  <button id="selectModalButton" [hidden]="true" data-toggle="modal" data-target="#UpdateSelectedModal" data-backdrop="static" data-keyboard="false"></button>
-                  <button id="uploadedModalButton" [hidden]="true" data-toggle="modal" data-target="#uploadedModal" data-backdrop="static" data-keyboard="false"></button>
+                  <input formControlName="zipFileUpdate" (change)="UpdatezipFiles($event)" accept="application/zip"
+                    id="zip-update" name='upload_cont_img' type="file" style="display:none;" class="form-control" />
+                  <button id="selectModalButton" [hidden]="true" data-toggle="modal" data-target="#UpdateSelectedModal"
+                    data-backdrop="static" data-keyboard="false"></button>
+                  <button id="uploadedModalButton" [hidden]="true" data-toggle="modal" data-target="#uploadedModal"
+                    data-backdrop="static" data-keyboard="false"></button>
                 </div>
               </div>
               <div class="col-sm-2">
@@ -377,7 +478,8 @@
             </thead>
             <tbody class="form-scroll">
               <tr *ngFor="let data of Listitems;let i=index;" class="addDataAttr">
-                <td class="checkGreen" style="text-align:center;width:80px;"><i class="fa fa-check-circle-o green" aria-hidden="true"></i></td>
+                <td class="checkGreen" style="text-align:center;width:80px;"><i class="fa fa-check-circle-o green"
+                    aria-hidden="true"></i></td>
                 <td class="purple" style="width: 250px;">{{data}}</td>
                 <td class="red" attr.data-val="data-{{data}}">pending</td>
               </tr>
@@ -386,10 +488,12 @@
         </div>
       </div>
     </div>
-    <div class="col-xs-12 col-sm-6" *ngIf="isdataUploaded">
-      <div class="card" style="height:372px;">
-        <h5 class="h5-color">Overview</h5>
+    <div class="col-xs-12 col-sm-12" *ngIf="isdataUploaded" style="margin-top: 20px;">
+      <div class="card" style="height:auto;">
+        <h5 class="h5-color">Overview</h5>&nbsp;
         <span class="bb-grey">&nbsp;</span>
+        <span style="margin-left:880px;"><b> StartTime: </b>{{Starttime}} </span>
+        <span style="margin-left:880px;" *ngIf="show"><b> EndTime: </b>{{Endtime}}</span>
         <div class="card-block">
           <table class="table table-bordered table-data">
             <thead>
@@ -397,9 +501,12 @@
                 <th style="width:217px;">
                   <span><i class="fa fa-star blue" aria-hidden="true"></i></span>
                 </th>
-                <th class="colorGreen" style="width:90px;">Inserted</th>
-                <th class="colorOrange" style="width: 90px;">Exists</th>
+                <th class="colorGreen">Inserted</th>
+                <th class="colorOrange">Exists</th>
                 <th class="colorRed">Failed</th>
+                <th class="colorRed">Time Consumed</th>
+                <th class="colorGreen">Valid Records</th>
+                <th class="colorRed">Invalid Records</th>
               </tr>
             </thead>
             <tbody class="form-scroll">
@@ -407,43 +514,100 @@
                 <th class="blueHeader width-align">{{dataName}}</th>
                 <td class="colorGreen">{{InsertCount}}</td>
                 <td class="colorOrange">{{ExistsCount}}</td>
-                <td class="colorRed">{{FailedCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_1"><u>{{FailedCount}}</u></a></td>
+                <td class="colorRed">{{timer}}min</td>
+                <td class="colorGreen">{{valid}}</td>
+                <td class="colorRed">{{invalid}}</td>
               </tr>
               <tr *ngIf="codeVisible">
                 <th class="blueHeader width-align">{{dataCodeName}}</th>
                 <td class="colorGreen">{{InsertCodeCount}}</td>
                 <td class="colorOrange">{{ExistsCodeCount}}</td>
-                <td class="colorRed">{{FailedCodeCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_2"><u>{{FailedCodeCount}}</u></a></td>
+                <td class="colorRed">{{timer1}}min</td>
+                <td class="colorGreen">{{valid_1}}</td>
+                <td class="colorRed">{{invalid_1}}</td>
               </tr>
               <tr *ngIf="crossDataVisible">
                 <th class="blueHeader width-align">{{dataCrossName}}</th>
                 <td class="colorGreen">{{InsertCrossCount}}</td>
                 <td class="colorOrange">{{ExistsCrossCount}}</td>
-                <td class="colorRed">{{FailedCrossCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_3"><u>{{FailedCrossCount}}</u></a></td>
+                <td class="colorRed">{{timer3}}min</td>
+                <td class="colorGreen">{{valid_3}}</td>
+                <td class="colorRed">{{invalid_3}}</td>
               </tr>
               <tr *ngIf="brandVisible">
                 <th class="blueHeader width-align">{{dataBrandName}}</th>
                 <td class="colorGreen">{{InsertBrandCount}}</td>
                 <td class="colorOrange">{{ExistsBrandCount}}</td>
-                <td class="colorRed">{{FailedBrandCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_4"><u>{{FailedBrandCount}}</u></a></td>
+                <td class="colorRed">{{timer4}}min</td>
+                <td class="colorGreen">{{valid_4}}</td>
+                <td class="colorRed">{{invalid_4}}</td>
               </tr>
               <tr *ngIf="cecDataVisible">
                 <th class="blueHeader width-align">{{dataCecName}}</th>
                 <td class="colorGreen">{{InsertCecCount}}</td>
                 <td class="colorOrange">{{ExistsCecCount}}</td>
-                <td class="colorRed">{{FailedCecCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_5"><u>{{FailedCecCount}}</u></a></td>
+                <td class="colorRed">{{timer5}}min</td>
+                <td class="colorGreen">{{valid_5}}</td>
+                <td class="colorRed">{{invalid_5}}</td>
               </tr>
               <tr *ngIf="edidDataVisible">
                 <th class="blueHeader width-align">{{dataEdidName}}</th>
                 <td class="colorGreen">{{InsertEdidCount}}</td>
                 <td class="colorOrange">{{ExistsEdidCount}}</td>
-                <td class="colorRed">{{FailedEdidCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_6"><u>{{FailedEdidCount}}</u></a></td>
+                <td class="colorRed">{{timer6}}min</td>
+                <td class="colorGreen">{{valid_6}}</td>
+                <td class="colorRed">{{invalid_6}}</td>
               </tr>
               <tr *ngIf="cecEdidDataVisible">
                 <th class="blueHeader width-align">{{dataCecEdidName}}</th>
                 <td class="colorGreen">{{InsertCecEdidCount}}</td>
                 <td class="colorOrange">{{ExistsCecEdidCount}}</td>
-                <td class="colorRed">{{FailedCecEdidCount}}</td>
+                <td class="colorRed" style="cursor:pointer"><a data-toggle="modal"
+                    data-target="#edidDataModal_7"><u>{{FailedCecEdidCount}}</u></a></td>
+                <td class="colorRed">{{timer7}}min</td>
+                <td class="colorGreen">{{valid_7}}</td>
+                <td class="colorRed">{{invalid_7}}</td>
+              </tr>
+              <tr *ngIf="cecEdidDataVisible">
+                <th class="blueHeader width-align" style="text-align: center;color: blueviolet;">{{dataCeconly}}</th>
+                <td class="colorGreen">{{InsertCeconlyCount}}</td>
+                <td class="colorOrange">0</td>
+                <td class="colorRed">-</td>
+                <td class="colorRed">-</td>
+                <td class="colorGreen">{{valid_8}}</td>
+                <td class="colorRed" title="Out of {{valid_7}} Valid records, for {{invalid_8}} records CEC data is absent" style="cursor:pointer"><u>{{invalid_8}}</u></td>
+              </tr>
+              <tr *ngIf="cecEdidDataVisible">
+                <th class="blueHeader width-align" style="text-align: center;color: blueviolet;">{{dataEdidonly}}</th>
+                <td class="colorGreen">{{InsertEdidonlyCount}}</td>
+                <td class="colorOrange">0</td>
+                <td class="colorRed">-</td>
+                <td class="colorRed">-</td>
+                <td class="colorGreen">{{valid_9}}</td>
+                <td class="colorRed" title="Out of {{valid_7}} Valid records, for {{invalid_9}} records EDID data is absent" style="cursor:pointer"><u>{{invalid_9}}</u></td>
+              </tr>
+              <tr *ngIf="show">
+                <td>
+                  <div style="float: right;">
+                    <b>Total Time: </b>
+                    <b>{{timercount}} min</b>&nbsp;&nbsp;
+                    <button class="btn btn-info float-right" title="Download CEC-EDID data"
+                      (click)="SingleexcelDownload()">
+                      <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -452,7 +616,8 @@
     </div>
   </div>
 
-  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -472,7 +637,8 @@
     </div>
   </div>
 
-  <div class="modal fade" id="uploadedModal" tabindex="-1" role="dialog" aria-labelledby="uploadedModalLabel" aria-hidden="true">
+  <div class="modal fade" id="uploadedModal" tabindex="-1" role="dialog" aria-labelledby="uploadedModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-width" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -485,13 +651,15 @@
           <p class="dark-green">Data Uploaded Successfully</p>
         </div>
         <div class="modal-footer">
-          <button type="button" (click)="uploadedZip()" class="btn btn-primary">Ok</button>
+          <button type="button" (click)="uploadedZip()" class="btn btn-primary" data-dismiss="modal">Ok</button>
+          <!-- <button type="button"  id="close" class="btn btn-secondary" data-dismiss="modal">Ok</button> -->
         </div>
       </div>
     </div>
   </div>
 
-  <div class="modal fade" id="UpdateSelectedModal" tabindex="-1" role="dialog" aria-labelledby="UpdateSelectedModalLabel" aria-hidden="true">
+  <div class="modal fade" id="UpdateSelectedModal" tabindex="-1" role="dialog"
+    aria-labelledby="UpdateSelectedModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -519,13 +687,15 @@
                     <tr>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" (click)="cecEdidCheck()" class="custom-control-input selectedCheck" id="cec_edid" value="" />
+                          <input type="checkbox" (click)="cecEdidCheck()" class="custom-control-input selectedCheck"
+                            id="cec_edid" value="" />
                           <label class="custom-control-label font-small" for="cec_edid">CEC-EDID</label>
                         </div>
                       </td>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" class="custom-control-input selectedCheck" id="cec_edid1" value="" [attr.disabled]="true" />
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="cec_edid1" value=""
+                            [attr.disabled]="true" />
                           <label class="custom-control-label font-small" for="cec_edid1">CEC-EDID</label>
                         </div>
                       </td>
@@ -533,13 +703,15 @@
                     <tr>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" (click)="componentDataCheck()" class="custom-control-input selectedCheck" id="component_data" value="" />
+                          <input type="checkbox" (click)="componentDataCheck()"
+                            class="custom-control-input selectedCheck" id="component_data" value="" />
                           <label class="custom-control-label font-small" for="component_data">Component Data</label>
                         </div>
                       </td>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" class="custom-control-input selectedCheck" id="component_data1" value="" [attr.disabled]="true" />
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="component_data1"
+                            value="" [attr.disabled]="true" />
                           <label class="custom-control-label font-small" for="component_data1">Component Data</label>
                         </div>
                       </td>
@@ -547,27 +719,33 @@
                     <tr>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" (click)="crossRefDataCheck()" class="custom-control-input selectedCheck" id="cross_ref_value" value="" />
-                          <label class="custom-control-label font-small" for="cross_ref_value">Cross Reference by Brands</label>
+                          <input type="checkbox" (click)="crossRefDataCheck()"
+                            class="custom-control-input selectedCheck" id="cross_ref_value" value="" />
+                          <label class="custom-control-label font-small" for="cross_ref_value">Cross Reference by
+                            Brands</label>
                         </div>
                       </td>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" class="custom-control-input selectedCheck" id="cross_ref_value1" value="" [attr.disabled]="true" />
-                          <label class="custom-control-label font-small" for="cross_ref_value1">Cross Reference by Brands</label>
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="cross_ref_value1"
+                            value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="cross_ref_value1">Cross Reference by
+                            Brands</label>
                         </div>
                       </td>
                     </tr>
                     <tr>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" (click)="codesetsDataCheck()" class="custom-control-input selectedCheck" id="codeset_data" value="" />
+                          <input type="checkbox" (click)="codesetsDataCheck()"
+                            class="custom-control-input selectedCheck" id="codeset_data" value="" />
                           <label class="custom-control-label font-small" for="codeset_data">Codesets</label>
                         </div>
                       </td>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" class="custom-control-input selectedCheck" id="codeset_data1" value="" [attr.disabled]="true" />
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="codeset_data1" value=""
+                            [attr.disabled]="true" />
                           <label class="custom-control-label font-small" for="codeset_data1">Codesets</label>
                         </div>
                       </td>
@@ -575,27 +753,33 @@
                     <tr>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" (click)="masterBrandCheck()" class="custom-control-input selectedCheck" id="master_brand_data" value="" />
-                          <label class="custom-control-label font-small" for="master_brand_data">Master Brand List</label>
+                          <input type="checkbox" (click)="masterBrandCheck()" class="custom-control-input selectedCheck"
+                            id="master_brand_data" value="" />
+                          <label class="custom-control-label font-small" for="master_brand_data">Master Brand
+                            List</label>
                         </div>
                       </td>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" class="custom-control-input selectedCheck" id="master_brand_data1" value="" [attr.disabled]="true" />
-                          <label class="custom-control-label font-small" for="master_brand_data1">Master Brand List</label>
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="master_brand_data1"
+                            value="" [attr.disabled]="true" />
+                          <label class="custom-control-label font-small" for="master_brand_data1">Master Brand
+                            List</label>
                         </div>
                       </td>
                     </tr>
                     <tr>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" (click)="brandInfoCecCheck()" class="custom-control-input selectedCheck" id="cec_data" value="" />
+                          <input type="checkbox" (click)="brandInfoCecCheck()"
+                            class="custom-control-input selectedCheck" id="cec_data" value="" />
                           <label class="custom-control-label font-small" for="cec_data">Brand Info CEC</label>
                         </div>
                       </td>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" class="custom-control-input selectedCheck" id="cec_data1" value="" [attr.disabled]="true" />
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="cec_data1" value=""
+                            [attr.disabled]="true" />
                           <label class="custom-control-label font-small" for="cec_data1">Brand Info CEC</label>
                         </div>
                       </td>
@@ -603,13 +787,15 @@
                     <tr>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" (click)="brandInfoEdidCheck()" class="custom-control-input selectedCheck" id="edid_data" value="" />
+                          <input type="checkbox" (click)="brandInfoEdidCheck()"
+                            class="custom-control-input selectedCheck" id="edid_data" value="" />
                           <label class="custom-control-label font-small" for="edid_data">Brand Info EDID</label>
                         </div>
                       </td>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" class="custom-control-input selectedCheck" id="edid_data1" value="" [attr.disabled]="true" />
+                          <input type="checkbox" class="custom-control-input selectedCheck" id="edid_data1" value=""
+                            [attr.disabled]="true" />
                           <label class="custom-control-label font-small" for="edid_data1">Brand Info EDID</label>
                         </div>
                       </td>
@@ -617,13 +803,15 @@
                     <tr>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" (click)="zipDataCheck()" class="custom-control-input" id="zip_data" value="" />
+                          <input type="checkbox" (click)="zipDataCheck()" class="custom-control-input" id="zip_data"
+                            value="" />
                           <label class="custom-control-label font-small" for="zip_data">Zip Data</label>
                         </div>
                       </td>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" class="custom-control-input" id="zip_data1" value="" [attr.disabled]="true" />
+                          <input type="checkbox" class="custom-control-input" id="zip_data1" value=""
+                            [attr.disabled]="true" />
                           <label class="custom-control-label font-small" for="zip_data1">Zip Data</label>
                         </div>
                       </td>
@@ -631,13 +819,15 @@
                     <tr>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" (click)="binDataCheck()" class="custom-control-input" id="bin_data" value="" />
+                          <input type="checkbox" (click)="binDataCheck()" class="custom-control-input" id="bin_data"
+                            value="" />
                           <label class="custom-control-label font-small" for="bin_data">Bin Data</label>
                         </div>
                       </td>
                       <td>
                         <div class="custom-control custom-checkbox checkbox-lg">
-                          <input type="checkbox" class="custom-control-input" id="bin_data1" value="" [attr.disabled]="true" />
+                          <input type="checkbox" class="custom-control-input" id="bin_data1" value=""
+                            [attr.disabled]="true" />
                           <label class="custom-control-label font-small" for="bin_data1">Bin Data</label>
                         </div>
                       </td>
@@ -647,7 +837,8 @@
               </div>
               <div class="col-sm-12">
                 <div class="form-group float-right">
-                  <button type="reset" class="btn btn-secondary" (click)="closeModal()" data-dismiss="modal">Close</button>&nbsp;
+                  <button type="reset" class="btn btn-secondary" (click)="closeModal()"
+                    data-dismiss="modal">Close</button>&nbsp;
                   <button type="submit" class="btn btn-primary">Update</button>
                 </div>
               </div>
@@ -725,7 +916,8 @@
     </div>
   </div>
 
-  <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+  <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -737,7 +929,7 @@
         <div class="modal-body">
           <p class="dark-blue">This will overwrite your existing records !!</p>
           <p class="h5-red">If yes, Please choose the data sections to delete.</p>
-          <form [formGroup]="UpdateForm" class="form-material" (ngSubmit)="onUpdateFilesSubmit()">
+          <form [formGroup]="UpdateForm" class="form-material" (ngSubmit)="onUpdateFilesSubmit(timer1)">
             <div class="row">
               <div class="col-sm-6">
                 <div class="custom-control custom-checkbox checkbox-lg">
@@ -747,7 +939,8 @@
               </div>
               <div class="col-sm-6">
                 <div class="custom-control custom-checkbox checkbox-lg">
-                  <input type="checkbox" (click)="deleteCompData()" class="custom-control-input" id="brand_model_value" value="" />
+                  <input type="checkbox" (click)="deleteCompData()" class="custom-control-input" id="brand_model_value"
+                    value="" />
                   <label class="custom-control-label" for="brand_model_value">Component Data</label>
                 </div>
               </div>
@@ -759,7 +952,8 @@
               </div>
               <div class="col-sm-6">
                 <div class="custom-control custom-checkbox checkbox-lg">
-                  <input type="checkbox" (click)="deleteCodesetData()" class="custom-control-input" id="code_value" value="" />
+                  <input type="checkbox" (click)="deleteCodesetData()" class="custom-control-input" id="code_value"
+                    value="" />
                   <label class="custom-control-label" for="code_value">Codesets</label>
                 </div>
               </div>
@@ -778,7 +972,8 @@
               </div>
               <div class="col-sm-6" *ngIf="advancedOption">
                 <div class="custom-control custom-checkbox checkbox-lg">
-                  <input type="checkbox" (click)="deviceAuth()" class="custom-control-input" id="device_auth" value="" />
+                  <input type="checkbox" (click)="deviceAuth()" class="custom-control-input" id="device_auth"
+                    value="" />
                   <label class="custom-control-label" for="device_auth">Device Authentication</label>
                 </div>
               </div>
@@ -811,7 +1006,8 @@
               </div>
               <div class="col-sm-12">
                 <div class="form-group float-right">
-                  <button type="button" class="btn btn-secondary" (click)="closeModal()" data-dismiss="modal">Close</button>&nbsp;
+                  <button type="button" class="btn btn-secondary" (click)="closeModal()"
+                    data-dismiss="modal">Close</button>&nbsp;
                   <button type="submit" class="btn btn-primary">Delete</button>
                 </div>
               </div>
@@ -823,7 +1019,191 @@
     </div>
   </div>
 
+  <div class="modal fade" id="edidDataModal_1" tabindex="-1" role="dialog" aria-labelledby="edidDataModal_1Label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidDataModal_1Label" *ngIf="masterDataVisible">Failed Records View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow-y: scroll;min-height: 5px;max-height: 300px;">
+            <table class="display select nowrap table table-striped table-bordered form-scroll" datatable
+              [dtOptions]="dtOptions" cellspacing="0" style="width:100%;">
+              <tbody>
+                <tr *ngIf="masterDataVisible">
+                  <th>MasterBrand failed records</th>
+                </tr>
+                <tr *ngFor="let client of masterBrandfailedrecords; let i=index;">
+                  <td>{{client}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="edidDataModal_2" tabindex="-1" role="dialog" aria-labelledby="edidDataModal_2Label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidDataModal_2Label" *ngIf="codeVisible">Failed Records View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow-y: scroll;min-height: 5px;max-height: 300px;">
+            <table class="display select nowrap table table-striped table-bordered form-scroll" datatable
+              [dtOptions]="dtOptions" cellspacing="0" style="width:100%;">
+              <tbody>
+                <tr *ngIf="codeVisible">
+                  <th>Codeset failed records</th>
+                </tr>
+                <tr *ngFor="let client of codesetfailedrecords; let i=index;">
+                  <td>{{client}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="edidDataModal_3" tabindex="-1" role="dialog" aria-labelledby="edidDataModal_3Label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidDataModal_3Label" *ngIf="masterDataVisible">Edid View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow-y: scroll;min-height: 5px;max-height: 300px;">
+            <table class="display select nowrap table table-striped table-bordered form-scroll" datatable
+              [dtOptions]="dtOptions" cellspacing="0" style="width:100%;">
+              <tbody>
+
+                <tr *ngIf="crossDataVisible">
+                  <th>Cross Reference by Brands failed records</th>
+                </tr>
+                <tr *ngFor="let client of crossfailedrecords; let i=index;">
+                  <td>{{client}}</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="edidDataModal_4" tabindex="-1" role="dialog" aria-labelledby="edidDataModal_4Label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidDataModal_4Label" *ngIf="brandVisible">Failed Records View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow-y: scroll;min-height: 5px;max-height: 300px;">
+            <table class="display select nowrap table table-striped table-bordered form-scroll" datatable
+              [dtOptions]="dtOptions" cellspacing="0" style="width:100%;">
+              <tbody>
+                <tr *ngIf="brandVisible">
+                  <th>Component Data failed records</th>
+                </tr>
+                <tr *ngFor="let client of brandfailedrecords; let i=index;">
+                  <td>{{client}}</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="edidDataModal_5" tabindex="-1" role="dialog" aria-labelledby="edidDataModal_5Label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidDataModal_5Label" *ngIf="cecDataVisible">Failed Records View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow-y: scroll;min-height: 5px;max-height: 300px;">
+            <table class="display select nowrap table table-striped table-bordered form-scroll" datatable
+              [dtOptions]="dtOptions" cellspacing="0" style="width:100%;">
+              <tbody>
+                <tr *ngIf="cecDataVisible">
+                  <th>Brand Info CEC failed records</th>
+                </tr>
+                <tr *ngFor="let client of cecfailedrecords; let i=index;">
+                  <td>{{client}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="edidDataModal_6" tabindex="-1" role="dialog" aria-labelledby="edidDataModal_6Label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidDataModal_6Label" *ngIf="edidDataVisible">Failed Records View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow-y: scroll;min-height: 5px;max-height: 300px;">
+            <table class="display select nowrap table table-striped table-bordered form-scroll" datatable
+              [dtOptions]="dtOptions" cellspacing="0" style="width:100%;">
+              <tbody>
+                <tr *ngIf="edidDataVisible">
+                  <th>Brand Info Edid failed records</th>
+                </tr>
+                <tr *ngFor="let client of edidfailedrecords; let i=index;">
+                  <td>{{client}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="edidDataModal_7" tabindex="-1" role="dialog" aria-labelledby="edidDataModal_7Label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidDataModal_7Label" *ngIf="cecEdidDataVisible">Failed Records View</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow-y: scroll;min-height: 5px;max-height: 300px;">
+            <table class="display select nowrap table table-striped table-bordered form-scroll" datatable
+              [dtOptions]="dtOptions" cellspacing="0" style="width:100%;">
+              <tbody>
+                <tr *ngIf="cecEdidDataVisible">
+                  <th>CEC-EDID failed records</th>
+                </tr>
+                <tr *ngFor="let client of cecedidfailedrecords; let i=index;">
+                  <td style="overflow-wrap: anywhere;">{{client}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <notifier-container></notifier-container>
 </div>
-
-

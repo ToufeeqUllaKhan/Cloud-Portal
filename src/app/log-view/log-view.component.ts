@@ -13,18 +13,18 @@ export class LogViewComponent implements OnInit {
   ngOnInit() {
     localStorage.removeItem('logSelected');
   }
-/** setting logselected storage value since admin clients page should route based on click operation here
- * i.e., if user clicked searchlogView then admin clients page route to search history page else generic-logs page will be routed based on client selection in admin clients page
- * */
+  /** setting logselected storage value since admin clients page should route based on click operation here
+   * i.e., if user clicked searchlogView then admin clients page route to search history page else generic-logs page will be routed based on client selection in admin clients page
+   * */
   searchlogView() {
     localStorage.setItem('logSelected', 'SearchLog');
     this.router.navigate(['/report-clients']).then(() => {
       // location.reload();
     });
   }
-/** setting logselected storage value since admin clients page should route based on click operation here
- * i.e., if user clicked searchlogView then admin clients page route to search history page else generic-logs page will be routed based on client selection in admin clients page
- * */
+  /** setting logselected storage value since admin clients page should route based on click operation here
+   * i.e., if user clicked searchlogView then admin clients page route to search history page else generic-logs page will be routed based on client selection in admin clients page
+   * */
   genericView() {
     localStorage.setItem('logSelected', 'GenericLog');
     this.router.navigate(['/report-clients']).then(() => {

@@ -337,3 +337,24 @@ tbody {
   font-size: 1.05rem;
   color: #25c55e;
 }
+
+.form-scroll {
+  overflow-y: auto;
+  overflow-x:hidden;
+  height: 450px;
+}
+
+  .form-scroll::-webkit-scrollbar-track {
+    border: 1px solid rgba(38, 198, 218, 0.7);
+    background-color: #fff;
+  }
+
+  .form-scroll::-webkit-scrollbar {
+    background-color: #2dcdb4;
+    width: 0.7em;
+    height: 0.7em
+  }
+
+  .form-scroll::-webkit-scrollbar-thumb {
+    background-color: #2dcdb4;
+  }

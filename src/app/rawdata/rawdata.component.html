@@ -1,147 +1,459 @@
 <div class="container-fluid main-scroll">
-    <!-- Bread crumb and right sidebar toggle -->
-    <!-- ============================================================== -->
-    <div class="row page-titles">
-      <div class="align-self-center">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
-          <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
-          <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active">View Raw Capture Data</li>
-        </ol>
-      </div>
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">View Raw Capture Data</li>
+      </ol>
     </div>
-    <div class="row">
-        <select [(ngModel)]='status'  class="form form-control selectDrop" (change)="onchangestatus()" (ngModelChange)="onModelChange($event)"  style="width:auto;margin-left: auto;">
-          <option value=null>All</option>
-          <option value=0>Exported</option>
-          <option value=1>Not Exported</option>
-          
-        </select>&nbsp;&nbsp;
-        <button  id="button" class="btn btn-primary float-right">
-          <i class="fas fa-file-export" ></i>
-          Export to Staging
-        </button>
+  </div>
+  <div class="row">
+    <div class="col-xl-1 col-md-1 hideData" style="width:auto;margin-left: auto;">
+      <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
+          aria-hidden="true"></i></button>
+    </div>&nbsp;&nbsp;
+    <!-- <select [(ngModel)]='device' class="form form-control selectDrop" (change)="onchangedevice()"
+      (ngModelChange)="onModelChange($event)" style="width:auto;">
+      <option [value]=null hidden> Device </option>
+      <option value=null>All</option>
+      <option *ngFor="let list of filter_Device" value={{list}}>{{list}}</option>
+    </select>&nbsp;&nbsp;
+    <select [(ngModel)]='subdevice' class="form form-control selectDrop" (change)="onchangestatus()"
+      (ngModelChange)="onModelChange($event)" style="width:auto;">
+      <option [value]=null hidden> SubDevice </option>
+      <option value=null>All</option>
+      <option *ngFor="let list of filter_Subdevice" value={{list}}>{{list}}</option>
+    </select>&nbsp;&nbsp; -->
+    <select [(ngModel)]='status' class="form form-control selectDrop" (change)="onchangestatus()"
+      (ngModelChange)="onModelChange($event)" style="width:auto;">
+      <option [value]=null hidden>Status </option>
+      <option value='null'>All</option>
+      <option value=2>Exported to Staging</option>
+      <option value=1>Not Exported to Staging</option>
+      <option value=0>Inactive</option>
 
-        <div class="col-md-12">&nbsp;</div>
-        <div class="col-md-12">
-          <div class="col-xl-12 col-md-12">
-              <table id="projectView" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
-            class="display select nowrap table table-striped table-bordered" cellspacing="0" style="width:auto;">
-              <thead>
+    </select>&nbsp;&nbsp;
+    <div>
+      <button class="btn btn-info float-right"
+        title="Download based on filtered data" id="single_download">
+        <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
+    </div>
+    &nbsp;&nbsp;
+    <button id="button" class="btn btn-primary float-right">
+      <i class="fas fa-file-export"></i>
+      Export to Staging
+    </button>
+
+    <div class="col-md-12">&nbsp;</div>
+    <button id="editRawdata" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
+      data-toggle="modal" data-target="#edidRawModal" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u></button>
+
+    <button id="remarks" type="button" data-toggle="modal" data-target="#edidDataModal"
+      class="btn btn-primary btn-remarks" hidden><i class="fa fa-eye" aria-hidden="true"></i></button>
+
+
+    <div class="row">
+      <div class="example-header">
+        <label>Show
+          <select (change)="onPageSizeChanged()" id="page-size">
+            <option value="10">10</option>
+            <option value="100">100</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+          </select>
+          entries</label>
+      </div>
+      <div style="margin-left: auto;">
+        <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue" />
+        </label>
+      </div>
+      <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+        style="width: 1075px; height: 380px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+        [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
+        [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents"
+        [rowSelection]="rowSelection" [suppressRowClickSelection]="true" [rowMultiSelectWithClick]="true" (click)="onRowClicked()">
+      </ag-grid-angular>
+
+    </div>
+  </div>
+
+
+
+  <div class="modal fade" id="edidDataModal" tabindex="-1" role="dialog" aria-labelledby="edidDataModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="edidDataView">Edid View</h5>
+          <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="RemarksView">Remarks View</h5>
+          <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="SupportedregionsView">Supported Regions View
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+            <table class="table table-bordered" cellspacing="0">
+              <tbody *ngIf="edidDataView">
                 <tr>
-                  <th><input name="select_all" value="1" type="checkbox"></th>
-                  <th> Device </th>
-                  <th> Subdevice </th>
-                  <th> Brand </th>
-                  <th> Targetmodel</th>
-                  <th> TargetRegion</th>
-                  <th> TargetCountry </th>
-                  <th> Remotemodel </th>
-                  <th> Regionofcapture </th>
-                  <th> Countryofcapture </th>
-                  <th> Year </th>
-                  <th> CECDevice </th>
-                  <th> Cecpresent </th>
-                  <th> Cecenabled </th>
-                  <th> Vendoridhex </th>
-                  <th> Vendoridstring </th>
-                  <th> Osdhex </th>
-                  <th> Osdstring </th>
-                  <th> Edid </th>
-                  <th> Sourcetype </th>
-                  <th> Sourcename </th>
-                  <th> Region Country Model </th>
-                  <th> Remarks </th>
-                  <th> Status </th>
+                  <th>EDID</th>
+                  <th>Actions</th>
                 </tr>
-              </thead>
-              <tbody>
-                <!-- <tr *ngFor="let client of clientDetails;let i=index;"> -->
-                  <!-- <td class="align-center">{{i+1}}</td> -->
-                  
-                <tr  *ngFor="let client of rawdatacapture;let i=index;">
-                  <td><input value={{client.Detectionid}} type="checkbox"></td>
-                    <td> {{client.Device}}</td>
-                    <td> {{client.Subdevice }}</td>
-                    <td> {{client.Brand }}</td>
-                    <td> {{client.Targetmodel}}</td>
-                    <td> {{client.TargetRegion}}</td>
-                    <td> {{client.TargetCountry }}</td>
-                    <td> {{client.Remotemodel }}</td>
-                    <td> {{client.Regionofcapture }}</td>
-                    <td> {{client.Countryofcapture }}</td>
-                    <td> {{client.Year }}</td>
-                    <td> {{client.CECDevice }}</td>
-                    <td> {{client.Cecpresent }}</td>
-                    <td> {{client.Cecenabled }}</td>
-                    <td> {{client.Vendoridhex }}</td>
-                    <td> {{client.Vendoridstring }}</td>
-                    <td> {{client.Osdhex }}</td>
-                    <td> {{client.Osdstring }}</td>
-                    <td><button type="button" data-toggle="modal" data-target="#edidDataModal" class="btn btn-primary btn-edid" value= {{client.Edid}}><i class="fa fa-eye" aria-hidden="true"></i></button></td>
-                    <td> {{client.Sourcetype }}</td>
-                    <td> {{client.Sourcename }}</td>
-                    <td><button type="button" data-toggle="modal" data-target="#edidDataModal" class="btn btn-primary btn-supportedregions" value= {{client.Supportedregions}}><i class="fa fa-eye" aria-hidden="true"></i></button></td>
-                    <td><button type="button" data-toggle="modal" data-target="#edidDataModal" class="btn btn-primary btn-remarks" value= {{client.Remarks}}><i class="fa fa-eye" aria-hidden="true"></i></button></td>
-                    <td> {{client.Status }}</td>
+                <tr>
+                  <td>{{EdidData}}</td>
+                  <td style="vertical-align: middle;">
+                    <button type="button" (click)="decodeedid()"
+                      style="vertical-align: middle;cursor: pointer;background:none;border:none;" data-toggle="modal"
+                      data-target="#DecodeedidDataModal" class="btn btn-primary">Decode
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody *ngIf="RemarksView">
+                <tr>
+                  <th>MetaData</th>
+                  <td>{{Metadata}}</td>
+                </tr>
+                <tr>
+                  <th>CEC</th>
+                  <td>{{CEC}}</td>
+                </tr>
+                <tr>
+                  <th>EDID</th>
+                  <td>{{EDID}}</td>
+                </tr>
+                <tr>
+                  <th>Scan Device</th>
+                  <td>{{Scandevice}}</td>
+                </tr>
+              </tbody>
+              <tbody *ngIf="SupportedregionsView">
+                <tr>
+                  <th>Supported Regions</th>
+                  <td>{{Supportedregions}}</td>
                 </tr>
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
     </div>
-    </div>
-    
-    
+  </div>
 
-    <div class="modal fade" id="edidDataModal" tabindex="-1" role="dialog" aria-labelledby="edidDataModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title h5-color" id="edidDataModalLabel"  *ngIf="edidDataView">Edid View</h5>
-            <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="RemarksView">Remarks View</h5>
-            <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="SupportedregionsView">Supported Regions View</h5>
-            <button type="button" class="close" data-dismiss="modal"  aria-label="Close">&times;</button>  
-          </div>
-          <div class="modal-body">
-            <div class="col-sm-12">
-              <table class="table table-bordered" cellspacing="0">
-                <tbody *ngIf="edidDataView">
-                  <tr>
-                    <th>EDID</th>
-                    <td>{{EdidData}}</td>
-                  </tr>
-                </tbody>
-                <tbody *ngIf="RemarksView">
-                  <tr>
-                    <th>MetaData</th>
-                    <td>{{Metadata}}</td>
-                  </tr>
-                  <tr>
-                    <th>CEC</th>
-                    <td>{{CEC}}</td>
-                  </tr>
-                  <tr>
-                    <th>EDID</th>
-                    <td>{{EDID}}</td>
-                  </tr>
-                  <tr>
-                    <th>Scan Device</th>
-                    <td>{{Scandevice}}</td>
-                  </tr>
-                </tbody>
-                <tbody *ngIf="SupportedregionsView">
-                  <tr>
-                    <th>Supported Regions</th>
-                    <td>{{Supportedregions}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+  <div class="modal fade" id="DecodeedidDataModal" tabindex="-1" role="dialog"
+    aria-labelledby="DecodeedidDataModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="margin-top: 60px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="DecodeedidDataModalLabel" *ngIf="DecodeedidDataView">Decode Edid View
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow: auto;">
+            <table class="display select nowrap tables table-striped table-bordered" cellspacing="0"
+              style="width:auto;">
+              <tbody *ngIf="DecodeedidDataView">
+                <tr>
+                  <th *ngFor="let header of keys">{{header}}</th>
+                </tr>
+                <tr>
+                  <td *ngFor="let Defn of Values">{{Defn}}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="modal fade" id="edidRawModal" tabindex="-1" role="dialog" aria-labelledby="edidRawModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidRawModalLabel">Edit Raw data</h5>
+          <button type="button" class="close" data-dismiss="modal" (click)="modalClose()" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+
+            <form [formGroup]="saveEditRawData" class="form-material form-scroll" (ngSubmit)="onsaveEditRawSubmit()">
+              <br />
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Device<span class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedDevice"
+                      formControlName="Device" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Device.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.Device.errors" class="invalid-feedback">
+                      <div *ngIf="m.Device.errors.required" class="error-defined text-right">Device is required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">SubDevice<span
+                        class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedSubdevice"
+                      formControlName="Subdevice" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Subdevice.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.Subdevice.errors" class="invalid-feedback">
+                      <div *ngIf="m.Subdevice.errors.required" class="error-defined text-right">Subdevice is required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Brand<span class="color-red">*</span></label>
+                    <!-- <input id="typeahead-format4" type="text" (keypress)="keyPressHandler($event)" (change)="brandCECSelect()" class="form-control form-control-line col-sm-7" formControlName="ceconlyBrand" [(ngModel)]="editedCeconlyBrandname" [ngbTypeahead]="brandSearch" [resultFormatter]="formatter" [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.ceconlyBrand.errors }" /> -->
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedBrand"
+                      formControlName="Brand" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Brand.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.Brand.errors" class="invalid-feedback">
+                      <div *ngIf="m.Brand.errors.required" class="error-defined text-right">Brand Name is required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Target Model<span
+                        class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedModel"
+                      formControlName="TargetModel" class="form-control form-control-line col-sm-7 upperCase"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.TargetModel.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.TargetModel.errors" class="invalid-feedback">
+                      <div *ngIf="m.TargetModel.errors.required" class="error-defined text-right">Target Model is
+                        required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Target Region</label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedRegion"
+                      formControlName="TargetRegion" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.TargetRegion.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.TargetRegion.errors" class="invalid-feedback">
+                      <div *ngIf="m.TargetRegion.errors.required" class="error-defined text-right">Target Region is
+                        required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Target Country</label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedCountry"
+                      formControlName="TargetCountry" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.TargetCountry.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.TargetCountry.errors" class="invalid-feedback">
+                      <div *ngIf="m.TargetCountry.errors.required" class="error-defined text-right">Target Country is
+                        required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Remote Model</label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedRemoteModel"
+                      formControlName="RemoteModel" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.RemoteModel.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.RemoteModel.errors" class="invalid-feedback">
+                      <div *ngIf="m.RemoteModel.errors.required" class="error-defined text-right">Remote Model is
+                        required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Region of Capture</label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedCaptureRegion"
+                      formControlName="CaptureRegion" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.CaptureRegion.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.CaptureRegion.errors" class="invalid-feedback">
+                      <div *ngIf="m.CaptureRegion.errors.required" class="error-defined text-right">Region of Capture is
+                        required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Country of Capture</label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedCaptureCountry"
+                      formControlName="CaptureCountry" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.CaptureCountry.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.CaptureCountry.errors" class="invalid-feedback">
+                      <div *ngIf="m.CaptureCountry.errors.required" class="error-defined text-right">Country of Capture
+                        is required</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- <div class="col-sm-12">
+                    <div class="form-group form-inline">
+                      <label class="labelsubSpan col-sm-5 col-form-label">CEC Device</label>
+                      <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedCEC_Device" formControlName="CEC_Device"  class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.CEC_Device.errors }" />
+                      <div *ngIf="Rawdatasubmitted && m.CEC_Device.errors" class="invalid-feedback">
+                        <div *ngIf="m.CEC_Device.errors.required" class="error-defined text-right">CEC Device is required</div>
+                      </div>
+                    </div>
+                  </div> -->
+
+                <!-- <div class="col-sm-12">
+                    <div class="form-group form-inline">
+                      <label class="labelsubSpan col-sm-5 col-form-label">Vendor ID</label>
+                      <input type="text" id="checkInputValid" (change)="vendorMod()" [(ngModel)]="editedVendor" maxlength="6" (keypress)="hexaOnly($event)" formControlName="VendorId" class="form-control form-control-line col-sm-7 upperCase" [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.VendorId.errors }" />
+                      <div *ngIf="Rawdatasubmitted && m.VendorId.errors" class="invalid-feedback">
+                        <div *ngIf="m.VendorId.errors.required" class="error-defined text-right">Vendor ID is required</div>
+                      </div>
+                      <div class="text-right color-merron" style="padding-left: 68%;" *ngIf="vendorError">Vendor ID is Required</div>
+                    </div>
+                  </div>
+                  <div class="col-sm-12">
+                    <div class="form-group form-inline">
+                      <label class="labelsubSpan col-sm-5 col-form-label">VendorID String</label>
+                      <input type="text" [(ngModel)]="editedVendorstr" formControlName="Vendoridstring" class="form-control form-control-line col-sm-7 upperCase" [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Vendoridstring.errors }" />
+                      <div *ngIf="Rawdatasubmitted && m.Vendoridstring.errors" class="invalid-feedback">
+                        <div *ngIf="m.Vendoridstring.errors.required" class="error-defined text-right">VendorID string is required</div>
+                      </div>
+                      <div class="text-right color-merron" style="padding-left: 68%;" *ngIf="vendorError">VendorID string is Required</div>
+                    </div>
+                  </div>
+                
+                  <div class="col-sm-12">
+                    <div class="form-group form-inline">
+                      <label class="labelsubSpan col-sm-5 col-form-label">OSD String</label>
+                      <input type="text" [(ngModel)]="editedOSD" (change)="vendorMod()" formControlName="OSDString" class="form-control form-control-line col-sm-7 upperCase" [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.OSDString.errors }" />
+                      <div *ngIf="Rawdatasubmitted && m.OSDString.errors" class="invalid-feedback">
+                        <div *ngIf="m.OSDString.errors.required" class="error-defined text-right">OSD String is required</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-sm-12">
+                    <div class="form-group form-inline">
+                      <label class="labelsubSpan col-sm-5 col-form-label">Edid</label>
+                      <textarea (keypress)="keyPressHandler($event)" id="checkEdidValid" (change)="vendorMod()" type="text" rows="5" [(ngModel)]="editedEDID128" formControlName="Edid" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Edid.errors }"></textarea>
+                      <div *ngIf="Rawdatasubmitted && m.Edid.errors" class="invalid-feedback">
+                        <div *ngIf="m.Edid.errors.required" class="error-defined text-right">Edid is required</div>
+                      </div>
+                      <div class="text-right color-merron" style="padding-left: 76%;" *ngIf="edidError">Enter Valid Edid</div>
+                    </div>
+                  </div> -->
+
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Year</label>
+                    <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editYear"
+                      formControlName="Year" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Year.errors }" />
+                    <div *ngIf="Rawdatasubmitted && m.Year.errors" class="invalid-feedback">
+                      <div *ngIf="m.Year.errors.required" class="error-defined text-right">Year is required</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Status</label>
+                    <!-- <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedStatus" formControlName="Status" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Status.errors }" /> -->
+                    <select [(ngModel)]="editedStatus" formControlName="Status"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Status.errors }">
+                      <option [value]=null>Select</option>
+                      <option value="1">Active</option>
+                      <option value="0">In active</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="
+                border: 1px dotted;
+                width: 404px;
+                margin-left: 21px;
+                margin-bottom: 10px;
+            "></div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Region</label>
+                    <!-- <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedStatus" formControlName="Status" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Status.errors }" /> -->
+                    <select id="region" formControlName="Region" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Region.errors }">
+                      <option [value]=null>Select</option>
+                      <option *ngFor="let region of regionlist" value={{region}}>{{region}}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Country</label>
+                    <!-- <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedStatus" formControlName="Status" class="form-control form-control-line col-sm-7" [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Status.errors }" /> -->
+                    <select id="country" formControlName="Country" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Country.errors }">
+                      <option [value]=null>Select</option>
+                      <option *ngFor="let country of countrylist" value={{country}}>{{country}}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Model</label>
+                    <input id="model" type="text" (keypress)="keyPressHandler($event)" formControlName="Model"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Model.errors }" />
+                  </div>
+                </div>
+                <input type="button" id="add" value="Add" style="margin-left: 380px;" />&nbsp;
+                <!-- <div class="col-sm-12" style="margin-top: 10px;">
+                  <div class="form-group form-inline">
+                    <textarea id="myTextarea" class="form-control form-control-line col-sm-12" formControlName="Uids"
+                      type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="editedUid" value="{{Uid}}" disabled>
+        {{Uid}}
+      </textarea>
+                  </div>
+                </div> -->
+
+                <div class="col-sm-12" style="margin-top: 10px;">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label"> Region Country Model</label>
+                    <textarea id="myTextarea" (keypress)="keyPressHandler($event)" type="text" rows="4"
+                      [(ngModel)]="editedSupportedRegion" formControlName="Region_Country_Model"
+                      class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': Rawdatasubmitted && m.Region_Country_Model.errors }"
+                      value="{{editedSupportedRegion}}" disabled>{{editedSupportedRegion}}</textarea>
+                    <div *ngIf="Rawdatasubmitted && m.Region_Country_Model.errors" class="invalid-feedback">
+                      <div *ngIf="m.Region_Country_Model.errors.required" class="error-defined text-right">Region
+                        Country Model is required</div>
+                    </div>
+                  </div>
+                </div>
+                <input type="button" id="edit" value="Edit" style="margin-left: 380px;margin-bottom: 10px;" />
+              </div>
+              <div class="form-group row text-right">
+                <div class="col-sm-12">
+                  <button type="button" class="btn btn-secondary" (click)="modalClose()"
+                    data-dismiss="modal">Close</button>&nbsp;
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
-  
+
+  </div>
+  <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
+    [fullScreen]="true">
+    <p style="color: white"> Loading... </p>
+  </ngx-spinner>
+</div>

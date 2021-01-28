@@ -1,0 +1,195 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-12 col-12 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Import Project From Production</li>
+      </ol>
+    </div>
+  </div>
+  <br />
+  <aw-wizard>
+    <aw-wizard-step stepTitle="Do You want to create New Instance.">
+      <div class="row">
+        <div class="card" style="width: 18rem;">
+          <div class="card-body">
+            <p class="card-text">Do You want to create an New Instance.</p>
+            <button type="button" style="width: fit-content;margin-left: 130px;" class="btn btn-info"
+              [awGoToStep]="{stepIndex: 3}">No</button> &nbsp;
+            <button type="button" style="width: fit-content;" class="btn btn-info"
+              [awGoToStep]="{stepIndex: 1}">Yes</button>
+          </div>
+        </div>
+      </div>
+    </aw-wizard-step>
+    <aw-wizard-step stepTitle="Create an Instance" awOptionalStep>
+      <div class="row">
+        <div class="col-lg-6 col-xlg-6 col-md-6">
+          <div class="card">
+            <div class="card-block" style="margin: 10px;">
+              <br />
+              <h5 class="h5-color">Create New DB Instance</h5>
+              <br />
+              <div class="col-md-12">
+                <form [formGroup]="newdbInstanceForm" class="form-material" (ngSubmit)="onNewDbInstanceSubmit()">
+                  <div class="col-md-12">
+                    <div class="form-group form-inline">
+                      <label class="col-form-label col-sm-4">DB Instance<span class="color-red">*</span></label>
+                      <input type="text" [(ngModel)]="new_DB_Instance" formControlName="newDBInstance"
+                        class="form-control form-control-line col-sm-8"
+                        [ngClass]="{ 'is-invalid': dbNewsubmitted && g.newDBInstance.errors }"/>
+                      <div *ngIf="dbNewsubmitted && g.newDBInstance.errors" class="invalid-feedback">
+                        <div *ngIf="g.newDBInstance.errors.required" style="font-size: 12pt;text-align: center;float: right;">
+                          DB Instance is required</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group row text-right">
+                    <div class="col-sm-12">
+                      <button type="button" class="btn btn-secondary" awPreviousStep>Back</button>&nbsp;
+                      <button type="submit" class="btn btn-info">Submit</button>
+                      <button type="button" id="next" class="btn btn-info" [awGoToStep]="{stepIndex: 2}"
+                        hidden>Next</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aw-wizard-step>
+    <aw-wizard-step stepTitle="Create an Instance in Cloud service" awOptionalStep>
+        <div class="row">
+        <div class="card" style="width: 18rem;">
+          <div class="card-body">
+            <p class="card-text">Create an Instance in Cloud service with same instance name.</p>
+            <button type="button" style="width: fit-content;float: right;" class="btn btn-info"
+              [awGoToStep]="{stepIndex: 3}">Ok</button>
+          </div>
+        </div>
+      </div>
+    </aw-wizard-step>
+    <aw-wizard-step stepTitle="Import Project from Prod">
+      <div class="row" *ngIf="!isClientDivVisible">
+        <div class="col-lg-9 col-xlg-10 col-md-8">
+          <div class="card">
+            <div class="card-block" style="margin: 10px;">
+              <h5 class="h5-color">Create Client Details</h5>
+              <div>&nbsp;</div>
+              <div class="row" *ngIf="!isClientDivVisible">
+                <div class="col-md-12">
+                  <form [formGroup]="createClientForm" (ngSubmit)="oncreateClientSubmit()">
+                    <div class="row">
+                      <div class="col-md-6 form-material form-custom">
+                        <div class="form-group">
+                          <label class="col-form-label">Client Name<span class="color-red">*</span></label>
+                          <input type="text" formControlName="clientName" [(ngModel)]="clientSelected"
+                            class="form-control form-control-line"
+                            [ngClass]="{ 'is-invalid': submitted && f.clientName.errors }">
+                          <div *ngIf="submitted && f.clientName.errors" class="invalid-feedback">
+                            <div *ngIf="f.clientName.errors.required" style="font-size: 12pt;text-align: center;float: right;">Client Name is required</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6 form-material form-custom">
+                        <div class="form-group">
+                          <label class="col-form-label">Region<span class="color-red">*</span></label>
+                          <span (click)="newRegion()" class="float-right oval" title="Add Region">
+                            <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                          </span>
+                          <select [(ngModel)]='regionSelected' formControlName="regionName" class="form-control"
+                            [ngClass]="{ 'is-invalid': submitted && f.regionName.errors }">
+                            <option [value]=null>Select</option>
+                            <option *ngFor="let list of regions" value={{list.name}}>{{list.name}}</option>
+                          </select>
+                          <div *ngIf="submitted && f.regionName.errors" class="invalid-feedback">
+                            <div *ngIf="f.regionName.errors.required" style="font-size: 12pt;text-align: center;float: right;">Region is required</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6 form-material form-custom">
+                        <div class="form-group">
+                          <label class="col-form-label">DB Instance<span class="color-red">*</span></label>
+                          <select [(ngModel)]='db_instance' formControlName="dbInstance" class="form-control"
+                            [ngClass]="{ 'is-invalid': submitted && f.dbInstance.errors }" (change)="onchangedbinstance()">
+                            <option [value]=null>Select</option>
+                            <option *ngFor="let list of dbinstance" value={{list.dbInstance}}>{{list.dbInstance}}
+                            </option>
+                          </select>
+                          <div *ngIf="submitted && f.dbInstance.errors" class="invalid-feedback">
+                            <div *ngIf="f.dbInstance.errors.required" style="font-size: 12pt;text-align: center;float: right;">DB Instance is required</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6 form-material form-custom">
+                        <div class="form-group">
+                          <label class="col-form-label">Project Name<span class="color-red">*</span></label>
+                          <select [(ngModel)]='project_name' formControlName="projectName" class="form-control" 
+                          [ngClass]="{ 'is-invalid': submitted && f.projectName.errors }" (change)="onchangeproject()">
+                            <option [value]=null>Select</option>
+                            <option *ngFor="let list of projectnames" value={{list}}>{{list}}</option>
+                          </select>
+                          <div *ngIf="submitted && f.projectName.errors" class="invalid-feedback">
+                            <div *ngIf="f.projectName.errors.required" style="font-size: 12pt;text-align: center;float: right;">Project Name is required</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <br />
+                    <div class="form-group row text-right">
+                      <div class="col-sm-12">
+                        <button type="button" (click)="close()" class="btn btn-secondary">Close</button>&nbsp;
+                        <button type="submit" class="btn btn-info">Create</button>&nbsp;
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" *ngIf="!NewRegion">
+        <div class="col-lg-6 col-xlg-6 col-md-6">
+          <div class="card">
+            <div class="card-block" style="margin: 10px;">
+              <h5 class="h5-color">Create New Region</h5>
+              <br />
+              <div class="col-md-12">
+                <form [formGroup]="newregionForm" class="form-material" (ngSubmit)="onNewRegionSubmit()">
+                  <div class="col-md-12">
+                    <div class="form-group form-inline">
+                      <label class="col-form-label col-sm-4">Region Name</label>
+                      <input type="text" [(ngModel)]="newRegName" formControlName="newRegionName"
+                        class="form-control form-control-line col-sm-8"
+                        [ngClass]="{ 'is-invalid': newRegSubmitted && n.newRegionName.errors }" />
+                      <div *ngIf="newRegSubmitted && n.newRegionName.errors" class="invalid-feedback">
+                        <div *ngIf="n.newRegionName.errors.required" style="font-size: 12pt;text-align: center;float: right;">
+                          Region Name is required</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group row text-right">
+                    <div class="col-sm-12">
+                      <button type="button" (click)="regBack()" class="btn btn-secondary">Back</button>&nbsp;
+                      <button type="submit" class="btn btn-info">Submit</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aw-wizard-step>
+  </aw-wizard>
+  
+</div>
+<ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
