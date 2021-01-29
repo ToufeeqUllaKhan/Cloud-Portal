@@ -114,7 +114,7 @@ export class CloudApiModulesComponent implements OnInit {
               this.toastr.warning(value.message);
             }
           });
-          
+
 
         /** List of Api Modules available for selected Project start */
       });
@@ -317,7 +317,7 @@ export class CloudApiModulesComponent implements OnInit {
       pushArr.push(value['item_text'])
     });
     this.tabslist = pushArr;
-    
+
     if (this.projectNames.length === 0) {
       $('#Tickets').hide();
       $('.hideData').css('display', 'none');
@@ -375,5 +375,5 @@ export class CloudApiModulesComponent implements OnInit {
       this.router.navigate(['/api-db-test']);
     }
   }
-  
+
 }

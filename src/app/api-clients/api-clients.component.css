@@ -10,9 +10,11 @@
   font-size: 16pt;
   cursor: pointer;
 }
+
 button i.fa-green {
   opacity: 1;
 }
+
 .edit-icon {
   color: #f3f3f3;
   font-size: 15pt;
@@ -33,8 +35,10 @@ button i.fa-green {
 }
 
 .zoom-img:hover {
-  -ms-transform: scale(1.1); /* IE 9 */
-  -webkit-transform: scale(1.1); /* Safari 3-8 */
+  -ms-transform: scale(1.1);
+  /* IE 9 */
+  -webkit-transform: scale(1.1);
+  /* Safari 3-8 */
   transform: scale(1.1);
 }
 
@@ -138,25 +142,26 @@ ul {
   overflow-x: auto;
 }
 
-  .scroll-x::-webkit-scrollbar-track {
-    border: 1px solid rgba(38, 198, 218, 0.7);
-    background-color: #fff;
-  }
+.scroll-x::-webkit-scrollbar-track {
+  border: 1px solid rgba(38, 198, 218, 0.7);
+  background-color: #fff;
+}
 
-  .scroll-x::-webkit-scrollbar {
-    background-color: #2dcdb4;
-  }
+.scroll-x::-webkit-scrollbar {
+  background-color: #2dcdb4;
+}
 
-  .scroll-x::-webkit-scrollbar-thumb {
-    background-color: #2dcdb4;
-  }
+.scroll-x::-webkit-scrollbar-thumb {
+  background-color: #2dcdb4;
+}
 
 ::-webkit-scrollbar {
   width: 0.7em;
   height: 0.7em
 }
 
-button:focus, button:active {
+button:focus,
+button:active {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -184,15 +189,16 @@ button:focus, button:active {
   /*color: #c3bcbca8;*/
   color: #cac3c3ab;
 }
-.horizontal-scrollable > .row {
+
+.horizontal-scrollable>.row {
   overflow-x: auto;
   white-space: nowrap;
 }
 
-  .horizontal-scrollable > .row > .col-xs-4 {
-    display: inline-block;
-    float: none;
-  }
+.horizontal-scrollable>.row>.col-xs-4 {
+  display: inline-block;
+  float: none;
+}
 
 .pull-btm {
   margin-top: 0.5rem;
@@ -203,10 +209,13 @@ button:focus, button:active {
     width: 7.5rem !important;
   }
 }
+
 .float-left {
   float: left;
 }
-.h4, h4 {
+
+.h4,
+h4 {
   font-size: 1.2rem;
   color: #ffffff;
 }
@@ -220,7 +229,7 @@ button:focus, button:active {
   box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.56);
   cursor: pointer;
   border-radius: 5px;
-  background: linear-gradient(60deg,#66bb6a,#43a047) !important;
+  background: linear-gradient(60deg, #66bb6a, #43a047) !important;
 }
 
 .fa-3x {
@@ -236,18 +245,21 @@ button:focus, button:active {
   position: relative;
   top: 22px;
 }
+
 .text-wrap {
   width: 145px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap !important;
 }
+
 @media (min-width: 992px) {
   .col-lg-3 {
     flex: 0 0 25%;
     max-width: 20%;
   }
 }
+
 .icons-check {
   opacity: 0;
 }
@@ -281,6 +293,7 @@ svg {
   text-overflow: ellipsis;
   white-space: nowrap !important;
 }
+
 .dropdown-menu li:hover .sub-menu {
   visibility: visible;
 }

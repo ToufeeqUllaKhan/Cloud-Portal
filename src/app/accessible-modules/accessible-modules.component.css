@@ -19,7 +19,7 @@
   margin-bottom: 0px;
 }
 
-.page-titles .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+.page-titles .breadcrumb .breadcrumb-item+.breadcrumb-item::before {
   content: " \2192";
   color: #a6b7bf;
 }
@@ -54,8 +54,10 @@
 }
 
 .zoom-img:hover {
-  -ms-transform: scale(1.1); /* IE 9 */
-  -webkit-transform: scale(1.1); /* Safari 3-8 */
+  -ms-transform: scale(1.1);
+  /* IE 9 */
+  -webkit-transform: scale(1.1);
+  /* Safari 3-8 */
   transform: scale(1.1);
 }
 
@@ -83,54 +85,54 @@
   margin-bottom: 30px;
 }
 
-  .card-counter:hover {
-    box-shadow: 4px 4px 20px #DADADA;
-    transition: .3s linear all;
-  }
+.card-counter:hover {
+  box-shadow: 4px 4px 20px #DADADA;
+  transition: .3s linear all;
+}
 
-  .card-counter.primary {
-    background-color: #007bff;
-    color: #FFF;
-  }
+.card-counter.primary {
+  background-color: #007bff;
+  color: #FFF;
+}
 
-  .card-counter.danger {
-    background-color: #ef5350;
-    color: #FFF;
-  }
+.card-counter.danger {
+  background-color: #ef5350;
+  color: #FFF;
+}
 
-  .card-counter.success {
-    background-color: #66bb6a;
-    color: #FFF;
-  }
+.card-counter.success {
+  background-color: #66bb6a;
+  color: #FFF;
+}
 
-  .card-counter.info {
-    background-color: #26c6da;
-    color: #FFF;
-  }
+.card-counter.info {
+  background-color: #26c6da;
+  color: #FFF;
+}
 
-  .card-counter i {
-    font-size: 3.5em;
-    opacity: 0.3;
-  }
+.card-counter i {
+  font-size: 3.5em;
+  opacity: 0.3;
+}
 
-  .card-counter .count-name {
-    position: absolute;
-    right: 35px;
-    top: 20px;
-    font-size: 1.1rem;
-    display: block;
-    cursor: pointer;
-  }
+.card-counter .count-name {
+  position: absolute;
+  right: 35px;
+  top: 20px;
+  font-size: 1.1rem;
+  display: block;
+  cursor: pointer;
+}
 
-  .card-counter .count-numbers {
-    position: absolute;
-    right: 35px;
-    top: 65px;
-    font-style: italic;
-    text-transform: capitalize;
-    opacity: 0.5;
-    display: block;
-  }
+.card-counter .count-numbers {
+  position: absolute;
+  right: 35px;
+  top: 65px;
+  font-style: italic;
+  text-transform: capitalize;
+  opacity: 0.5;
+  display: block;
+}
 
 .hover-cursor {
   cursor: pointer;
@@ -139,6 +141,7 @@
 .bg-blue {
   background-color: #666ee8 !important;
 }
+
 .bg-green {
   background-color: #28d094 !important;
 }

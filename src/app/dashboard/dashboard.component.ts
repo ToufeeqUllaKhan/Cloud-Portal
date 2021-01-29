@@ -86,7 +86,7 @@ export class DashboardComponent implements OnInit {
 
   /** for routing to clients when data management is clicked  **/
   dataMgt() {
-    localStorage.setItem('moduleselected','Data Management Tool')
+    localStorage.setItem('moduleselected', 'Data Management Tool')
     this.router.navigate(['/clients'])
       .then(() => {
         location.reload();
@@ -95,20 +95,16 @@ export class DashboardComponent implements OnInit {
 
   /** for routing to api-clients when cloud api module is clicked  **/
   cloudTest() {
-    localStorage.setItem('moduleselected','Cloud API Search Tester')
+    localStorage.setItem('moduleselected', 'Cloud API Search Tester')
     this.router.navigate(['/api-clients'])
       .then(() => {
         location.reload();
       });
   }
-  /** for routing to log-view when Analytical reports module is clicked  **/
+  /** for routing to reports-view when Analytical reports module is clicked  **/
   reports() {
-    localStorage.setItem('moduleselected','Analytics Report')
-    this.router.navigate(['/log-view'])
-      .then(() => {
-        location.reload();
-      });
+    localStorage.setItem('moduleselected', 'Analytics Report')
+    this.router.navigate(['/reports-view']);
   }
-  
 
 }

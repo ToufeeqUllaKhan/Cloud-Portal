@@ -8,9 +8,9 @@ describe('StagingdataComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ StagingdataComponent ]
+      declarations: [StagingdataComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

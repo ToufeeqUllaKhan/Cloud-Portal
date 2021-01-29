@@ -10,6 +10,7 @@ import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham.css";
+var lodash = require('lodash');
 
 @Component({
   selector: 'app-changehistory',
@@ -20,21 +21,25 @@ export class ChangehistoryComponent implements OnInit {
   usersName: any;
   projectNames: any; selectedItems: Array<any> = [];
   projects: Array<any> = []; finalArray = []; ProjectList = [];
-  dropdownSettings: any = {}; ShowFilter = false; tabslist = [];
-  limitSelection = false; mainArr = [];switchRoute: any;
+  dropdownSettings: any = {}; columnSettings: any = {}; ShowFilter = false; tabslist = [];
+  limitSelection = false; mainArr = []; switchRoute: any;
   noData: boolean = false; projArr = []; tabsProject: any; tabValue: any; count: any = 0; oldValue: string; modalCount: any = 0;
   //   submitted: Boolean = false;
   clientDetails = [];
   dtOptions: DataTables.Settings = {};
   dtTrigger: Subject<any> = new Subject<any>();
   editedSignature: any;
-  editSignatureData: FormGroup; signatureDetails = [];parameters:any;
-  // projectNames: any; 
+  editSignatureData: FormGroup; signatureDetails = []; parameters: any;
   resultProjArr: any = [];
+  report_visiblity: any = [];
+  columns_visible: any = [];
+  columns: any = [];
+
   public gridApi;
   public gridColumnApi;
   public frameworkComponents;
   public columnDefs;
+  public columnDef;
   public defaultColDef;
   public rowData;
   public paginationNumberFormatter;
@@ -94,11 +99,25 @@ export class ChangehistoryComponent implements OnInit {
       itemsShowLimit: 10,
       allowSearchFilter: this.ShowFilter
     };
+    this.columnSettings = {
+      singleSelection: false,
+      idField: 'item_id',
+      textField: 'item_text',
+      selectAllText: 'Select All',
+      unSelectAllText: 'UnSelect All',
+      itemsShowLimit: 0,
+      allowSearchFilter: this.ShowFilter
+    };
     let Projectname = this.projectNames;
     this.tabslist = Projectname;
     this.tabValue = this.projectNames[0];
-    
-    this.viewdata(Projectname[0])
+    this.mainService.ChangeHistory(this.tabValue, null)
+      .subscribe(value => {
+        let parameter = [this.tabValue]
+        this.parameters = parameter;
+        this.viewdata();
+      });
+
     $(document).ready(function () {
       $(".pop-menu").click(function () {
         $(this).toggleClass("transition");
@@ -111,6 +130,13 @@ export class ChangehistoryComponent implements OnInit {
           e.preventDefault();
       });
     });
+    var self = this;
+    $('#column_visible').click(function (e) {
+      if (!($('.tab-content .dropdown-list').hasClass('hidden'))) {
+        $('.tab-content .dropdown-list').css('width', 'auto')
+      }
+      self.columnvisiblity();
+    })
 
 
   }
@@ -121,17 +147,26 @@ export class ChangehistoryComponent implements OnInit {
   onSelectAll(items: any) {
     this.projectNames = items;
   }
+
+  onSelectColumnAll(items: any) {
+    this.report_visiblity = items;
+    this.columnvisiblity();
+  }
+
   toogleShowFilter() {
     this.ShowFilter = !this.ShowFilter;
     this.dropdownSettings = Object.assign({}, this.dropdownSettings, { allowSearchFilter: this.ShowFilter });
+    this.columnSettings = Object.assign({}, this.columnSettings, { allowSearchFilter: this.ShowFilter });
   }
 
 
   handleLimitSelection() {
     if (this.limitSelection) {
       this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: 2 });
+      this.columnSettings = Object.assign({}, this.columnSettings, { limitSelection: 2 });
     } else {
       this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: null });
+      this.columnSettings = Object.assign({}, this.columnSettings, { limitSelection: null });
     }
   }
 
@@ -224,12 +259,17 @@ export class ChangehistoryComponent implements OnInit {
     if (this.tabsProject === undefined) {
       if (this.projectNames[0] != null || this.projectNames[0] != undefined) {
         let resultFetchArr: any = this.mainArr.filter(u =>
-          (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2') );
+          (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
         this.resultProjArr = resultFetchArr;
       }
     }
     var projectName = this.resultProjArr[0]['projectname'];
-    this.viewdata(projectName);
+    this.mainService.ChangeHistory(projectName, null)
+      .subscribe(value => {
+        let parameter = [projectName]
+        this.parameters = parameter;
+        this.viewdata();
+      });
   }
 
   AdminClients() {
@@ -246,7 +286,7 @@ export class ChangehistoryComponent implements OnInit {
       });
   }
 
-    
+
   onPageSizeChanged() {
     var value = (<HTMLInputElement>document.getElementById('page-size')).value;
     // this.paginationPageSize = Number(value);
@@ -259,51 +299,109 @@ export class ChangehistoryComponent implements OnInit {
     this.gridColumnApi = params.columnApi;
   }
 
-  
-  viewdata(projectName) {
-    this.searchValue=null
-    this.spinnerService.show();this.columnDefs = [
-        { field: "DataHistoryId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Username", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "DataSection", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Operation", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TotalFailedRecord", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TotalInsertedRecord", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TotalUpdatedRecord", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "UpdateDescription", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "RecordCount", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "IPaddress", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Remarks", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "TimeStamp",field: "CreatedDate", resizable: true, sortable: true, filter: 'agDateColumnFilter', floatingFilter: true }
-      ];
-      this.mainService.ChangeHistory(projectName, null)
+
+  viewdata() {
+    this.searchValue = null
+    this.spinnerService.show();
+    this.columnDef = [
+      { headerName: "DataHistoryId", field: "DataHistoryId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Username", field: "Username", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "DataSection", field: "DataSection", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Operation", field: "Operation", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "TotalFailedRecord", field: "TotalFailedRecord", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "TotalInsertedRecord", field: "TotalInsertedRecord", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "TotalUpdatedRecord", field: "TotalUpdatedRecord", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "UpdateDescription", field: "UpdateDescription", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "RecordCount", field: "RecordCount", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "IPaddress", field: "IPaddress", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Remarks", field: "Remarks", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "TimeStamp", field: "CreatedDate", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+    ];
+    this.gridColumnApi.moveColumns(['DataHistoryId', 'Username', 'ProjectName', 'DataSection', 'Operation', 'TotalFailedRecord', 'TotalInsertedRecord', 'TotalUpdatedRecord', 'UpdateDescription', 'RecordCount', 'IPaddress', 'Remarks', 'CreatedDate'], 0)
+    let arrData = [];
+    for (var i = 0; i < this.columnDef.length; i++) {
+      arrData.push({ item_id: i, item_text: this.columnDef[i]['headerName'] });
+    }
+    this.report_visiblity = arrData;
+    this.columns_visible = arrData;
+    this.columns = this.columnDef;
+    this.columnvisiblity();
+
+  }
+
+
+  columnvisiblity() {
+    let column = this.columns;
+    this.report_visiblity = lodash.sortBy(this.report_visiblity, 'item_id');
+    this.report_visiblity = lodash.uniqWith(this.report_visiblity, lodash.isEqual);
+    let visible = []; let columnvisible = []; let moveColumn = [];
+    for (let i = 0; i < this.report_visiblity.length; i++) {
+      visible.push(column.filter(u => u.headerName === this.report_visiblity[i]['item_text']));
+    }
+    visible = visible.filter(u => u.length > 0);
+    visible.forEach(element => {
+      columnvisible.push(element[0]);
+    })
+    this.columnDefs = columnvisible;
+    this.columnDefs.forEach(element => {
+      moveColumn.push(element['field']);
+    })
+    this.gridColumnApi.moveColumns(moveColumn, 0);
+    this.View();
+  }
+
+  changecolumns() {
+    this.columnvisiblity();
+  }
+
+  onColumnSelect(e) {
+    this.report_visiblity.push(e);
+  }
+
+  View() {
+    let projectName = this.parameters[0];
+    this.mainService.ChangeHistory(projectName, null)
       .subscribe(value => {
         const newArray = []; let datasource1;
-      for (let i = 0; i < value.data.length; i++) {
-        const keys = Object.keys(value.data[i])
-        const newObject = {};
-        keys.forEach(key => {
-          const newKey = key.charAt(0).toUpperCase() + key.slice(1);
-          newObject[newKey] = value.data[i][key];
-        })
-        newArray.push(newObject);
-        if (value.data[i]['createdDate'] != undefined) {
-          var d = new Date(value.data[i]['createdDate']);
-          var getT = (d.getUTCMonth() + 1) + '/' + d.getDate() + '/' + d.getUTCFullYear() + ' ' +
-            d.getUTCHours() + ':' + d.getUTCMinutes();
-          value.data[i]['createdDate'] = getT;
+        for (let i = 0; i < value.data.length; i++) {
+          const keys = Object.keys(value.data[i])
+          const newObject = {};
+          keys.forEach(key => {
+            const newKey = key.charAt(0).toUpperCase() + key.slice(1);
+            newObject[newKey] = value.data[i][key];
+          })
+          newArray.push(newObject);
+          if (value.data[i]['createdDate'] != undefined) {
+            var d = new Date(value.data[i]['createdDate']);
+            var getT = (d.getUTCMonth() + 1) + '/' + d.getDate() + '/' + d.getUTCFullYear() + ' ' +
+              d.getUTCHours() + ':' + d.getUTCMinutes();
+            value.data[i]['createdDate'] = getT;
+          }
         }
-      }
-      datasource1 = newArray;
-      this.rowData =datasource1
-      this.gridApi.setQuickFilter(this.searchValue)
+        datasource1 = newArray;
+        this.rowData = datasource1
+        if (this.rowData.length < 8) {
+          this.setAutoHeight();
+        }
+        else {
+          this.setFixedHeight();
+        }
+        this.gridApi.setQuickFilter(this.searchValue)
       });
-      
-      
   }
-  
-  search(){
+
+  search() {
     this.gridApi.setQuickFilter(this.searchValue);
+  }
+
+  setAutoHeight() {
+    this.gridApi.setDomLayout('autoHeight');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '';
+  }
+
+  setFixedHeight() {
+    this.gridApi.setDomLayout('normal');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '500px';
   }
 }

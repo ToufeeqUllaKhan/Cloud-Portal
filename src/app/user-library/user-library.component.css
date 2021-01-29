@@ -20,7 +20,7 @@
   margin-bottom: 0px;
 }
 
-.page-titles .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+.page-titles .breadcrumb .breadcrumb-item+.breadcrumb-item::before {
   content: " \2192";
   color: #a6b7bf;
 }
@@ -58,7 +58,8 @@
   margin-bottom: 30px;
 }
 
-table.dataTable thead th, table.dataTable tbody td {
+table.dataTable thead th,
+table.dataTable tbody td {
   padding: 8px 6px;
 }
 
@@ -89,7 +90,8 @@ table.dataTable thead th, table.dataTable tbody td {
   color: #1e88e5;
 }
 
-table.dataTable thead th, table.dataTable thead td {
+table.dataTable thead th,
+table.dataTable thead td {
   color: #1e88e5;
 }
 
@@ -115,7 +117,7 @@ table.dataTable thead th, table.dataTable thead td {
   border: 1px solid #1e88e5;
   min-width: 6rem;
   padding: .1rem 0;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   padding: 0;
   left: -102px !important;
 }
@@ -189,44 +191,47 @@ ul.pop-menu li {
   max-width: 240px;
 }
 
-  .signatureData:hover {
-    white-space: initial;
-    cursor: pointer;
-    word-wrap: break-word;
-  }
+.signatureData:hover {
+  white-space: initial;
+  cursor: pointer;
+  word-wrap: break-word;
+}
 
 #projectView {
   border-collapse: collapse;
   width: 100%;
 }
 
-  #projectView td, #projectView th {
-    border: 1px solid #ddd;
-    padding: 8px;
-  }
+#projectView td,
+#projectView th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
 
-  #projectView tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
+#projectView tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
 
-  #projectView tr:hover {
-    background-color: #ddd;
-  }
+#projectView tr:hover {
+  background-color: #ddd;
+}
 
-  #projectView th {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    /*background-color: #26c6da;*/
-    background: linear-gradient(60deg,#66bb6a,#43a047) !important;
-    color: white;
-  }
+#projectView th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  /*background-color: #26c6da;*/
+  background: linear-gradient(60deg, #66bb6a, #43a047) !important;
+  color: white;
+}
 
 .align-center {
   text-align: center !important;
 }
-.btn-access{
-  cursor:pointer;
+
+.btn-access {
+  cursor: pointer;
 }
+
 u {
   cursor: pointer;
   color: #007bff;

@@ -387,7 +387,7 @@ export class ClientsComponent implements OnInit {
               this.selectedClients.push(value);
               let filterProject: any = value.data.filter(u =>
                 (u.statusFlag != 2 || u.statusFlag != '2'));
-                for (var i = 0; i < filterProject.length; i++) {
+              for (var i = 0; i < filterProject.length; i++) {
                 projectCheckedData.push(filterProject[i]['projectname']);
               }
               var result = this.checkedItems.filter(function (n) {
@@ -478,7 +478,7 @@ export class ClientsComponent implements OnInit {
           let projectArr = [];
           let filterProject: any = this.finalArr.filter(u =>
             (u.statusFlag != 2 || u.statusFlag != '2'));
-          for (var j = 0; j <filterProject.length; j++) {
+          for (var j = 0; j < filterProject.length; j++) {
             projectArr.push(filterProject[j]['projectname']);
             var uniqueProjects = projectArr.filter((v, i, a) => a.indexOf(v) === i);
             // this.projects = uniqueProjects.reverse();

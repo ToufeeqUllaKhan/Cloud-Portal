@@ -1,0 +1,29 @@
+<div class="container-fluid">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Reports View</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xl-4 col-md-6">
+      <div class="card-counter bg-brown info hover-cursor" (click)="AnalyticalreportsView()">
+        <i class="fa fa-bar-chart"></i>
+        <span class="count-name">Summary Reports</span>
+        <!--<span class="count-numbers">12</span>-->
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+      <div class="card-counter bg-blue info hover-cursor" (click)="CustomizedreportsView()">
+        <i class="fa fa-file"></i>
+        <span class="count-name">Customized Reports</span>
+        <!--<span class="count-numbers">2000</span>-->
+      </div>
+    </div>
+  </div>
+</div>

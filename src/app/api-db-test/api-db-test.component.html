@@ -40,7 +40,9 @@
     <div class="col-xl-6 col-md-6">
       <div class="card">
         <div class="card-block">
-          <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'" [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)" (click)="changeProject()" (onSelect)="onProjectSelect($event)"></ng-multiselect-dropdown>
+          <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'"
+            [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)"
+            (click)="changeProject()" (onSelect)="onProjectSelect($event)"></ng-multiselect-dropdown>
         </div>
       </div>
     </div>
@@ -61,7 +63,7 @@
       <b>{{ApiForm}}</b> API is not assigned for project <b>{{tabName}}</b>
     </p>
   </div>
-  <br/>
+  <br />
   <div class="row noDataExists">
     <div class="col-xl-12 col-md-12">
       <div class="card card-pd">
@@ -71,13 +73,16 @@
               Response Time: {{responsetime}}
             </label>
           </h5>
-          <form [formGroup]="apiregisterForm" class="form-material" (ngSubmit)="onRegisterSearchSubmit()" *ngIf="isRegister">
+          <form [formGroup]="apiregisterForm" class="form-material" (ngSubmit)="onRegisterSearchSubmit()"
+            *ngIf="isRegister">
             <br />
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Signature Key</label>
-                  <textarea type="text" rows="2" [(ngModel)]="sign_key" formControlName="SignatureKey" class="form-control disable form-control-line col-sm-8" [ngClass]="{ 'is-invalid': regsubmitted && g.SignatureKey.errors }"></textarea>
+                  <textarea type="text" rows="2" [(ngModel)]="sign_key" formControlName="SignatureKey"
+                    class="form-control disable form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': regsubmitted && g.SignatureKey.errors }"></textarea>
                   <div *ngIf="regsubmitted && g.SignatureKey.errors" class="invalid-feedback">
                     <div *ngIf="g.SignatureKey.errors.required">Signature Key is required</div>
                   </div>
@@ -87,7 +92,9 @@
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Device ID</label>
                   <span style="pointer-events: none;">Portal_</span>
-                  <textarea rows="1" type="text" maxlength="25" [(ngModel)]="device_id" formControlName="deviceId" class="form-control form-control-line col-sm-6" [ngClass]="{ 'is-invalid': regsubmitted && g.deviceId.errors }"></textarea>
+                  <textarea rows="1" type="text" maxlength="25" [(ngModel)]="device_id" formControlName="deviceId"
+                    class="form-control form-control-line col-sm-6"
+                    [ngClass]="{ 'is-invalid': regsubmitted && g.deviceId.errors }"></textarea>
                   <!-- <input type="text" [(ngModel)]="device_id" formControlName="deviceId" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': regsubmitted && g.deviceId.errors }"/> -->
                   <div *ngIf="regsubmitted && g.deviceId.errors" class="invalid-feedback">
                     <div *ngIf="g.deviceId.errors.required">Device ID is required</div>
@@ -97,7 +104,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">DB Version</label>
-                  <select [(ngModel)]='db_version' (change)="dbVersionChange()" formControlName="dbVersion" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': regsubmitted && g.dbVersion.errors }">
+                  <select [(ngModel)]='db_version' (change)="dbVersionChange()" formControlName="dbVersion"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': regsubmitted && g.dbVersion.errors }">
                     <option [value]=null>Select</option>
                     <option *ngFor="let list of dbVersion" value={{list}}>{{list}}</option>
                   </select>
@@ -109,7 +118,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Country Code</label>
-                  <input type="text" [(ngModel)]="country_code" formControlName="countryCode" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': regsubmitted && g.countryCode.errors }" />
+                  <input type="text" [(ngModel)]="country_code" formControlName="countryCode"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': regsubmitted && g.countryCode.errors }" />
                   <div *ngIf="regsubmitted && g.countryCode.errors" class="invalid-feedback">
                     <div *ngIf="g.countryCode.errors.required">Country Code is required</div>
                   </div>
@@ -128,7 +139,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-3">Guid</label>
-                  <textarea rows="2" type="text" [(ngModel)]="guid_data" formControlName="Guid" class="form-control form-control-line col-sm-9" [ngClass]="{ 'is-invalid': logsubmitted && j.Guid.errors }"></textarea>
+                  <textarea rows="2" type="text" [(ngModel)]="guid_data" formControlName="Guid"
+                    class="form-control form-control-line col-sm-9"
+                    [ngClass]="{ 'is-invalid': logsubmitted && j.Guid.errors }"></textarea>
                   <div *ngIf="logsubmitted && j.Guid.errors" class="invalid-feedback">
                     <div *ngIf="j.Guid.errors.required">Guid is required</div>
                   </div>
@@ -141,13 +154,16 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiCurrentDbForm" class="form-material" (ngSubmit)="onCurrentDbSearchSubmit()" *ngIf="isCurrentDb">
+          <form [formGroup]="apiCurrentDbForm" class="form-material" (ngSubmit)="onCurrentDbSearchSubmit()"
+            *ngIf="isCurrentDb">
             <br />
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-5">Datatype</label>
-                  <input type="text" [(ngModel)]="current_datatype" [attr.disabled]="true" formControlName="CurrentDatatype" class="form-control form-control-line col-sm-7 disableClass" [ngClass]="{ 'is-invalid': currentdbsubmitted && r.CurrentDatatype.errors }" />
+                  <input type="text" [(ngModel)]="current_datatype" [attr.disabled]="true"
+                    formControlName="CurrentDatatype" class="form-control form-control-line col-sm-7 disableClass"
+                    [ngClass]="{ 'is-invalid': currentdbsubmitted && r.CurrentDatatype.errors }" />
                   <div *ngIf="currentdbsubmitted && r.CurrentDatatype.errors" class="invalid-feedback">
                     <div *ngIf="r.CurrentDatatype.errors.required">Datatype is required</div>
                   </div>
@@ -160,13 +176,16 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiLatestDbForm" class="form-material" (ngSubmit)="onLatestDbSearchSubmit()" *ngIf="isLatestDb">
+          <form [formGroup]="apiLatestDbForm" class="form-material" (ngSubmit)="onLatestDbSearchSubmit()"
+            *ngIf="isLatestDb">
             <br />
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-5">Datatype</label>
-                  <input type="text" [(ngModel)]="latest_datatype" [attr.disabled]="true" formControlName="LatestDatatype" class="form-control form-control-line col-sm-7 disableClass" [ngClass]="{ 'is-invalid': latestdbsubmitted && t.LatestDatatype.errors }" />
+                  <input type="text" [(ngModel)]="latest_datatype" [attr.disabled]="true"
+                    formControlName="LatestDatatype" class="form-control form-control-line col-sm-7 disableClass"
+                    [ngClass]="{ 'is-invalid': latestdbsubmitted && t.LatestDatatype.errors }" />
                   <div *ngIf="latestdbsubmitted && t.LatestDatatype.errors" class="invalid-feedback">
                     <div *ngIf="t.LatestDatatype.errors.required">Datatype is required</div>
                   </div>
@@ -179,13 +198,16 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiDownloadStatsForm" class="form-material" (ngSubmit)="onDownloadStatsSubmit()" *ngIf="isDownloadStats">
+          <form [formGroup]="apiDownloadStatsForm" class="form-material" (ngSubmit)="onDownloadStatsSubmit()"
+            *ngIf="isDownloadStats">
             <br />
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-7">Download Status</label>
-                  <select [(ngModel)]='down_status' formControlName="DownloadStatus" class="form-control form-control-line col-sm-5" [ngClass]="{ 'is-invalid': downStatsubmitted && v.DownloadStatus.errors }">
+                  <select [(ngModel)]='down_status' formControlName="DownloadStatus"
+                    class="form-control form-control-line col-sm-5"
+                    [ngClass]="{ 'is-invalid': downStatsubmitted && v.DownloadStatus.errors }">
                     <option [value]=null>Select</option>
                     <option value=0>0</option>
                     <option value=1>1</option>
@@ -202,13 +224,16 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiDownloadBinForm" class="form-material" (ngSubmit)="onDownloadBinSearchSubmit()" *ngIf="isDownloadBin">
+          <form [formGroup]="apiDownloadBinForm" class="form-material" (ngSubmit)="onDownloadBinSearchSubmit()"
+            *ngIf="isDownloadBin">
             <br />
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-5">Datatype</label>
-                  <input type="text" [attr.disabled]="true" [(ngModel)]="data_type" formControlName="Datatype" class="form-control form-control-line col-sm-7 disableClass" [ngClass]="{ 'is-invalid': binsubmitted && k.Datatype.errors }" />
+                  <input type="text" [attr.disabled]="true" [(ngModel)]="data_type" formControlName="Datatype"
+                    class="form-control form-control-line col-sm-7 disableClass"
+                    [ngClass]="{ 'is-invalid': binsubmitted && k.Datatype.errors }" />
                   <div *ngIf="binsubmitted && k.Datatype.errors" class="invalid-feedback">
                     <div *ngIf="k.Datatype.errors.required">Datatype is required</div>
                   </div>
@@ -221,13 +246,16 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiDownloadZipForm" class="form-material" (ngSubmit)="onDownloadZipSearchSubmit()" *ngIf="isDownloadZip">
+          <form [formGroup]="apiDownloadZipForm" class="form-material" (ngSubmit)="onDownloadZipSearchSubmit()"
+            *ngIf="isDownloadZip">
             <br />
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-5">Datatype</label>
-                  <input type="text" [attr.disabled]="true" [(ngModel)]="zip_datatype" formControlName="ZipDatatype" class="form-control form-control-line col-sm-7 disableClass" [ngClass]="{ 'is-invalid': zipsubmitted && m.ZipDatatype.errors }" />
+                  <input type="text" [attr.disabled]="true" [(ngModel)]="zip_datatype" formControlName="ZipDatatype"
+                    class="form-control form-control-line col-sm-7 disableClass"
+                    [ngClass]="{ 'is-invalid': zipsubmitted && m.ZipDatatype.errors }" />
                   <div *ngIf="zipsubmitted && m.ZipDatatype.errors" class="invalid-feedback">
                     <div *ngIf="m.ZipDatatype.errors.required">Datatype is required</div>
                   </div>
@@ -240,12 +268,15 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiAutosearchForm" class="form-material" (ngSubmit)="onApiAutoSearchSubmit()" *ngIf="isAutoSearch">
+          <form [formGroup]="apiAutosearchForm" class="form-material" (ngSubmit)="onApiAutoSearchSubmit()"
+            *ngIf="isAutoSearch">
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Device</label>
-                  <select [(ngModel)]='auto_device' formControlName="AutoDevice" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': autosubmitted && n.AutoDevice.errors }">
+                  <select [(ngModel)]='auto_device' formControlName="AutoDevice"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': autosubmitted && n.AutoDevice.errors }">
                     <option [value]=null>Select</option>
                     <option *ngFor="let list of devices" value={{list}}>{{list}}</option>
                   </select>
@@ -257,7 +288,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">EDID</label>
-                  <textarea rows="2" type="text" [(ngModel)]="auto_edid" formControlName="AutoEdid" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': autosubmitted && n.AutoEdid.errors }"></textarea>
+                  <textarea rows="2" type="text" [(ngModel)]="auto_edid" formControlName="AutoEdid"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': autosubmitted && n.AutoEdid.errors }"></textarea>
                   <div *ngIf="autosubmitted && n.AutoEdid.errors" class="invalid-feedback">
                     <div *ngIf="n.AutoEdid.errors.required">EDID is required</div>
                   </div>
@@ -266,7 +299,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Vendor ID</label>
-                  <input type="text" [(ngModel)]="auto_vendorId" formControlName="AutovendorId" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': autosubmitted && n.AutovendorId.errors }" />
+                  <input type="text" [(ngModel)]="auto_vendorId" formControlName="AutovendorId"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': autosubmitted && n.AutovendorId.errors }" />
                   <div *ngIf="autosubmitted && n.AutovendorId.errors" class="invalid-feedback">
                     <div *ngIf="n.AutovendorId.errors.required">Vendor ID is required</div>
                   </div>
@@ -275,7 +310,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">OSD</label>
-                  <input type="text" [(ngModel)]="auto_osd" formControlName="AutoOSD" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': autosubmitted && n.AutoOSD.errors }" />
+                  <input type="text" [(ngModel)]="auto_osd" formControlName="AutoOSD"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': autosubmitted && n.AutoOSD.errors }" />
                   <div *ngIf="autosubmitted && n.AutoOSD.errors" class="invalid-feedback">
                     <div *ngIf="n.AutoOSD.errors.required">OSD is required</div>
                   </div>
@@ -289,12 +326,15 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiModelsearchForm" class="form-material" (ngSubmit)="onApiModelSearchSubmit()" *ngIf="isModelSearch">
+          <form [formGroup]="apiModelsearchForm" class="form-material" (ngSubmit)="onApiModelSearchSubmit()"
+            *ngIf="isModelSearch">
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Device</label>
-                  <select [(ngModel)]='device_list' formControlName="Device" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': submitted && h.Device.errors }">
+                  <select [(ngModel)]='device_list' formControlName="Device"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': submitted && h.Device.errors }">
                     <option [value]=null>Select</option>
                     <option *ngFor="let list of devices" value={{list}}>{{list}}</option>
                   </select>
@@ -306,7 +346,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Brand</label>
-                  <input type="text" [(ngModel)]="brand_data" formControlName="Brand" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': submitted && h.Brand.errors }" />
+                  <input type="text" [(ngModel)]="brand_data" formControlName="Brand"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': submitted && h.Brand.errors }" />
                   <div *ngIf="submitted && h.Brand.errors" class="invalid-feedback">
                     <div *ngIf="h.Brand.errors.required">Brand is required</div>
                   </div>
@@ -315,7 +357,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Model</label>
-                  <input type="text" [(ngModel)]="model_data" formControlName="Model" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': submitted && h.Model.errors }" />
+                  <input type="text" [(ngModel)]="model_data" formControlName="Model"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': submitted && h.Model.errors }" />
                   <div *ngIf="submitted && h.Model.errors" class="invalid-feedback">
                     <div *ngIf="h.Model.errors.required">Model is required</div>
                   </div>
@@ -330,12 +374,15 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiDeltasearchForm" class="form-material" (ngSubmit)="onApiDeltaSearchSubmit()" *ngIf="isDeltaSearch">
+          <form [formGroup]="apiDeltasearchForm" class="form-material" (ngSubmit)="onApiDeltaSearchSubmit()"
+            *ngIf="isDeltaSearch">
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Device</label>
-                  <select [(ngModel)]='delta_device' formControlName="deltaDevice" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': deltasubmitted && p.deltaDevice.errors }">
+                  <select [(ngModel)]='delta_device' formControlName="deltaDevice"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': deltasubmitted && p.deltaDevice.errors }">
                     <option [value]=null>Select</option>
                     <option *ngFor="let list of devices" value={{list}}>{{list}}</option>
                   </select>
@@ -347,7 +394,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Brand</label>
-                  <input type="text" [(ngModel)]="delta_brand" formControlName="deltaBrandId" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': deltasubmitted && p.deltaBrandId.errors }" />
+                  <input type="text" [(ngModel)]="delta_brand" formControlName="deltaBrandId"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': deltasubmitted && p.deltaBrandId.errors }" />
                   <div *ngIf="deltasubmitted && p.deltaBrandId.errors" class="invalid-feedback">
                     <div *ngIf="p.deltaBrandId.errors.required">Brand is required</div>
                   </div>
@@ -370,12 +419,15 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiFeedbacksearchForm" class="form-material" (ngSubmit)="onApiFeedbackSearchSubmit()" *ngIf="isFeedbackSearch">
+          <form [formGroup]="apiFeedbacksearchForm" class="form-material" (ngSubmit)="onApiFeedbackSearchSubmit()"
+            *ngIf="isFeedbackSearch">
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Device</label>
-                  <select [(ngModel)]='feedback_device' formControlName="FeedbackDevice" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackDevice.errors }">
+                  <select [(ngModel)]='feedback_device' formControlName="FeedbackDevice"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackDevice.errors }">
                     <option [value]=null>Select</option>
                     <option *ngFor="let list of devices" value={{list}}>{{list}}</option>
                   </select>
@@ -387,7 +439,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Brand</label>
-                  <input type="text" [(ngModel)]="fb_brand" formControlName="FeedBackBrand" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedBackBrand.errors }" />
+                  <input type="text" [(ngModel)]="fb_brand" formControlName="FeedBackBrand"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedBackBrand.errors }" />
                   <div *ngIf="fbsubmitted && q.FeedBackBrand.errors" class="invalid-feedback">
                     <div *ngIf="q.FeedBackBrand.errors.required">Brand is required</div>
                   </div>
@@ -396,7 +450,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Model</label>
-                  <input type="text" [(ngModel)]="fb_model" formControlName="FeedbackModel" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackModel.errors }" />
+                  <input type="text" [(ngModel)]="fb_model" formControlName="FeedbackModel"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackModel.errors }" />
                   <div *ngIf="fbsubmitted && q.FeedbackModel.errors" class="invalid-feedback">
                     <div *ngIf="q.FeedbackModel.errors.required">Model is required</div>
                   </div>
@@ -405,7 +461,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Vendor ID</label>
-                  <input type="text" [(ngModel)]="fb_vendor" formControlName="FeedbackVendor" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackVendor.errors }" />
+                  <input type="text" [(ngModel)]="fb_vendor" formControlName="FeedbackVendor"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackVendor.errors }" />
                   <div *ngIf="fbsubmitted && q.FeedbackVendor.errors" class="invalid-feedback">
                     <div *ngIf="q.FeedbackVendor.errors.required">Vendor ID is required</div>
                   </div>
@@ -414,7 +472,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">OSD</label>
-                  <input type="text" [(ngModel)]="fb_osd" formControlName="FeedbackOSD" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackOSD.errors }" />
+                  <input type="text" [(ngModel)]="fb_osd" formControlName="FeedbackOSD"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackOSD.errors }" />
                   <div *ngIf="fbsubmitted && q.FeedbackOSD.errors" class="invalid-feedback">
                     <div *ngIf="q.FeedbackOSD.errors.required">OSD is required</div>
                   </div>
@@ -423,7 +483,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">EDID</label>
-                  <textarea rows="2" type="text" [(ngModel)]="fb_edid" formControlName="FeedbackEdid" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackEdid.errors }"></textarea>
+                  <textarea rows="2" type="text" [(ngModel)]="fb_edid" formControlName="FeedbackEdid"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackEdid.errors }"></textarea>
                   <div *ngIf="fbsubmitted && q.FeedbackEdid.errors" class="invalid-feedback">
                     <div *ngIf="q.FeedbackEdid.errors.required">EDID is required</div>
                   </div>
@@ -432,7 +494,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Codeset</label>
-                  <input type="text" [(ngModel)]="fb_codeset" formControlName="FeedbackCodeset" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackCodeset.errors }" />
+                  <input type="text" [(ngModel)]="fb_codeset" formControlName="FeedbackCodeset"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackCodeset.errors }" />
                   <div *ngIf="fbsubmitted && q.FeedbackCodeset.errors" class="invalid-feedback">
                     <div *ngIf="q.FeedbackCodeset.errors.required">Codeset is required</div>
                   </div>
@@ -441,7 +505,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Search Type</label>
-                  <input type="text" [(ngModel)]="fb_searchtype" formControlName="FeedbackSearchtype" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackSearchtype.errors }" />
+                  <input type="text" [(ngModel)]="fb_searchtype" formControlName="FeedbackSearchtype"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackSearchtype.errors }" />
                   <div *ngIf="fbsubmitted && q.FeedbackSearchtype.errors" class="invalid-feedback">
                     <div *ngIf="q.FeedbackSearchtype.errors.required">Search Type is required</div>
                   </div>
@@ -450,7 +516,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Message</label>
-                  <textarea rows="2" type="text" [(ngModel)]="fb_message" formControlName="FeedbackMessage" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackMessage.errors }"></textarea>
+                  <textarea rows="2" type="text" [(ngModel)]="fb_message" formControlName="FeedbackMessage"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackMessage.errors }"></textarea>
                   <div *ngIf="fbsubmitted && q.FeedbackMessage.errors" class="invalid-feedback">
                     <div *ngIf="q.FeedbackMessage.errors.required">Message is required</div>
                   </div>
@@ -459,7 +527,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Status Flag</label>
-                  <input type="text" [(ngModel)]="fb_statusflag" formControlName="FeedbackStatus" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackStatus.errors }" />
+                  <input type="text" [(ngModel)]="fb_statusflag" formControlName="FeedbackStatus"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': fbsubmitted && q.FeedbackStatus.errors }" />
                   <div *ngIf="fbsubmitted && q.FeedbackStatus.errors" class="invalid-feedback">
                     <div *ngIf="q.FeedbackStatus.errors.required">Status Flag is required</div>
                   </div>
@@ -473,12 +543,15 @@
               </div>
             </div>
           </form>
-          <form [formGroup]="apiGenericLogForm" class="form-material" (ngSubmit)="onApiGenericSearchSubmit()" *ngIf="isGenericSearch">
+          <form [formGroup]="apiGenericLogForm" class="form-material" (ngSubmit)="onApiGenericSearchSubmit()"
+            *ngIf="isGenericSearch">
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Api Name</label>
-                  <input type="text" [(ngModel)]="apiname" formControlName="ApiName" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': apiGenericsubmitted && s.ApiName.errors }" />
+                  <input type="text" [(ngModel)]="apiname" formControlName="ApiName"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': apiGenericsubmitted && s.ApiName.errors }" />
                   <div *ngIf="apiGenericsubmitted && s.ApiName.errors" class="invalid-feedback">
                     <div *ngIf="s.ApiName.errors.required">Api Name is required</div>
                   </div>
@@ -487,7 +560,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Input</label>
-                  <input type="text" [(ngModel)]="inputData" formControlName="Input" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': apiGenericsubmitted && s.Input.errors }" />
+                  <input type="text" [(ngModel)]="inputData" formControlName="Input"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': apiGenericsubmitted && s.Input.errors }" />
                   <div *ngIf="apiGenericsubmitted && s.Input.errors" class="invalid-feedback">
                     <div *ngIf="s.Input.errors.required">Input is required</div>
                   </div>
@@ -496,7 +571,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Output</label>
-                  <input type="text" [(ngModel)]="outputData" formControlName="Output" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': apiGenericsubmitted && s.Output.errors }" />
+                  <input type="text" [(ngModel)]="outputData" formControlName="Output"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': apiGenericsubmitted && s.Output.errors }" />
                   <div *ngIf="apiGenericsubmitted && s.Output.errors" class="invalid-feedback">
                     <div *ngIf="s.Output.errors.required">Output is required</div>
                   </div>
@@ -505,7 +582,9 @@
               <div class="col-md-6">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-form-label col-sm-4">Result</label>
-                  <input type="text" [(ngModel)]="resultData" formControlName="Result" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': apiGenericsubmitted && s.Result.errors }" />
+                  <input type="text" [(ngModel)]="resultData" formControlName="Result"
+                    class="form-control form-control-line col-sm-8"
+                    [ngClass]="{ 'is-invalid': apiGenericsubmitted && s.Result.errors }" />
                   <div *ngIf="apiGenericsubmitted && s.Result.errors" class="invalid-feedback">
                     <div *ngIf="s.Result.errors.required">Result is required</div>
                   </div>
@@ -529,7 +608,9 @@
     <div class="col-xl-12 col-md-12">
       <div class="tab tabView" role="tabpanel">
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
-          <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}" class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab" aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
+          <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}"
+            class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab"
+            aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
         </div>
         <div class="tab-content" *ngIf="isTabDataVisible">
           <div class="col-md-12">
@@ -575,7 +656,8 @@
                 <tbody>
                   <tr>
                     <td *ngFor="let item of bin | keyvalue"> {{ item.value }} </td>
-                    <td title="Click Here to Download a Bin File"><i class="fa fa-download" (click)="downloadBin()" aria-hidden="true"></i></td>
+                    <td title="Click Here to Download a Bin File"><i class="fa fa-download" (click)="downloadBin()"
+                        aria-hidden="true"></i></td>
                   </tr>
                 </tbody>
               </table>
@@ -591,7 +673,8 @@
                 <tbody>
                   <tr>
                     <td *ngFor="let item of zip | keyvalue"> {{ item.value }} </td>
-                    <td title="Click Here to Download a Zip File"><i class="fa fa-download" (click)="downloadZip()" aria-hidden="true"></i></td>
+                    <td title="Click Here to Download a Zip File"><i class="fa fa-download" (click)="downloadZip()"
+                        aria-hidden="true"></i></td>
                   </tr>
                 </tbody>
               </table>
@@ -635,7 +718,7 @@
                 <thead>
                   <tr>
                     <td class="formatStyle">Codeset Number</td>
-                    <td class="formatStyle">Codeset Binary	</td>
+                    <td class="formatStyle">Codeset Binary </td>
                     <td class="formatStyle">Checksum</td>
                   </tr>
                 </thead>
@@ -654,9 +737,12 @@
       </div>
     </div>
   </div>
-  
-  
+
+
   <div class="row"><br />&nbsp;</div>
-  <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
+  <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
+    [fullScreen]="true">
+    <p style="color: white"> Loading... </p>
+  </ngx-spinner>
 
 </div>

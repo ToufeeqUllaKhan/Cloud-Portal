@@ -1,72 +1,86 @@
 <div class="container-fluid main-scroll">
-    <!-- Bread crumb and right sidebar toggle -->
-    <!-- ============================================================== -->
-    <div class="row page-titles">
-      <div class="align-self-center">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
-          <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
-          <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">{{switchRoute}}</a></li>
-          <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active"><a [routerLink]="" (click)="AdminClients()">Clients</a></li>
-          <i class="fa fa-arrow-right" aria-hidden="true"></i>
-          <li class="breadcrumb-item active">History_View</li>
-        </ol>
-      </div>
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">{{switchRoute}}</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="" (click)="AdminClients()">Clients</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">History_View</li>
+      </ol>
     </div>
+  </div>
   <div class="row">
     <div class="col-lg-10 col-xlg-10 col-md-10">
       <div class="card">
         <div class="card-block">
-          <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'" [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)" (click)="changeProject()" (onSelect)="onProjectSelect($event)"></ng-multiselect-dropdown>
+          <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'"
+            [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)"
+            (click)="changeProject()" (onSelect)="onProjectSelect($event)"></ng-multiselect-dropdown>
         </div>
       </div>
     </div>
     <!-- <div class="col-xl-1 col-md-1 hideData">
       <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh" aria-hidden="true"></i></button>
     </div> -->
+  </div>
+  <br />
+  <div class="tab tabView" role="tabpanel">
+    <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+      <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}"
+        class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab"
+        aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
     </div>
-    <br />
-    <div class="tab tabView" role="tabpanel">
-      <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
-        <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}" class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab" aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
+    <div class="tab-content">
+      <div class="col-md-12">&nbsp;</div>
+      <div class="row">
+        <div class="example-header" style="display: flex;">&nbsp;&nbsp;&nbsp;
+          <label>Show
+            <select (change)="onPageSizeChanged()" id="page-size" style="height: 34px;">
+              <option value="10">10</option>
+              <option value="100">100</option>
+              <option value="500">500</option>
+              <option value="1000">1000</option>
+            </select>
+            entries</label>
+        </div>
+        <div title="Selected Columns will be  Visible" style="margin-left: auto;display: flex;">
+          <label style="align-self: center;">Column Filter: </label>&nbsp;
+          <ng-multiselect-dropdown id="column_visible" name="columns_visible" [(ngModel)]="report_visiblity"
+            [placeholder]="'Select Columns to Visible'" [data]="columns_visible" [settings]="columnSettings"
+            (onSelectAll)="onSelectColumnAll($event)" (click)="changecolumns()" (onSelect)="onColumnSelect($event)">
+          </ng-multiselect-dropdown>
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+          <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue"
+              style="height: 34px;" />
+          </label>
+        </div>&nbsp;&nbsp;
+        <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+          style="width: 100%; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+          [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
+          [paginationNumberFormatter]="paginationNumberFormatter">
+        </ag-grid-angular>
+        <div class="col-md-12">
+          <table *ngIf="noData">
+            <tbody>
+              <tr>
+                <td style="padding-top: 2rem;">No Data Available!!!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <br />
+        <br />
+
       </div>
-      <div class="tab-content">
-        <div class="col-md-12">&nbsp;</div>
-        <div class="row">
-          <div class="example-header">
-            <label>Show
-              <select (change)="onPageSizeChanged()" id="page-size">
-                <option value="10">10</option>
-                <option value="100">100</option>
-                <option value="500">500</option>
-                <option value="1000">1000</option>
-              </select>
-              entries</label>
-          </div>
-          <div style="margin-left: auto;">
-            <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue"/>
-            </label>
-          </div>
-          <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
-            style="width: 100%; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
-            [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
-            [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents">
-          </ag-grid-angular>
-          <div class="col-md-12">
-            <table *ngIf="noData">
-              <tbody><tr><td style="padding-top: 2rem;">No Data Available!!!</td></tr></tbody>
-            </table>
-          </div>
-
-          <br />
-          <br />
-          <br />
-
-        </div>
-        </div>
     </div>
-    </div>
-  
+  </div>
+</div>

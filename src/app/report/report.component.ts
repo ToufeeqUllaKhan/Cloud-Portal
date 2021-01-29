@@ -13,6 +13,7 @@ import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham.css";
 import { EdidviewCellRenderer } from "../brand-library/edidview-cell-renderer.component";
 declare let alasql;
+var lodash = require('lodash');
 
 @Component({
   selector: 'app-report',
@@ -24,7 +25,7 @@ export class ReportComponent implements OnInit {
 
   searchForm: FormGroup;
   projects: Array<any> = [];
-  dropdownSettings: any = {}; ShowFilter = false;
+  dropdownSettings: any = {}; columnSettings: any = {}; ShowFilter = false;
   limitSelection = false;
   projectNames: any = []; selectedItems: Array<any> = [];
   user: User = new User();
@@ -70,6 +71,7 @@ export class ReportComponent implements OnInit {
   public gridColumnApi;
   public frameworkComponents;
   public columnDefs;
+  public columnDef;
   public defaultColDef;
   public rowData;
   public paginationNumberFormatter;
@@ -81,6 +83,9 @@ export class ReportComponent implements OnInit {
   portal: Boolean;
   role: string;
   module: string;
+  report_visiblity: any = [];
+  columns_visible: any = [];
+  columns: any = [];
   constructor(private fb: FormBuilder, private mainService: MainService, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService, private config: NgbDatepickerConfig, private calender: NgbCalendar, private titleService: Title) {
     this.titleService.setTitle('Reports');
     this.user = JSON.parse(localStorage.getItem('currentUser'));
@@ -190,12 +195,21 @@ export class ReportComponent implements OnInit {
       });
     this.spinnerService.hide();
     this.dropdownSettings = {
-      singleSelection: true,
+      singleSelection: false,
       idField: 'item_id',
       textField: 'item_text',
       selectAllText: 'Select All',
       unSelectAllText: 'UnSelect All',
-      itemsShowLimit: 10,
+      itemsShowLimit: 2,
+      allowSearchFilter: this.ShowFilter
+    };
+    this.columnSettings = {
+      singleSelection: false,
+      idField: 'item_id',
+      textField: 'item_text',
+      selectAllText: 'Select All',
+      unSelectAllText: 'UnSelect All',
+      itemsShowLimit: 0,
       allowSearchFilter: this.ShowFilter
     };
 
@@ -229,27 +243,13 @@ export class ReportComponent implements OnInit {
         let arr = [];
         this.mainService.getSearchDetails(Dbname, null, null, null, 0)
           .then(value => {
-            if (this.switchRoute == 'SearchLog') {
-              if (value.data.length != 0) {
-                value.data = value.data.filter(function (obj) {
-                  return obj.dataType !== 2 && obj.dataType !== 6 && obj.dataType !== 10;
-                });
-              }
-              for (let i = 0; i < value.data.length; i++) {
-                arr.push({ ticketName: value.data[i]['description'], description: value.data[i]['description'] });
-              }
-              // $('#all_download').show();
+            if (value.data.length != 0) {
+              value.data = value.data.filter(function (obj) {
+                return obj.dataType !== 5 && obj.dataType !== 9;
+              });
             }
-            else if (this.switchRoute == 'GenericLog') {
-              if (value.data.length != 0) {
-                value.data = value.data.filter(function (obj) {
-                  return obj.dataType == 10;
-                });
-              }
-              for (let i = 0; i < value.data.length; i++) {
-                arr.push({ ticketName: value.data[i]['description'], description: value.data[i]['description'] });
-              }
-              // $('#all_download').hide();
+            for (let i = 0; i < value.data.length; i++) {
+              arr.push({ ticketName: value.data[i]['description'], description: value.data[i]['description'] });
             }
             this.brands = arr;
           })
@@ -313,14 +313,17 @@ export class ReportComponent implements OnInit {
           if (this.Datatype == 1) {
             dataTypeSelection = 1;
           }
+          if (this.Datatype == 2) {
+            dataTypeSelection = 2;
+          }
           if (this.Datatype == 3) {
             dataTypeSelection = 3;
           }
           if (this.Datatype == 4) {
             dataTypeSelection = 4;
           }
-          if (this.Datatype == 5) {
-            dataTypeSelection = 5;
+          if (this.Datatype == 6) {
+            dataTypeSelection = 6;
           }
           if (this.Datatype == 7) {
             dataTypeSelection = 7;
@@ -328,11 +331,11 @@ export class ReportComponent implements OnInit {
           if (this.Datatype == 8) {
             dataTypeSelection = 8;
           }
-          if (this.Datatype == 9) {
-            dataTypeSelection = 9;
-          }
           if (this.Datatype == 10) {
             dataTypeSelection = 10;
+          }
+          if (this.Datatype == 11) {
+            dataTypeSelection = 11;
           }
 
           // let searchDbname: any = this.mainArr.filter(u => u.projectname == this.projectNames[0]['item_text']);
@@ -354,14 +357,17 @@ export class ReportComponent implements OnInit {
               "dir": "asc"
             }
           ];
-          this.mainService.GetPaginatedProductionDBStats(dbname, projectname, StartDate, EndDate, 1, 10, search, order, datatype)
-            .subscribe(value => {
-              let temp = parseInt(value.recordsTotal);
-              let parameter = [dbname, projectname, StartDate, EndDate, 1, temp, search, order, datatype]
-              this.parameters = parameter;
-              this.viewdata();
-              this.refreshScreen();
-            })
+          this.mainService.getSearchDetails(dbname, projectname, StartDate, EndDate, datatype)
+            .then(
+              // this.mainService.GetPaginatedProductionDBStats(dbname, projectname, StartDate, EndDate, 1, 10, search, order, datatype)
+              //   .subscribe
+              value => {
+                let temp = parseInt(value.recordsTotal);
+                let parameter = [dbname, projectname, StartDate, EndDate, 1, temp, search, order, datatype]
+                this.parameters = parameter;
+                this.viewdata();
+                this.refreshScreen();
+              })
           if (this.SelectedBrandName != '') {
             $("select").prop("disabled", false);
             $("a").css('pointer-events', 'auto');
@@ -375,6 +381,12 @@ export class ReportComponent implements OnInit {
     var self = this;
     $('#single_download').click(function () {
       self.onBtnExport();
+    })
+    $('#column_visible').click(function (e) {
+      if (!($('.tab-content .dropdown-list').hasClass('hidden'))) {
+        $('.tab-content .dropdown-list').css('width', 'auto')
+      }
+      self.columnvisiblity();
     })
   }
 
@@ -395,17 +407,26 @@ export class ReportComponent implements OnInit {
   onSelectAll(items: any) {
     this.projectNames = items;
   }
+
+  onSelectColumnAll(items: any) {
+    this.report_visiblity = items;
+    this.columnvisiblity();
+  }
+
   toogleShowFilter() {
     this.ShowFilter = !this.ShowFilter;
     this.dropdownSettings = Object.assign({}, this.dropdownSettings, { allowSearchFilter: this.ShowFilter });
+    this.columnSettings = Object.assign({}, this.columnSettings, { allowSearchFilter: this.ShowFilter });
   }
 
 
   handleLimitSelection() {
     if (this.limitSelection) {
       this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: 2 });
+      this.columnSettings = Object.assign({}, this.columnSettings, { limitSelection: 2 });
     } else {
       this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: null });
+      this.columnSettings = Object.assign({}, this.columnSettings, { limitSelection: null });
     }
   }
 
@@ -425,7 +446,7 @@ export class ReportComponent implements OnInit {
 
   /** Project Selection */
   async onProjectSelect(e) {
-    if (this.projectNames.length == 1) {
+    if (this.projectNames.length > 1) {
       this.isSearchDataVisible = true;
       this.device_list = [];
       this.versions = [];
@@ -496,13 +517,15 @@ export class ReportComponent implements OnInit {
       $('#all_download').hide();
       this.toastr.warning('Please Select the Project to Activate the fields', '');
     }
-    if (this.projectNames.length == 1) {
+    if (this.projectNames.length > 0) {
       this.noData = false;
       $('.hideData').css('display', 'block');
       $('.tabView').css('display', 'block');
       $('.col-lg-12').css('display', 'block');
       $('#single_download').show();
       $('#all_download').show();
+      $('.nav-item').removeClass('active');
+      $('a#nav-home-tab0').addClass('active');
       this.isSearchDataVisible = true;
       this.getTabName(this.projectNames[0]['item_text']);
       this.onProjectSelect(this.tabslist[0]);
@@ -512,11 +535,11 @@ export class ReportComponent implements OnInit {
   /** Search History Submit operation */
   SearchHistory() {
     this.spinnerService.hide();
-    if (this.checked === true) {
-      $('input[type="checkbox"]:not(:checked)').trigger('click');
-    } else {
-      $('input[type="checkbox"]:checked').trigger('click');
-    }
+    // if (this.checked === true) {
+    //   $('input[type="checkbox"]:not(:checked)').trigger('click');
+    // } else {
+    //   $('input[type="checkbox"]:checked').trigger('click');
+    // }
     let StartDate;
     let EndDate;
     if (this.from_date != null && this.to_date != null) {
@@ -535,11 +558,13 @@ export class ReportComponent implements OnInit {
         EndDate = ModifiedEndDate;
       }
       let ProjectName; let searchDbname: any;
-      if (this.projectNames[0]['item_text'] != undefined) {
-        ProjectName = this.projectNames[0]['item_text'];
-      } else {
-        ProjectName = this.projectNames[0]
-      }
+
+      // if (this.projectNames[0]['item_text'] != undefined) {
+      //   ProjectName = this.projectNames[0]['item_text'];
+      // } else {
+      //   ProjectName = this.projectNames[0]
+      // }
+      ProjectName = this.tabsProject;
 
 
       if (ProjectName.startsWith('PROD_')) {
@@ -560,14 +585,17 @@ export class ReportComponent implements OnInit {
       if (this.Datatype == 1) {
         dataTypeSelection = 1;
       }
+      if (this.Datatype == 2) {
+        dataTypeSelection = 2;
+      }
       if (this.Datatype == 3) {
         dataTypeSelection = 3;
       }
       if (this.Datatype == 4) {
         dataTypeSelection = 4;
       }
-      if (this.Datatype == 5) {
-        dataTypeSelection = 5;
+      if (this.Datatype == 6) {
+        dataTypeSelection = 6;
       }
       if (this.Datatype == 7) {
         dataTypeSelection = 7;
@@ -575,11 +603,11 @@ export class ReportComponent implements OnInit {
       if (this.Datatype == 8) {
         dataTypeSelection = 8;
       }
-      if (this.Datatype == 9) {
-        dataTypeSelection = 9;
-      }
       if (this.Datatype == 10) {
         dataTypeSelection = 10;
+      }
+      if (this.Datatype == 11) {
+        dataTypeSelection = 11;
       }
       datatype = dataTypeSelection;
       this.excelFromDate = StartDate;
@@ -596,13 +624,16 @@ export class ReportComponent implements OnInit {
           "dir": "asc"
         }
       ];
-      this.mainService.GetPaginatedProductionDBStats(dbname, projectname, StartDate, EndDate, 1, 10, search, order, datatype)
-        .subscribe(value => {
-          let temp = parseInt(value.recordsTotal);
-          let parameter = [dbname, projectname, StartDate, EndDate, 1, temp, search, order, datatype]
-          this.parameters = parameter;
-          this.viewdata();
-        })
+      this.mainService.getSearchDetails(dbname, projectname, StartDate, EndDate, datatype)
+        .then(
+          // this.mainService.GetPaginatedProductionDBStats(dbname, projectname, StartDate, EndDate, 1, 10, search, order, datatype)
+          //   .subscribe(
+          value => {
+            let temp = parseInt(value.recordsTotal);
+            let parameter = [dbname, projectname, StartDate, EndDate, 1, temp, search, order, datatype]
+            this.parameters = parameter;
+            this.viewdata();
+          })
     }
   }
 
@@ -629,7 +660,7 @@ export class ReportComponent implements OnInit {
       let dbname = searchDbname[0]['dbPath'];
       let projectname = this.projectNames[0]['item_text'];
       let datatype;
-      let arr = [1, 3, 4, 5, 7, 8, 9];
+      let arr = [1, 2, 3, 4, 6, 7, 8, 10, 11];
       let pushData = [];
       this.excelFromDate = StartDate;
       this.excelToDate = EndDate;
@@ -657,7 +688,7 @@ export class ReportComponent implements OnInit {
             pushData.push(newArray);
           });
       }
-      console.log(pushData)
+      // console.log(pushData)
       if (pushData.length != 0) {
         this.arrayJsonData = pushData;
         this.excelDownload();
@@ -667,28 +698,24 @@ export class ReportComponent implements OnInit {
 
   /** Excel Download Functionality */
   excelDownload() {
-    if (this.switchRoute == 'GenericLog') {
-      if (this.arrayJsonData[0].length == 0) {
-        this.arrayJsonData[0] = [{}];
-      }
-    }
-    else if (this.switchRoute == 'SearchLog') {
-
-      if (this.arrayJsonData[0].length == 0) {
-        this.arrayJsonData[0] = [{}];
-      } if (this.arrayJsonData[1].length == 0) {
-        this.arrayJsonData[1] = [{}];
-      } if (this.arrayJsonData[2].length == 0) {
-        this.arrayJsonData[2] = [{}];
-      } if (this.arrayJsonData[3].length == 0) {
-        this.arrayJsonData[3] = [{}];
-      } if (this.arrayJsonData[4].length == 0) {
-        this.arrayJsonData[4] = [{}];
-      } if (this.arrayJsonData[5].length == 0) {
-        this.arrayJsonData[5] = [{}];
-      } if (this.arrayJsonData[6].length == 0) {
-        this.arrayJsonData[6] = [{}];
-      }
+    if (this.arrayJsonData[0].length == 0) {
+      this.arrayJsonData[0] = [{}];
+    } if (this.arrayJsonData[1].length == 0) {
+      this.arrayJsonData[1] = [{}];
+    } if (this.arrayJsonData[2].length == 0) {
+      this.arrayJsonData[2] = [{}];
+    } if (this.arrayJsonData[3].length == 0) {
+      this.arrayJsonData[3] = [{}];
+    } if (this.arrayJsonData[4].length == 0) {
+      this.arrayJsonData[4] = [{}];
+    } if (this.arrayJsonData[5].length == 0) {
+      this.arrayJsonData[5] = [{}];
+    } if (this.arrayJsonData[6].length == 0) {
+      this.arrayJsonData[6] = [{}];
+    } if (this.arrayJsonData[7].length == 0) {
+      this.arrayJsonData[7] = [{}];
+    } if (this.arrayJsonData[8].length == 0) {
+      this.arrayJsonData[8] = [{}];
     }
     var data1 = this.arrayJsonData[0];
     var data2 = this.arrayJsonData[1];
@@ -697,22 +724,15 @@ export class ReportComponent implements OnInit {
     var data5 = this.arrayJsonData[4];
     var data6 = this.arrayJsonData[5];
     var data7 = this.arrayJsonData[6];
-    var filename = '' + this.switchRoute + 'Stats_From_' + this.excelFromDate + ' To ' + this.excelToDate;
-
-    if (this.switchRoute == 'SearchLog') {
-      var opts = [{ sheetid: 'RegisteredBoxIds', header: true }, { sheetid: 'ModelSearch', header: false }, { sheetid: 'MostSearchedBrand', header: false },
-      { sheetid: 'AutoSearchResults', header: false }, { sheetid: 'BINDownloads', header: false }, { sheetid: 'ZipDownloads', header: false },
-      { sheetid: 'FeedbackResults', header: false }];
-      var res = alasql('SELECT INTO XLSX("' + filename + '",?) FROM ?',
-        [opts, [data1, data2, data3, data4, data5, data6, data7]]);
-      this.spinnerService.hide();
-    }
-    else if (this.switchRoute == 'GenericLog') {
-      var opts = [{ sheetid: 'GenericLogDetails', header: true }];
-      var res = alasql('SELECT INTO XLSX("' + filename + '",?) FROM ?',
-        [opts, [data1]]);
-      this.spinnerService.hide();
-    }
+    var data8 = this.arrayJsonData[7];
+    var data9 = this.arrayJsonData[8];
+    var filename = 'Search History Stats_From_' + this.excelFromDate + ' To ' + this.excelToDate;
+    var opts = [{ sheetid: 'RegisteredBoxIds', header: true }, { sheetid: 'BINDownloads', header: false }, { sheetid: 'ZipDownloads', header: false },
+    { sheetid: 'AutoSearch', header: false }, { sheetid: 'ModelSearch', header: false }, { sheetid: 'MostSearchedBrand', header: false },
+    { sheetid: 'MostSearchedModel', header: false }, { sheetid: 'FeedbackResults', header: false }, { sheetid: 'Generic Logs', header: false }];
+    var res = alasql('SELECT INTO XLSX("' + filename + '",?) FROM ?',
+      [opts, [data1, data2, data3, data4, data5, data6, data7, data8, data9]]);
+    this.spinnerService.hide();
 
   }
 
@@ -764,33 +784,9 @@ export class ReportComponent implements OnInit {
       this.isautoSearch = true; this.isbinDownload = true; this.iszipDownload = true;
       this.isfeedbackAPI = true; this.isgenericLog = true;
     }
-    if (this.brand_list == 'Model Search') {
-      this.bname = 'ModelSearch'
-      this.Datatype = 3;
-      this.isregisteredBoxId = true;
-      this.ismodelSearch = false; this.ismostSearchedBrand = true;
-      this.isautoSearch = true; this.isbinDownload = true; this.iszipDownload = true;
-      this.isfeedbackAPI = true; this.isgenericLog = true;
-    }
-    if (this.brand_list == 'Most Searched Brand') {
-      this.bname = 'MostSearchedBrand';
-      this.Datatype = 4;
-      this.isregisteredBoxId = true;
-      this.ismodelSearch = true; this.ismostSearchedBrand = false;
-      this.isautoSearch = true; this.isbinDownload = true; this.iszipDownload = true;
-      this.isfeedbackAPI = true; this.isgenericLog = true;
-    }
-    if (this.brand_list == 'AutoSearch-Device Grouping') {
-      this.bname = 'AutoSearch';
-      this.Datatype = 5;
-      this.isregisteredBoxId = true;
-      this.ismodelSearch = true; this.ismostSearchedBrand = true;
-      this.isautoSearch = false; this.isbinDownload = true; this.iszipDownload = true;
-      this.isfeedbackAPI = true; this.isgenericLog = true;
-    }
     if (this.brand_list == 'BIN Downloads') {
       this.bname = 'BINDownload';
-      this.Datatype = 7;
+      this.Datatype = 2;
       this.isregisteredBoxId = true;
       this.ismodelSearch = true; this.ismostSearchedBrand = true;
       this.isautoSearch = true; this.isbinDownload = false; this.iszipDownload = true;
@@ -798,15 +794,47 @@ export class ReportComponent implements OnInit {
     }
     if (this.brand_list == 'Zip Downloads') {
       this.bname = 'ZIPDownload'
-      this.Datatype = 8;
+      this.Datatype = 3;
       this.isregisteredBoxId = true;
       this.ismodelSearch = true; this.ismostSearchedBrand = true;
       this.isautoSearch = true; this.isbinDownload = true; this.iszipDownload = false;
       this.isfeedbackAPI = true; this.isgenericLog = true;
     }
+    if (this.brand_list == 'AutoSearch') {
+      this.bname = 'AutoSearch';
+      this.Datatype = 4;
+      this.isregisteredBoxId = true;
+      this.ismodelSearch = true; this.ismostSearchedBrand = true;
+      this.isautoSearch = false; this.isbinDownload = true; this.iszipDownload = true;
+      this.isfeedbackAPI = true; this.isgenericLog = true;
+    }
+    if (this.brand_list == 'Model Search') {
+      this.bname = 'ModelSearch'
+      this.Datatype = 6;
+      this.isregisteredBoxId = true;
+      this.ismodelSearch = false; this.ismostSearchedBrand = true;
+      this.isautoSearch = true; this.isbinDownload = true; this.iszipDownload = true;
+      this.isfeedbackAPI = true; this.isgenericLog = true;
+    }
+    if (this.brand_list == 'Most Searched Brand') {
+      this.bname = 'MostSearchedBrand';
+      this.Datatype = 7;
+      this.isregisteredBoxId = true;
+      this.ismodelSearch = true; this.ismostSearchedBrand = false;
+      this.isautoSearch = true; this.isbinDownload = true; this.iszipDownload = true;
+      this.isfeedbackAPI = true; this.isgenericLog = true;
+    }
+    if (this.brand_list == 'Most Searched Model') {
+      this.bname = 'MostSearchedModel';
+      this.Datatype = 8;
+      this.isregisteredBoxId = true;
+      this.ismodelSearch = true; this.ismostSearchedBrand = false;
+      this.isautoSearch = true; this.isbinDownload = true; this.iszipDownload = true;
+      this.isfeedbackAPI = true; this.isgenericLog = true;
+    }
     if (this.brand_list == 'Feedback API') {
       this.bname = 'FeedbackAPI'
-      this.Datatype = 9;
+      this.Datatype = 10;
       this.isregisteredBoxId = true;
       this.ismodelSearch = true; this.ismostSearchedBrand = true;
       this.isautoSearch = true; this.isbinDownload = true; this.iszipDownload = true;
@@ -814,13 +842,13 @@ export class ReportComponent implements OnInit {
     }
     if (this.brand_list == 'Generic Log') {
       this.bname = 'GenericLog'
-      this.Datatype = 10;
+      this.Datatype = 11;
       this.isregisteredBoxId = true;
       this.ismodelSearch = true; this.ismostSearchedBrand = true;
       this.isautoSearch = true; this.isbinDownload = true; this.iszipDownload = true;
       this.isfeedbackAPI = true; this.isgenericLog = false;
     }
-    // return this.Datatype;
+    return this.Datatype;
   }
   /** datatype selection based on selection of brands list start **/
 
@@ -899,7 +927,6 @@ export class ReportComponent implements OnInit {
     this.router.navigate(['/log-view']);
   }
 
-
   onPageSizeChanged() {
     var value = (<HTMLInputElement>document.getElementById('page-size')).value;
     // this.paginationPageSize = Number(value);
@@ -910,6 +937,16 @@ export class ReportComponent implements OnInit {
   onGridReady(params) {
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
+  }
+
+  setAutoHeight() {
+    this.gridApi.setDomLayout('autoHeight');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '';
+  }
+
+  setFixedHeight() {
+    this.gridApi.setDomLayout('normal');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '500px';
   }
 
   methodFromParent_viewEdid(cell) {
@@ -942,7 +979,7 @@ export class ReportComponent implements OnInit {
   viewdata() {
     this.searchValue = null
     this.spinnerService.show();
-    if (this.SelectedBrandName == 'Most Searched Brand') {
+    if (this.SelectedBrandName == 'Most Searched Brand' || this.SelectedBrandName == 'Most Searched Model') {
       this.defaultColDef = {
         flex: 1,
         minWidth: 100,
@@ -955,223 +992,275 @@ export class ReportComponent implements OnInit {
     }
 
     if (this.SelectedBrandName == 'Registered Box Ids') {
-      this.columnDefs = [
-        { field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SsuGuid", field: "Ssuguid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Region", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "RegionCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "CountryCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      this.columnDef = [
+        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxDBVersion", field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxSerialNo", field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Ssu GUID", field: "Ssu GUID", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Region", field: "Region", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "RegionCode", field: "RegionCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Country", field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "CountryCode", field: "CountryCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
       ];
       this.portal = true;
-      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssuguid', 'Region', 'RegionCode', 'Country', 'CountryCode'], 0);
+      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssu GUID', 'Region', 'RegionCode', 'Country', 'CountryCode'], 0);
+    }
+    if ((this.SelectedBrandName == 'BIN Downloads') || (this.SelectedBrandName == 'Bin Downloads')) {
+      this.columnDef = [
+        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxDBVersion", field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxSerialNo", field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Ssu GUID", field: "Ssu GUID", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "DownloadedDBVersion", field: "Downloaded DB Version", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BinId", field: "FK_BinId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      ];
+      this.portal = true;
+      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssu GUID', 'Downloaded DB Version', 'FK_BinId'], 0)
+    }
+    if ((this.SelectedBrandName == 'ZIP Downloads') || (this.SelectedBrandName == 'Zip Downloads')) {
+      this.columnDef = [
+        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxDBVersion", field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxSerialNo", field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Ssu GUID", field: "Ssu GUID", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "DownloadedDBVersion", field: "Downloaded DB Version", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "ZipId", field: "FK_ZipId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      ];
+      this.portal = true;
+      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssu GUID', 'Downloaded DB Version', 'FK_ZipId'], 0)
+    }
+    if (this.SelectedBrandName == 'AutoSearch') {
+      this.columnDef = [
+        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxDBVersion", field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxSerialNo", field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Ssu GUID", field: "Ssu GUID", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Brand", field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "ModelInput", field: "ModelInput", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "VendorId", field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Osd", field: "Osd", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Edid", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
+        { headerName: "TimeConsumed", field: "TimeConsumed", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Model Matched", field: "Model Matched", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "CodesetMatches", field: "CodesetMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "SearchResult", field: "SearchResult", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      ];
+      this.portal = true;
+      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssu GUID', 'Device', 'Brand', 'ModelInput', 'VendorId', 'Osd', 'Edid', 'TimeConsumed', 'Model Matched', 'CodesetMatches', 'SearchResult'], 0)
     }
     if (this.SelectedBrandName == 'Model Search') {
-      this.columnDefs = [
-        { field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SsuGuid", field: "Ssuguid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "ModelInput", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TimeConsumed", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "ModelMatched", field: "ModelMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "CodesetMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "SearchResult", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      this.columnDef = [
+        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxDBVersion", field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxSerialNo", field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Ssu GUID", field: "Ssu GUID", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Brand", field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "ModelInput", field: "ModelInput", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "TimeConsumed", field: "TimeConsumed", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Model Matched", field: "Model Matched", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "CodesetMatches", field: "CodesetMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "SearchResult", field: "SearchResult", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
       ];
       this.portal = true;
-      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssuguid', 'Device', 'Brand', 'ModelInput', 'TimeConsumed', 'ModelMatches', 'CodesetMatches', 'SearchResult'], 0)
-    }
-    if (this.SelectedBrandName == 'AutoSearch-Device Grouping') {
-      this.columnDefs = [
-        { field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SsuGuid", field: "Ssuguid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "ModelInput", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Osd", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-        { field: "TimeConsumed", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "ModelMatched", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "CodesetMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "SearchResult", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
-      ];
-      this.portal = true;
-      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssuguid', 'Device', 'Brand', 'ModelInput', 'VendorId', 'Osd', 'Edid', 'TimeConsumed', 'ModelMatched', 'CodesetMatches', 'SearchResult'], 0)
+      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssu GUID', 'Device', 'Brand', 'ModelInput', 'TimeConsumed', 'Model Matched', 'CodesetMatches', 'SearchResult'], 0)
     }
     if (this.SelectedBrandName == 'Most Searched Brand') {
-      this.columnDefs = [
-        { field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      this.columnDef = [
+        { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "BrandName", field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BrandCount", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+        { headerName: "BrandCount", field: "BrandCount", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
       ];
       this.portal = false;
       this.gridColumnApi.moveColumns(['Device', 'Brand', 'BrandCount'], 0)
     }
-    if ((this.SelectedBrandName == 'BIN Downloads') || (this.SelectedBrandName == 'Bin Downloads')) {
-      this.columnDefs = [
-        { field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SsuGuid", field: "Ssuguid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "DownloadedDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BinId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
-      ];
-      this.portal = true;
-      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssuguid', 'DownloadedDBVersion', 'BinId'], 0)
-    }
-    if ((this.SelectedBrandName == 'ZIP Downloads') || (this.SelectedBrandName == 'Zip Downloads')) {
-      this.columnDefs = [
-        { field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SsuGuid", field: "Ssuguid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "DownloadedDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "ZipId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
-      ];
-      this.portal = true;
-      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssuguid', 'DownloadedDBVersion', 'ZipId'], 0)
-    }
-    if (this.SelectedBrandName == 'Generic Log') {
-      this.columnDefs = [
-        { headerName: "APIName", field: "Apiname", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SsuGuid", field: "Ssuguid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Input", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Output", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Result", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+    if (this.SelectedBrandName == 'Most Searched Model') {
+      this.columnDef = [
+        { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Model", field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "ModelCount", field: "ModelCount", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
       ];
       this.portal = false;
-      this.gridColumnApi.moveColumns(['Apiname', 'Ssuguid', 'Input', 'Output', 'Result'], 0)
+      this.gridColumnApi.moveColumns(['Device', 'Model', 'ModelCount'], 0)
+    }
+    if (this.SelectedBrandName == 'Generic Log') {
+      this.columnDef = [
+        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxDBVersion", field: "EmbeddedDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Apiname", field: "Apiname", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Ssu GUID", field: "Ssu GUID", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Input", field: "Input", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Output", field: "Output", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Result", field: "Result", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      ];
+      this.portal = false;
+      this.gridColumnApi.moveColumns(['ProjectName', 'EmbeddedDBVersion', 'Apiname', 'Ssu GUID', 'Input', 'Output', 'Result'], 0)
     }
     if (this.SelectedBrandName == 'Feedback API') {
-      this.columnDefs = [
-        { field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SsuGuid", field: "Ssuguid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Osd", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-        { field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "SearchType", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Message", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "StatusFlag", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      this.columnDef = [
+        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxDBVersion", field: "EmbeddedDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxSerialNo", field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "AuthKey", field: "AuthKey", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BrandName", field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Model", field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "VendorId", field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Osd", field: "Osd", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Edid", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
+        { headerName: "Codeset", field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "SearchType", field: "SearchType", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "Message", field: "Message", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "StatusFlag", field: "StatusFlag", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
       ];
       this.portal = true;
-      this.gridColumnApi.moveColumns(['BoxSerialNo', 'BoxId', 'Ssuguid', 'Device', 'BrandName', 'Model', 'VendorId', 'Osd', 'Edid', 'Codeset', 'SearchType', 'Message', 'StatusFlag'], 0)
+      this.gridColumnApi.moveColumns(['ProjectName', 'EmbeddedDBVersion', 'BoxSerialNo', 'BoxId', 'AuthKey', 'Device', 'BrandName', 'Model', 'VendorId', 'Osd', 'Edid', 'Codeset', 'SearchType', 'Message', 'StatusFlag'], 0)
     }
+
+    let arrData = [];
+    for (var i = 0; i < this.columnDef.length; i++) {
+      arrData.push({ item_id: i, item_text: this.columnDef[i]['headerName'] });
+    }
+    this.report_visiblity = arrData;
+    this.columns_visible = arrData;
+    this.columns = this.columnDef;
+    this.columnvisiblity();
+  }
+
+
+  columnvisiblity() {
+    let column = this.columns;
+    this.report_visiblity = lodash.sortBy(this.report_visiblity, 'item_id');
+    this.report_visiblity = lodash.uniqWith(this.report_visiblity, lodash.isEqual);
+    let visible = []; let columnvisible = []; let moveColumn = [];
+    for (let i = 0; i < this.report_visiblity.length; i++) {
+      visible.push(column.filter(u => u.headerName === this.report_visiblity[i]['item_text']));
+    }
+    visible = visible.filter(u => u.length > 0);
+    visible.forEach(element => {
+      columnvisible.push(element[0]);
+    })
+    this.columnDefs = columnvisible;
+    this.columnDefs.forEach(element => {
+      moveColumn.push(element['field']);
+    })
+    this.gridColumnApi.moveColumns(moveColumn, 0);
+    this.View();
+  }
+
+  changecolumns() {
+    this.columnvisiblity();
+  }
+
+  onColumnSelect(e) {
+    this.report_visiblity.push(e);
+  }
+
+  View() {
     let dbname = this.parameters[0], project = this.parameters[1], StartDate = this.parameters[2], EndDate = this.parameters[3], start = this.parameters[4], counter = this.parameters[5], search = this.parameters[6], order = this.parameters[7], datatype = this.parameters[8];
-    this.mainService.GetPaginatedProductionDBStats(dbname, project, StartDate, EndDate, start, counter, search, order, datatype)
-      .subscribe(value => {
-        if (value.data !== '0') {
-          this.spinnerService.hide();
-          const newArray = []; let datasource1;
-          for (let i = 0; i < value.data.length; i++) {
-            const keys = Object.keys(value.data[i])
-            const newObject = {};
-            keys.forEach(key => {
-              const newKey = key.charAt(0).toUpperCase() + key.slice(1);
-              newObject[newKey] = value.data[i][key];
-            })
-            newArray.push(newObject);
-            if (value.data[i]['createdDate'] != undefined) {
-              var d = new Date(value.data[i]['createdDate']);
-              var getT = (d.getUTCMonth() + 1) + '/' + d.getDate() + '/' + d.getUTCFullYear() + ' ' +
-                d.getUTCHours() + ':' + d.getUTCMinutes();
-              value.data[i]['createdDate'] = getT;
+    this.mainService.getSearchDetails(dbname, project, StartDate, EndDate, datatype)
+      .then(
+        // this.mainService.GetPaginatedProductionDBStats(dbname, project, StartDate, EndDate, start, counter, search, order, datatype)
+        //   .subscribe(
+        value => {
+          if (value.data !== '0') {
+            this.spinnerService.hide();
+            const newArray = []; let datasource1;
+            for (let i = 0; i < value.data.length; i++) {
+              const keys = Object.keys(value.data[i])
+              const newObject = {};
+              keys.forEach(key => {
+                const newKey = key.charAt(0).toUpperCase() + key.slice(1);
+                newObject[newKey] = value.data[i][key];
+              })
+              newArray.push(newObject);
+              if (value.data[i]['createdDate'] != undefined) {
+                var d = new Date(value.data[i]['createdDate']);
+                var getT = (d.getUTCMonth() + 1) + '/' + d.getDate() + '/' + d.getUTCFullYear() + ' ' +
+                  d.getUTCHours() + ':' + d.getUTCMinutes();
+                value.data[i]['createdDate'] = getT;
+              }
             }
+            datasource1 = newArray;
+            this.rowData = datasource1
+            this.datasource = datasource1
+            this.gridApi.setQuickFilter(this.searchValue)
           }
-          datasource1 = newArray;
-          this.rowData = datasource1
-          this.datasource = datasource1
-          this.gridApi.setQuickFilter(this.searchValue)
-        }
-        else {
-          this.rowData = [];
-          $('#single_download').hide();
-          this.gridApi.setQuickFilter(this.searchValue)
-          this.spinnerService.hide();
-        }
-        
-        let crudType = 7;
-        this.mainService.getRoleModule(crudType, null, null, null, null)
-          .then(value => {
-            /** based on role get modules accessible checked or not checked*/
-            let resultFetchArr: any = value.data.filter(u =>
-              u.name == this.role);
-            let permission = resultFetchArr.filter(u => u.mainModule === this.module)
-            if (permission[0]['readPermission'] === null) {
-              permission[0]['readPermission'] = 0
-            }
-            if (permission[0]['downloadPermission'] === null) {
-              permission[0]['downloadPermission'] = 0
-            }
-            if (permission[0]['writePermission'] === null) {
-              permission[0]['writePermission'] = 0
-            }
-            if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0) ||
-              (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0)) {
-              this.columnDefs = this.columnDefs;
-              $('#single_download').hide();
-              $('#all_download').hide();
-            }
-            if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
-              (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0)) {
-              this.columnDefs = this.columnDefs;
-              if(this.rowData.length===0){
+          else {
+            this.rowData = [];
+            $('#single_download').hide();
+            this.gridApi.setQuickFilter(this.searchValue)
+            this.spinnerService.hide();
+          }
+          if (this.rowData.length < 8) {
+            this.setAutoHeight();
+          }
+          else {
+            this.setFixedHeight();
+          }
+          let crudType = 7;
+          this.mainService.getRoleModule(crudType, null, null, null, null)
+            .then(value => {
+              /** based on role get modules accessible checked or not checked*/
+              let resultFetchArr: any = value.data.filter(u =>
+                u.name == this.role);
+              let permission = resultFetchArr.filter(u => u.mainModule === this.module)
+              if (permission[0]['readPermission'] === null) {
+                permission[0]['readPermission'] = 0
+              }
+              if (permission[0]['downloadPermission'] === null) {
+                permission[0]['downloadPermission'] = 0
+              }
+              if (permission[0]['writePermission'] === null) {
+                permission[0]['writePermission'] = 0
+              }
+              if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0) ||
+                (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0)) {
+                this.columnDefs = this.columnDefs;
                 $('#single_download').hide();
-              }
-              else{
-                $('#single_download').show();
-              }
-              if (this.switchRoute == 'SearchLog') {
-                $('#all_download').show();
-              }
-              else if (this.switchRoute == 'GenericLog') {
                 $('#all_download').hide();
               }
-            }
-            if ((permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1) ||
-              (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
-              (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
-              (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1)) {
-              this.columnDefs = this.columnDefs;
-              if(this.rowData.length===0){
-                $('#single_download').hide();
-              }
-              else{
-                $('#single_download').show();
-              }
-              if (this.switchRoute == 'SearchLog') {
+              if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
+                (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0)) {
+                this.columnDefs = this.columnDefs;
+                if (this.rowData.length === 0) {
+                  $('#single_download').hide();
+                }
+                else {
+                  $('#single_download').show();
+                }
                 $('#all_download').show();
               }
-              else if (this.switchRoute == 'GenericLog') {
-                $('#all_download').hide();
+              if ((permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1) ||
+                (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
+                (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
+                (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1)) {
+                this.columnDefs = this.columnDefs;
+                if (this.rowData.length === 0) {
+                  $('#single_download').hide();
+                }
+                else {
+                  $('#single_download').show();
+                }
+                $('#all_download').show();
               }
-            }
-            console.log(permission)
-          })
-      });
+              console.log(permission)
+            })
+        });
   }
 
   search() {

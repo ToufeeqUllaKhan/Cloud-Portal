@@ -109,10 +109,10 @@ export class AddRolesComponent implements OnInit {
 
             /** Here we are adding profile module manually since when user logins to websits he should have access to profile even though he dont have access for main Modules */
             let module = 'Profile Module'; let user = null; let project = null;
-            this.mainService.getRoleModules(1, role, module, user, project,null,null,null)
+            this.mainService.getRoleModules(1, role, module, user, project, null, null, null)
               .subscribe(value => {
               });
-            this.mainService.getRoleModules(crudType, role, module, user, project,1,null,null)
+            this.mainService.getRoleModules(crudType, role, module, user, project, 1, null, null)
               .subscribe(value => {
               });
           }
@@ -134,7 +134,7 @@ export class AddRolesComponent implements OnInit {
       } else {
         for (var j = 0; j < this.checkedArr.length; j++) {
           let module = this.checkedArr[j]; let user = null; let project = null;
-          await this.mainService.getRoleModules(crudType, role, module, user, project,1,null,null)
+          await this.mainService.getRoleModules(crudType, role, module, user, project, 1, null, null)
             .subscribe(value => {
               if (value.data[0]['result'] == 1) {
                 this.success++;

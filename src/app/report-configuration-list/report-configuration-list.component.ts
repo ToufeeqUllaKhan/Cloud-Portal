@@ -25,13 +25,14 @@ export class ReportConfigurationListComponent implements OnInit {
     localStorage.removeItem('selectedBrand');
     localStorage.removeItem('updatebrandLibraryAdminProjects');
     localStorage.removeItem('dataConfigBinProjects');
+    localStorage.removeItem('configureAdminProjectNames')
   }
 
   ngOnInit(): void {
     var getBrandProjects = JSON.parse(localStorage.getItem('BrandLibraryAdminProjects'));
     var getClientProjects = JSON.parse(localStorage.getItem('choosenAdminProjects'));
     let zipUploadsProjects = JSON.parse(localStorage.getItem('dataConfigProjects'));
-    
+
     this.switchRoute = localStorage.getItem('logSelected');
     let projectNames: any;
     if (getBrandProjects != null && getBrandProjects.length != 0) {
@@ -43,7 +44,7 @@ export class ReportConfigurationListComponent implements OnInit {
       projectNames = zipUploadsProjects;
     }
     // this.projectNames.push(projectNames)
-    this.projectNames=projectNames;
+    this.projectNames = projectNames;
     var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
     if (browserZoomLevel != 100) {
       this.zoomFunction();
@@ -52,21 +53,21 @@ export class ReportConfigurationListComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        let filterProjectwithstatus2=value.data.filter(u=>u.statusFlag===2);
-        let filterProjectwithstatus=value.data.filter(u=>u.statusFlag!=2);
+        let filterProjectwithstatus2 = value.data.filter(u => u.statusFlag === 2);
+        let filterProjectwithstatus = value.data.filter(u => u.statusFlag != 2);
         const unique = [...new Set(filterProjectwithstatus.map(item => item.projectname))];
         const unique1 = [...new Set(filterProjectwithstatus2.map(item => item.projectname))];
-        let arrData = [];let arrData_1 = [];
+        let arrData = []; let arrData_1 = [];
         for (var i = 0; i < unique.length; i++) {
           arrData.push({ item_id: i, item_text: unique[i] });
         }
         for (var i = 0; i < unique1.length; i++) {
-          arrData.push({ item_id: i, item_text: "PROD_"+unique1[i] });
+          arrData.push({ item_id: i, item_text: "PROD_" + unique1[i] });
         }
         for (var i = 0; i < arrData.length; i++) {
           arrData_1.push({ item_id: i, item_text: arrData[i]['item_text'] });
         }
-        
+
         this.ProjectList = arrData_1;
         // let FilterProject: any  = value.data.filter(u =>
         //   (u.statusFlag === 2 || u.statusFlag === '2'));
@@ -83,24 +84,24 @@ export class ReportConfigurationListComponent implements OnInit {
           let userName = localStorage.getItem('userName');
           this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
-              let filterProjects = [];let ProjectName: any;let clientsArray: any
+              let filterProjects = []; let ProjectName: any; let clientsArray: any
               for (var i = 0; i < value.data.length; i++) {
                 if (this.ProjectList[i]['item_text'] != undefined) {
-          ProjectName = this.ProjectList[i]['item_text'];
-        } else {
-          ProjectName = this.ProjectList[i]
-        }
-        
-        if(ProjectName.startsWith('PROD_')){
-          clientsArray = this.ProjectList.filter(u =>
-            u.item_text == ("PROD_"+value.data[i]['name']) && (u.statusFlag === 2 || u.statusFlag === '2'));
-        }
-        else{
-          clientsArray = this.ProjectList.filter(u =>
-            u.item_text == value.data[i]['name'] && (u.statusFlag != 2 || u.statusFlag != '2'));
-        }
+                  ProjectName = this.ProjectList[i]['item_text'];
+                } else {
+                  ProjectName = this.ProjectList[i]
+                }
+
+                if (ProjectName.startsWith('PROD_')) {
+                  clientsArray = this.ProjectList.filter(u =>
+                    u.item_text == ("PROD_" + value.data[i]['name']) && (u.statusFlag === 2 || u.statusFlag === '2'));
+                }
+                else {
+                  clientsArray = this.ProjectList.filter(u =>
+                    u.item_text == value.data[i]['name'] && (u.statusFlag != 2 || u.statusFlag != '2'));
+                }
                 // let clientsArray: any = this.ProjectList.filter(u =>
-                  // u.item_text == ("PROD_"+value.data[i]['name']));
+                // u.item_text == ("PROD_"+value.data[i]['name']));
                 filterProjects.push(...clientsArray);
               }
               let modifyItems = [];
@@ -131,7 +132,7 @@ export class ReportConfigurationListComponent implements OnInit {
       });
 
     this.dropdownSettings = {
-      singleSelection: true,
+      singleSelection: false,
       idField: 'item_id',
       textField: 'item_text',
       selectAllText: 'Select All',
@@ -290,7 +291,7 @@ export class ReportConfigurationListComponent implements OnInit {
     // console.log('onSelectAll', items);
     let arrData1 = [];
     for (var i = 0; i < items.length; i++) {
-      arrData1.push("PROD_"+items[i]['item_text']);
+      arrData1.push("PROD_" + items[i]['item_text']);
     }
     this.projectNames = arrData1;
   }
@@ -321,7 +322,7 @@ export class ReportConfigurationListComponent implements OnInit {
       $('.scroll-x').css('display', 'none')
       this.toastr.warning('Please Select the Project to Activate the fields', '');
     }
-    if (this.projectNames.length == 1) {
+    if (this.projectNames.length > 1) {
       this.listofbrands();
       $('.scroll-x').show();
     }
@@ -329,8 +330,8 @@ export class ReportConfigurationListComponent implements OnInit {
 
 
   listofbrands() {
-    
-    let datatype = 1;let resultFetchArr: any;
+
+    let datatype = 1; let resultFetchArr: any;
     this.mainService.getProjectNamesWaitReq(null, null, null, null, null, datatype)
       .then(value => {
         let ProjectName;
@@ -339,13 +340,13 @@ export class ReportConfigurationListComponent implements OnInit {
         } else {
           ProjectName = this.projectNames[0]
         }
-        
-        if(ProjectName.startsWith('PROD_')){
-          resultFetchArr= value.data.filter(u =>
+
+        if (ProjectName.startsWith('PROD_')) {
+          resultFetchArr = value.data.filter(u =>
             (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
         }
-        else{
-           resultFetchArr = value.data.filter(u =>
+        else {
+          resultFetchArr = value.data.filter(u =>
             (u.projectname == ProjectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
         }
         // let resultFetchArr: any = value.data.filter(u =>
@@ -354,25 +355,13 @@ export class ReportConfigurationListComponent implements OnInit {
         let dataType = 0; let arr = [];
         this.mainService.getSearchDetails(Dbname, null, null, null, dataType)
           .then(value => {
-            if (this.switchRoute == 'SearchLog') {
-              if (value.data.length != 0) {
-                value.data = value.data.filter(function (obj) {
-                  return obj.dataType !== 2 && obj.dataType !== 6 && obj.dataType !== 10;
-                });
-              }
-              for (let i = 0; i < value.data.length; i++) {
-                arr.push({ ticketName: value.data[i]['description'], description: value.data[i]['description'] });
-              }
+            if (value.data.length != 0) {
+              value.data = value.data.filter(function (obj) {
+                return obj.dataType !== 5 && obj.dataType !== 9;
+              });
             }
-            else if (this.switchRoute == 'GenericLog') {
-              if (value.data.length != 0) {
-                value.data = value.data.filter(function (obj) {
-                  return obj.dataType == 10;
-                });
-              }
-              for (let i = 0; i < value.data.length; i++) {
-                arr.push({ ticketName: value.data[i]['description'], description: value.data[i]['description'] });
-              }
+            for (let i = 0; i < value.data.length; i++) {
+              arr.push({ ticketName: value.data[i]['description'], description: value.data[i]['description'] });
             }
             this.dataTickets = arr;
           })

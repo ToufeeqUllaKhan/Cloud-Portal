@@ -394,7 +394,7 @@ export class ApiClientsComponent implements OnInit {
               this.selectedClients.push(value);
               let filterProject: any = value.data.filter(u =>
                 (u.statusFlag != 2 || u.statusFlag != '2'));
-                for (var i = 0; i < filterProject.length; i++) {
+              for (var i = 0; i < filterProject.length; i++) {
                 projectCheckedData.push(filterProject[i]['projectname']);
               }
               var result = this.checkedItems.filter(function (n) {
@@ -481,7 +481,7 @@ export class ApiClientsComponent implements OnInit {
           let projectArr = [];
           let filterProject: any = this.finalArr.filter(u =>
             (u.statusFlag != 2 || u.statusFlag != '2'));
-          for (var j = 0; j <filterProject.length; j++) {
+          for (var j = 0; j < filterProject.length; j++) {
             projectArr.push(filterProject[j]['projectname']);
             var uniqueProjects = projectArr.filter((v, i, a) => a.indexOf(v) === i);
             let diffArr = uniqueProjects.filter(x => this.RolelevelProjects.includes(x));
@@ -492,7 +492,7 @@ export class ApiClientsComponent implements OnInit {
           let projectArr = [];
           let filterProject: any = this.finalArr.filter(u =>
             (u.statusFlag != 2 || u.statusFlag != '2'));
-          for (var j = 0; j <filterProject.length; j++) {
+          for (var j = 0; j < filterProject.length; j++) {
             projectArr.push(filterProject[j]['projectname']);
           }
           var uniqueProjects = projectArr.filter((v, i, a) => a.indexOf(v) === i);

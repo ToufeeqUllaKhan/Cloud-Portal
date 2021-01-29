@@ -21,7 +21,7 @@
   margin-bottom: 0px;
 }
 
-.page-titles .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+.page-titles .breadcrumb .breadcrumb-item+.breadcrumb-item::before {
   content: " \2192";
   color: #a6b7bf;
 }
@@ -49,6 +49,7 @@
 .h5-color {
   /*color: #26c6da;*/
 }
+
 .form-inline label {
   display: flex;
   justify-content: left;
@@ -63,10 +64,10 @@
   margin-bottom: 0.5rem !important;
 }
 
-  .form-custom .form-group .col-form-label {
-    padding-top: 0rem;
-    padding-bottom: 0rem;
-  }
+.form-custom .form-group .col-form-label {
+  padding-top: 0rem;
+  padding-bottom: 0rem;
+}
 
 .form-material .form-control {
   background-color: transparent;
@@ -80,28 +81,28 @@
   padding-left: 1%;
 }
 
-  .form-material .form-control,
-  .form-material .form-control.focus,
-  .form-material .form-control:focus {
-    background-image: -webkit-gradient(linear, left top, left bottom, from(#009efb), to(#009efb)), -webkit-gradient(linear, left top, left bottom, from(#d9d9d9), to(#d9d9d9));
-    background-image: -webkit-linear-gradient(#009efb, #009efb), -webkit-linear-gradient(#d9d9d9, #d9d9d9);
-    background-image: -o-linear-gradient(#009efb, #009efb), -o-linear-gradient(#d9d9d9, #d9d9d9);
-    background-image: linear-gradient(#009efb, #009efb), linear-gradient(#d9d9d9, #d9d9d9);
-    border: 0 none;
-    border-radius: 0;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-    float: none;
-  }
+.form-material .form-control,
+.form-material .form-control.focus,
+.form-material .form-control:focus {
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#009efb), to(#009efb)), -webkit-gradient(linear, left top, left bottom, from(#d9d9d9), to(#d9d9d9));
+  background-image: -webkit-linear-gradient(#009efb, #009efb), -webkit-linear-gradient(#d9d9d9, #d9d9d9);
+  background-image: -o-linear-gradient(#009efb, #009efb), -o-linear-gradient(#d9d9d9, #d9d9d9);
+  background-image: linear-gradient(#009efb, #009efb), linear-gradient(#d9d9d9, #d9d9d9);
+  border: 0 none;
+  border-radius: 0;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  float: none;
+}
 
-    .form-material .form-control.focus,
-    .form-material .form-control:focus {
-      background-size: 100% 2px, 100% 1px;
-      outline: 0 none;
-      -webkit-transition-duration: 0.3s;
-      -o-transition-duration: 0.3s;
-      transition-duration: 0.3s;
-    }
+.form-material .form-control.focus,
+.form-material .form-control:focus {
+  background-size: 100% 2px, 100% 1px;
+  outline: 0 none;
+  -webkit-transition-duration: 0.3s;
+  -o-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+}
 
 .form-control-line .form-group {
   overflow: hidden;
@@ -114,9 +115,9 @@
   border-bottom: 1px solid #d9d9d9;
 }
 
-  .form-control-line .form-control:focus {
-    border-bottom: 1px solid #009efb;
-  }
+.form-control-line .form-control:focus {
+  border-bottom: 1px solid #009efb;
+}
 
 .custom-file-upload {
   display: inline-block;
@@ -155,18 +156,18 @@ label {
   overflow-y: auto;
 }
 
-  .div-list-scroll::-webkit-scrollbar-track {
-    border: 1px solid rgba(38, 198, 218, 0.7);
-    background-color: #fff;
-  }
+.div-list-scroll::-webkit-scrollbar-track {
+  border: 1px solid rgba(38, 198, 218, 0.7);
+  background-color: #fff;
+}
 
-  .div-list-scroll::-webkit-scrollbar {
-    background-color: #2dcdb4;
-  }
+.div-list-scroll::-webkit-scrollbar {
+  background-color: #2dcdb4;
+}
 
-  .div-list-scroll::-webkit-scrollbar-thumb {
-    background-color: #2dcdb4;
-  }
+.div-list-scroll::-webkit-scrollbar-thumb {
+  background-color: #2dcdb4;
+}
 
 ::-webkit-scrollbar {
   width: 0.7em;
@@ -180,6 +181,7 @@ label {
 .colorBlue {
   color: #2ecdb3 !important;
 }
+
 .float-right {
   float: right;
 }
@@ -194,34 +196,38 @@ label {
   font-size: 1.3rem;
   cursor: pointer;
 }
+
 u {
   cursor: pointer;
   color: #007bff;
 }
+
 strong {
   cursor: pointer;
   color: #007bff;
 }
+
 .form-scroll {
   overflow-y: auto;
   overflow-x: hidden;
   height: 460px;
 }
 
-  .form-scroll::-webkit-scrollbar-track {
-    border: 1px solid rgba(38, 198, 218, 0.7);
-    background-color: #fff;
-  }
+.form-scroll::-webkit-scrollbar-track {
+  border: 1px solid rgba(38, 198, 218, 0.7);
+  background-color: #fff;
+}
 
-  .form-scroll::-webkit-scrollbar {
-    background-color: #2dcdb4;
-    width: 0.7em;
-    height: 0.7em
-  }
+.form-scroll::-webkit-scrollbar {
+  background-color: #2dcdb4;
+  width: 0.7em;
+  height: 0.7em
+}
 
-  .form-scroll::-webkit-scrollbar-thumb {
-    background-color: #2dcdb4;
-  }
+.form-scroll::-webkit-scrollbar-thumb {
+  background-color: #2dcdb4;
+}
+
 ::-webkit-scrollbar {
   width: 0.7em;
   height: 0.7em

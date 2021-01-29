@@ -26,7 +26,7 @@ export class ReportsClientComponent implements OnInit {
   switchRoute: any;
 
   constructor(private router: Router, private mainService: MainService, private titleService: Title, private spinnerService: NgxSpinnerService, private toastr: ToastrService) {
-    this.titleService.setTitle("Admin Clients");
+    this.titleService.setTitle("Report Clients");
     this.checkboxValue = false;
   }
 
@@ -333,18 +333,11 @@ export class ReportsClientComponent implements OnInit {
       .subscribe(value => {
         // let filterProject: any = value.data.filter(u =>
         //   (u.statusFlag === 2 || u.statusFlag === '2'));
-          let filterProject: any = value.data;
+        let filterProject: any = value.data;
         clientArr.push(filterProject[0]['projectname']);
         localStorage.setItem('choosenAdminProjects', JSON.stringify(clientArr));
         if (clientArr.length != 0) {
-          if (this.switchRoute == 'SearchLog' || this.switchRoute == 'GenericLog') {
-            this.router.navigate(['/Report-configuration-list']);
-          }
-          // if (this.switchRoute == 'SearchLog') {
-          //   this.router.navigate(['/search-history']);
-          // } if (this.switchRoute == 'GenericLog') {
-          //   this.router.navigate(['/generic-logs']);
-          // }
+          this.router.navigate(['/Report-configuration-list']);
         }
       });
 

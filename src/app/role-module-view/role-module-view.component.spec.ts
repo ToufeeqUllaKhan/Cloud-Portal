@@ -8,9 +8,9 @@ describe('RoleModuleViewComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ RoleModuleViewComponent ]
+      declarations: [RoleModuleViewComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

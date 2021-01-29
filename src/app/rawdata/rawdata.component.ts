@@ -85,9 +85,6 @@ export class RawdataComponent implements OnInit {
       remarksviewCellRenderer: RemarksViewCellRenderer,
       regionsviewCellRenderer: SupportedRegionsViewCellRenderer
     };
-    this.defaultColDef = {
-      minWidth: 100,
-    };
     this.paginationNumberFormatter = function (params) {
       return '[' + params.value.toLocaleString() + ']';
     };
@@ -489,7 +486,7 @@ export class RawdataComponent implements OnInit {
             });
 
             // RegionCountry+=element.TargetRegion+" : "+element.TargetCountry+" : "+element.Targetmodel+" ;"
-            RegionCountry=RegionCountry.trim().slice(0,-1)
+            RegionCountry = RegionCountry.trim().slice(0, -1)
 
             Region.push(RegionCountry)
           });
@@ -595,25 +592,30 @@ export class RawdataComponent implements OnInit {
     if (this.saveEditRawData.invalid) {
       return;
     }
-    let checkEdidData;
-    if (this.editedEDID128 != null && this.editedEDID128 != undefined) {
-      checkEdidData = ((this.editedEDID128.includes('00 FF FF FF FF FF FF 00') || this.editedEDID128.includes('00 ff ff ff ff ff ff 00')) && this.editedEDID128.length >= 383);
-    }
-    //let checkEdidData = this.ce_edid.includes('00 FF FF FF FF FF FF 00');
-    if (this.editedVendor != undefined || this.editedOSD != undefined || this.editedEDID128 != undefined) {
-      if (this.editedEDID128 != undefined && checkEdidData == true) {
-        $('#checkEdidValid').css('border', '1px solid #ced4da');
-        this.edidError = false;
-        this.cecEdidValidate();
-      } if (this.editedEDID128 != undefined && checkEdidData == false) {
-        this.edidError = true;
-        this.Rawdatasubmitted = false;
-      }
-      if (this.editedEDID128 == undefined) {
-        this.cecEdidValidate();
-      }
+    this.cecEdidValidate();
+    // if ((this.editedVendor != undefined && this.editedVendor != '') || (this.editedOSD != undefined && this.editedOSD != '') || (this.editedEDID128 != undefined && this.editedEDID128 != '')) {
+    //   var edid128 = this.editedEDID128;
+    //   if (edid128 != null && edid128 != '' && edid128 != undefined) {
+    //     let checkEdidData = ((edid128.startsWith('00 FF FF FF FF FF FF 00') || edid128.startsWith('00 ff ff ff ff ff ff 00')) && edid128.length >= 383);
+    //     if (!checkEdidData) {
+    //       this.edidError = true;
+    //       this.Rawdatasubmitted = false;
+    //     }
+    //     else {
+    //       $('#checkEdidValid').css('border', '1px solid #ced4da');
+    //       this.edidError = false;
+    //       
+    //     }
+    //   }
+    //   else {
+    //     $('#checkEdidValid').css('border', '1px solid #ced4da');
+    //     this.edidError = false;
+    //     this.cecEdidValidate();
+    //   }
 
-    }
+    // } else {
+    //   this.toastr.error('', 'Enter Vendorid or OSD or EDID', { timeOut: 4000 })
+    // }
   }
 
   /** Vendor Validation in CEC EDID add Option start **/
@@ -856,6 +858,9 @@ export class RawdataComponent implements OnInit {
 
   viewdata() {
     this.searchValue = null
+    this.defaultColDef = {
+      minWidth: 100,
+    };
     this.columnDefs = [
       { field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
       { field: "Subdevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
@@ -880,13 +885,16 @@ export class RawdataComponent implements OnInit {
       { field: "Supportedregions", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "regionsviewCellRenderer" },
       { field: "Remarks", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "remarksviewCellRenderer" },
       { field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true },
-      {
-        field: "Action", resizable: true,
-        cellRenderer: "btnCellRenderer"
-      }
+      { field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
+      { field: "Action", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
     ];
     this.rowData = this.rawdatacapture;
+    if (this.rowData.length < 8) {
+      this.setAutoHeight();
+    }
+    else {
+      this.setFixedHeight();
+    }
     this.gridApi.setQuickFilter(this.searchValue)
 
 
@@ -972,7 +980,7 @@ export class RawdataComponent implements OnInit {
         }
 
         for (let i = 0; i < arr2.length; i++) {
-          this.mainService.getRemoteUID(arr2[i]['Brand'], arr2[i]['Targetmodel'], arr2[i]['Device'])
+          this.mainService.getRemoteUID(arr2[i]['Brand'], arr2[i]['Targetmodel'].toString(), arr2[i]['Device'])
             .subscribe(value => {
               let UpdatedUID = []; let UpdatedUIDs = '';
               if (value.data != [] || value.data != '[]') {
@@ -1065,5 +1073,15 @@ export class RawdataComponent implements OnInit {
       skipHeader: false
     }
     this.gridApi.exportDataAsCsv(excelParams);
+  }
+
+  setAutoHeight() {
+    this.gridApi.setDomLayout('autoHeight');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '';
+  }
+
+  setFixedHeight() {
+    this.gridApi.setDomLayout('normal');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '500px';
   }
 }

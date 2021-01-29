@@ -1,0 +1,395 @@
+<div class="container-fluid main-scroll">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-12 col-12 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/reports-view']">Reports</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Summary reports</li>
+      </ol>
+    </div>
+  </div>
+  <br />
+
+
+  <div class="tab tabView" role="tabpanel" style="margin:20px;">
+    <!-- <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+      <a class="nav-item nav-link" id="nav-home-tab0" (click)="summary()" data-toggle="tab" href="#" role="tab"
+        aria-controls="nav-home" aria-selected="true">Summary</a>
+      <a class="nav-item nav-link" id="nav-home-tab1" (click)="getTabName()" data-toggle="tab" href="#" role="tab"
+        aria-controls="nav-home" aria-selected="true">Customized Reports</a>
+    </div> -->
+    <div class="tab-content">
+      <div id="summarycontent">
+        <div class="col-md-12">&nbsp;</div>
+        <div class="row">
+          <div class="col-xl-3 col-md-3 hideData">
+            <label> DB Instance</label>
+            <div class="card">
+              <div class="card-block">
+                <select [(ngModel)]='summary_db_instance' class="form-control" (change)="summary()">
+                  <option [value]=null hidden>Select</option>
+                  <option *ngFor="let list of dbinstance" value={{list}}>{{list}}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-3 hideData" *ngIf="showProject">
+            <label>ProjectName</label>
+            <div class="card">
+              <div class="card-block">
+                <select [(ngModel)]='projectNames' class="form-control selectDrop" (change)="changeProject()"
+                  (ngModelChange)="onModelChange($event)">
+                  <option [value]=null>All</option>
+                  <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-3 hideData" *ngIf="showDevice">
+            <label>Device</label>
+            <div class="card">
+              <div class="card-block">
+                <select [(ngModel)]='Device' class="form-control selectDrop" (change)="changeDevice()"
+                  (ngModelChange)="onModelChange($event)">
+                  <option [value]=null>All</option>
+                  <option *ngFor="let list of DeviceList" value={{list}}>{{list}}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="col-xl-3 col-md-3 hideData">
+          <label>Embedded Db Version</label>
+          <div class="card">
+            <div class="card-block">
+              <select [(ngModel)]='db_version' class="form-control selectDrop" (change)="changeVersion()"
+                (ngModelChange)="onModelChange($event)">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of versions" value={{list}}>{{list}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-3 hideData">
+          <label>Device</label>
+          <div class="card">
+            <div class="card-block">
+              <select [(ngModel)]='projectNames' class="form-control selectDrop" (change)="changeProject()"
+                (ngModelChange)="onModelChange($event)">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-3 hideData">
+          <label>Brand</label>
+          <div class="card">
+            <div class="card-block">
+              <select [(ngModel)]='db_version' class="form-control selectDrop" (change)="changeVersion()"
+                (ngModelChange)="onModelChange($event)">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of versions" value={{list}}>{{list}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-3 hideData">
+          <label>BoxId</label>
+          <div class="card">
+            <div class="card-block">
+              <select [(ngModel)]='projectNames' class="form-control selectDrop" (change)="changeProject()"
+                (ngModelChange)="onModelChange($event)">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-3 hideData">
+          <label>Result Type</label>
+          <div class="card">
+            <div class="card-block">
+              <select [(ngModel)]='db_version' class="form-control selectDrop" (change)="changeVersion()"
+                (ngModelChange)="onModelChange($event)">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of versions" value={{list}}>{{list}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-3 hideData">
+          <label>Start Date</label>
+          <div class="card">
+            <div class="card-block">
+              <select [(ngModel)]='projectNames' class="form-control selectDrop" (change)="changeProject()"
+                (ngModelChange)="onModelChange($event)">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-3 hideData">
+          <label>End Date</label>
+          <div class="card">
+            <div class="card-block">
+              <select [(ngModel)]='db_version' class="form-control selectDrop" (change)="changeVersion()"
+                (ngModelChange)="onModelChange($event)">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of versions" value={{list}}>{{list}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-3 hideData">
+          <label>Report Type</label>
+          <div class="card">
+            <div class="card-block">
+              <select [(ngModel)]='projectNames' class="form-control selectDrop" (change)="changeProject()"
+                (ngModelChange)="onModelChange($event)">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-3 hideData">
+          <label> Response Time</label>
+          <div class="card">
+            <div class="card-block">
+              <select [(ngModel)]='db_version' class="form-control selectDrop" (change)="changeVersion()"
+                (ngModelChange)="onModelChange($event)">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of versions" value={{list}}>{{list}}</option>
+              </select>
+            </div>
+          </div>
+        </div> -->
+        </div>
+        <br />
+        <div class="card">
+          <div class="card-block">
+            <div id="chart-carousel" class="carousel slide" data-ride="carousel" data-interval="100000">
+              <div class="carousel-inner" style="background-color: #dccece;">
+                <div id="TotalRegcount" class="carousel-item active">
+                  <div id="piechart">
+                    <apx-chart [series]="TotalcountReg_series" [chart]="TotalcountReg_chart"
+                      [labels]="TotalcountReg_labels" [title]="TotalcountReg_title" [colors]="TotalcountReg_color">
+                    </apx-chart>
+                  </div>
+                </div>
+                <div id="Countrywise" class="carousel-item">
+                  <div id="barchart">
+                    <apx-chart [series]="Countrywise_series" [chart]="Countrywise_chart"
+                      [dataLabels]="Countrywise_dataLabels" [plotOptions]="Countrywise_plotOptions"
+                      [xaxis]="Countrywise_xaxis" [yaxis]="Countrywise_yaxis" [title]="Countrywise_title"></apx-chart>
+                  </div>
+                </div>
+                <div id="Monthwise_Reg" class="carousel-item">
+                  <div id="barchart">
+                    <apx-chart [series]="Monthwise_Reg_series" [chart]="Monthwise_Reg_chart"
+                      [dataLabels]="Monthwise_Reg_dataLabels" [plotOptions]="Monthwise_Reg_plotOptions"
+                      [xaxis]="Monthwise_Reg_xaxis" [yaxis]="Monthwise_Reg_yaxis" [title]="Monthwise_Reg_title"
+                      [stroke]="Monthwise_Reg_stroke" [colors]="Monthwise_Reg_color"></apx-chart>
+                  </div>
+                </div>
+                <div id="Monthwise_Search" class="carousel-item">
+                  <div id="barchart">
+                    <apx-chart [series]="Monthwise_Search_series" [chart]="Monthwise_Search_chart"
+                      [dataLabels]="Monthwise_Search_dataLabels" [plotOptions]="Monthwise_Search_plotOptions"
+                      [xaxis]="Monthwise_Search_xaxis" [yaxis]="Monthwise_Search_yaxis" [title]="Monthwise_Search_title"
+                      [stroke]="Monthwise_Search_stroke"></apx-chart>
+                  </div>
+                </div>
+                <div id="ModelSearchbasedonResulttype" class="carousel-item">
+                  <div id="piechart">
+                    <apx-chart [series]="ModelSearchbasedonResulttype_series"
+                      [chart]="ModelSearchbasedonResulttype_chart" [labels]="ModelSearchbasedonResulttype_labels"
+                      [title]="ModelSearchbasedonResulttype_title" [colors]="ModelSearchbasedonResulttype_color">
+                    </apx-chart>
+                  </div>
+                </div>
+                <div id="AvgResponseTimeModelSearch" class="carousel-item">
+                  <div id="piechart">
+                    <apx-chart [series]="AvgResponseTimeModelSearch_series" [chart]="AvgResponseTimeModelSearch_chart"
+                      [labels]="AvgResponseTimeModelSearch_labels" [title]="AvgResponseTimeModelSearch_title"
+                      [colors]="AvgResponseTimeModelSearch_color"></apx-chart>
+                  </div>
+                </div>
+                <div id="AutoSearchbasedonResulttype" class="carousel-item">
+                  <div id="piechart">
+                    <apx-chart [series]="AutoSearchbasedonResulttype_series" [chart]="AutoSearchbasedonResulttype_chart"
+                      [labels]="AutoSearchbasedonResulttype_labels" [title]="AutoSearchbasedonResulttype_title"
+                      [colors]="AutoSearchbasedonResulttype_color"></apx-chart>
+                  </div>
+                </div>
+                <div id="AvgResponseTimeAutoSearch" class="carousel-item">
+                  <div id="piechart">
+                    <apx-chart [series]="AvgResponseTimeAutoSearch_series" [chart]="AvgResponseTimeAutoSearch_chart"
+                      [labels]="AvgResponseTimeAutoSearch_labels" [title]="AvgResponseTimeAutoSearch_title"
+                      [colors]="AvgResponseTimeAutoSearch_color"></apx-chart>
+                  </div>
+                </div>
+                <div id="TopSearchBrand" class="carousel-item">
+                  <div id="piechart">
+                    <apx-chart [series]="TopSearchBrand_series" [chart]="TopSearchBrand_chart"
+                      [labels]="TopSearchBrand_labels" [title]="TopSearchBrand_title"></apx-chart>
+                  </div>
+                </div>
+                <div id="TopSearchModel" class="carousel-item">
+                  <div id="piechart">
+                    <apx-chart [series]="TopSearchModel_series" [chart]="TopSearchModel_chart"
+                      [labels]="TopSearchModel_labels" [title]="TopSearchModel_title"></apx-chart>
+                  </div>
+                </div>
+                <div id="TopSearchVendorID" class="carousel-item">
+                  <div id="piechart">
+                    <apx-chart [series]="TopSearchVendorID_series" [chart]="TopSearchVendorID_chart"
+                      [labels]="TopSearchVendorID_labels" [title]="TopSearchVendorID_title"></apx-chart>
+                  </div>
+                </div>
+                <div id="TopSearchOSD" class="carousel-item">
+                  <div id="piechart">
+                    <apx-chart [series]="TopSearchOSD_series" [chart]="TopSearchOSD_chart"
+                      [labels]="TopSearchOSD_labels" [title]="TopSearchOSD_title"></apx-chart>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Left and right controls -->
+              <a class="carousel-control-prev" href="#chart-carousel" data-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+              </a>
+              <a class="carousel-control-next" href="#chart-carousel" data-slide="next">
+                <span class="carousel-control-next-icon"></span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- <div id="reportcontent">
+        <div class="col-md-12">&nbsp;</div>
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="row" style="padding: 20px;">
+            <div class="col-xl-3 col-md-3 hideData">
+              <label> Reports</label>
+              <div class="card">
+                <div class="card-block">
+                  <select [(ngModel)]='brand_list' class="form-control selectDrop" (change)="changeTicket()"
+                    (ngModelChange)="onModelChange($event)">
+                    <option [value]=null hidden>Select</option>
+                    <option *ngFor="let list of brands" value={{list}}>{{list}}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-3 hideData">
+              <label> DB Instance</label>
+              <div class="card">
+                <div class="card-block">
+                  <select [(ngModel)]='report_db_instance' class="form-control" (change)="changeTicket()">
+                    <option [value]=null hidden>Select</option>
+                    <option *ngFor="let list of dbinstance" value={{list}}>{{list}}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-3 hideData" style="margin-left: auto;">
+              <label> </label>
+              <div>
+                <div>
+                  <button class="btn btn-info float-right" title="Download based on current selection of Ticket"
+                    id="single_download">
+                    <i class="fa fa-download" aria-hidden="true"> </i>&nbsp;
+                    &nbsp;Download</button>&nbsp;&nbsp;
+                  <button class="btn btn-primary float-right" id="all_download" (click)="download()"><i
+                      class="fa fa-download" aria-hidden="true"> </i> &nbsp; &nbsp;DownloadAll</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="example-header" style="display: flex;">&nbsp;&nbsp;&nbsp;
+            <label>Show
+              <select (change)="onPageSizeChanged()" id="page-size" style="height: 34px;">
+                <option value="10">10</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+              </select>
+              entries</label>
+          </div>
+          <div title="Selected Columns will be  Visible" style="margin-left: auto;display: flex;">
+            <label>Column: </label>&nbsp;
+            <ng-multiselect-dropdown name="columns_visible" [(ngModel)]="report_visiblity"
+              [placeholder]="'Select Columns to Visible'" [data]="columns_visible" [settings]="dropdownSettings"
+              (onSelectAll)="onSelectAll($event)" (click)="changecolumns()" (onSelect)="onColumnSelect($event)">
+            </ng-multiselect-dropdown>
+          </div>&nbsp;&nbsp;&nbsp;&nbsp;
+          <div>
+            <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue"
+                style="height: 34px;" />
+            </label>
+          </div>&nbsp;&nbsp;
+          <div>
+            <button class="btn btn-info" *ngIf="portal"
+            style="margin-left:auto;width: auto;padding: 3px;margin-right: 22px;">Portal_ &nbsp;&nbsp;
+            <input type="checkbox" (click)="check($event)" />
+          </button>
+          </div>
+        </div>
+        <div id="report_details" style="margin-top: 10px;">
+          <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+            style="width: 100%; height: 303px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+            [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
+            [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents">
+          </ag-grid-angular>
+        </div>
+        <br />
+        <br />
+        <br />
+
+
+
+
+        <div class="modal fade" id="edidDataModal" tabindex="-1" role="dialog" aria-labelledby="edidDataModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title h5-color" id="edidDataModalLabel">Edid View</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="col-sm-12">
+                  <table class="table table-bordered" cellspacing="0">
+                    <tbody *ngIf="edidDataView">
+                      <tr>
+                        <th>EDID</th>
+                        <td>{{EdidData}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div> -->
+    </div>
+  </div>
+  <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
+    [fullScreen]="true">
+    <p style="color: white"> Loading... </p>
+  </ngx-spinner>
+</div>

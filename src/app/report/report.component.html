@@ -6,13 +6,11 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
-        <li class="breadcrumb-item active"><a [routerLink]="['/dashboard']">Reports</a></li>
-        <i class="fa fa-arrow-right" aria-hidden="true"></i>
-        <li class="breadcrumb-item active"><a (click)="view()" [routerLink]="">Log View</a></li>
+        <li class="breadcrumb-item active"><a [routerLink]="['/reports-view']">Customized Reports</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
         <li class="breadcrumb-item active"><a (click)="clients()" [routerLink]="">Clients</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
-        <li class="breadcrumb-item active"><a (click)="dataConfig()" [routerLink]="">{{switchRoute}} Reports</a></li>
+        <li class="breadcrumb-item active"><a (click)="dataConfig()" [routerLink]="">Search Reports</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
         <li class="breadcrumb-item active">{{SelectedBrandName}}</li>
       </ol>
@@ -66,7 +64,7 @@
                       <label class="col-md-5">From Date</label>
                       <input type="text" class="form-control form-control-line col-sm-5"
                         (ngModelChange)="setMinDate($event)" (dateSelect)="onDateSelect($event)"
-                        [minDate]="{year: 2010, month: 1, day: 1}" [maxDate]="maxDate" formControlName="fromDate"
+                        [minDate]="{year: 1900, month: 1, day: 1}" [maxDate]="maxDate" formControlName="fromDate"
                         name="dp" value="{{startdate | date: 'MM-dd-yyyy'}}" [(ngModel)]="from_date" ngbDatepicker
                         #d="ngbDatepicker" readonly>
                       <span class="btn btn-outline-secondary calendar col-sm-2" (click)="d.toggle()" type="button">
@@ -119,10 +117,10 @@
         <br />
         <div class="tab-content">
           <!-- <div class="col-md-12">&nbsp;</div> -->
-          <div class="row">
-            <div class="example-header">
+          <div class="row" style="margin-top:4px">
+            <div class="example-header" style="display: flex;">&nbsp;&nbsp;&nbsp;
               <label>Show
-                <select (change)="onPageSizeChanged()" id="page-size">
+                <select (change)="onPageSizeChanged()" id="page-size" style="height: 34px;">
                   <option value="10">10</option>
                   <option value="100">100</option>
                   <option value="500">500</option>
@@ -130,10 +128,18 @@
                 </select>
                 entries</label>
             </div>
-            <div style="margin-left: auto;">
-              <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue" />
+            <div title="Selected Columns will be  Visible" style="margin-left: auto;display: flex;">
+              <label style="align-self: center;">Column Filter: </label>&nbsp;
+              <ng-multiselect-dropdown id="column_visible" name="columns_visible" [(ngModel)]="report_visiblity"
+                [placeholder]="'Select Columns to Visible'" [data]="columns_visible" [settings]="columnSettings"
+                (onSelectAll)="onSelectColumnAll($event)" (click)="changecolumns()" (onSelect)="onColumnSelect($event)">
+              </ng-multiselect-dropdown>
+            </div>&nbsp;&nbsp;&nbsp;&nbsp;
+            <div>
+              <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue"
+                  style="height: 34px;" />
               </label>
-            </div>
+            </div>&nbsp;&nbsp;
             <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
               style="width: 100%; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
               [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
@@ -149,7 +155,6 @@
               </table>
             </div>
 
-            <br />
             <br />
             <br />
 

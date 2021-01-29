@@ -4,6 +4,7 @@ import { MainService } from '../services/main-service';
 import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { HttpClient } from '@angular/common/http';
+declare var $: any;
 var lodash = require('lodash');
 @Component({
   selector: 'app-prod-cec-edid-history',
@@ -24,11 +25,11 @@ export class ProdCecEdidHistoryComponent implements OnInit {
   searchValue: any;
   userid: any;
   users: any[];
-  constructor(private mainService: MainService, private router: Router, private spinnerService: NgxSpinnerService) { 
+  constructor(private mainService: MainService, private router: Router, private spinnerService: NgxSpinnerService) {
     this.paginationPageSize = 10;
     this.rowSelection = 'multiple';
     this.defaultColDef = {
-      flex:1,
+      flex: 1,
       minWidth: 100,
     };
     this.paginationNumberFormatter = function (params) {
@@ -37,18 +38,21 @@ export class ProdCecEdidHistoryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.userid=null;
-    let temp=[];
+    this.userid = null;
+    let temp = [];
     this.mainService.Genericlog(2, this.userid, null)
       .then(value => {
-        for(let i=0;i<value.data.length;i++){
-          temp.push({loginid:value.data[i]['fK_LoginId'],user:value.data[i]['username']})
+        for (let i = 0; i < value.data.length; i++) {
+          temp.push({ loginid: value.data[i]['fK_LoginId'], user: value.data[i]['username'] })
         }
-        temp=lodash.uniqWith(temp, lodash.isEqual);
-        this.users=temp
+        temp = lodash.uniqWith(temp, lodash.isEqual);
+        this.users = temp
         this.viewdata(this.userid);
       })
-    
+    var self = this;
+    $('#single_download').click(function () {
+      self.onBtnExport();
+    })
   }
   onPageSizeChanged() {
     var value = (<HTMLInputElement>document.getElementById('page-size')).value;
@@ -60,19 +64,35 @@ export class ProdCecEdidHistoryComponent implements OnInit {
     this.gridColumnApi = params.columnApi;
   }
 
+  onBtnExport() {
+    let columndefs = this.gridApi.columnController.columnDefs; let columns = []; let filteredcolumns = [];
+    columndefs.forEach(element => {
+      columns.push(element['field'])
+    });
+    for (let i = 0; i < columns.length; i++) {
+      filteredcolumns.push(columns[i])
+    }
+    var excelParams = {
+      columnKeys: filteredcolumns,
+      allColumns: false,
+      fileName: 'CEC-EDID Centralized data changehistory',
+      skipHeader: false
+    }
+    this.gridApi.exportDataAsCsv(excelParams);
+  }
 
   viewdata(loginid) {
     this.spinnerService.hide()
     this.searchValue = null;
     this.columnDefs = [
-      { headerName: "Username",field: "Username", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { headerName:"Description",field: "LogDescription", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { headerName:"CreatedDate",field: "CreatedDate", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      { headerName: "Username", field: "Username", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Description", field: "LogDescription", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "CreatedDate", field: "CreatedDate", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
     ];
     this.mainService.Genericlog(2, loginid, null)
       .then(value => {
         let arr = []; const newArray = [];
-        if (value.data != "0" || value.data.length!=0 || value.data!='[]') {
+        if (value.data != "0" || value.data.length != 0 || value.data != '[]') {
           for (let i = 0; i < value.data.length; i++) {
             const keys = Object.keys(value.data[i])
             const newObject = {};
@@ -97,9 +117,9 @@ export class ProdCecEdidHistoryComponent implements OnInit {
     this.gridApi.setQuickFilter(this.searchValue);
   }
 
-  onchangeid(){
-    if(this.userid === 'null'){
-      this.userid=null
+  onchangeid() {
+    if (this.userid === 'null') {
+      this.userid = null
     }
     this.viewdata(this.userid)
   }
@@ -110,8 +130,8 @@ export class ProdCecEdidHistoryComponent implements OnInit {
         location.reload();
       });
   }
-  
-  refreshScreen(){
 
+  refreshScreen() {
+    this.viewdata(this.userid);
   }
 }

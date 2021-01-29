@@ -8,9 +8,9 @@ describe('ApiCongigurationComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ApiCongigurationComponent ]
+      declarations: [ApiCongigurationComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

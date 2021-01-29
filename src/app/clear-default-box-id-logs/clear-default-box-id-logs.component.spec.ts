@@ -8,9 +8,9 @@ describe('ClearDefaultBoxIdLogsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ClearDefaultBoxIdLogsComponent ]
+      declarations: [ClearDefaultBoxIdLogsComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

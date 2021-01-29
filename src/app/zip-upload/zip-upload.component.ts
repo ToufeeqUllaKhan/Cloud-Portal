@@ -1630,7 +1630,7 @@ export class ZipUploadComponent implements OnInit {
       "edidbrand": "", "edid128": "", "vendorid": "", "osd": "", "osdstr": "", "iscecpresent": "", "iscecenabled": "",
       "codeset": ""
     };
-    let resultArray = [];let resultArray1=[];let temp='';
+    let resultArray = []; let resultArray1 = []; let temp = '';
 
     for (var i = 1; i < allTextLines.length; i++) {
 
@@ -1645,23 +1645,23 @@ export class ZipUploadComponent implements OnInit {
           ArrayValues.push(row);
         }
       }
-      else{
+      else {
         resultArray1.push(allTextLines[i]);
-        resultArray1=resultArray1.filter(u=>u!="")
+        resultArray1 = resultArray1.filter(u => u != "")
       }
       resultArray.push(ArrayValues[0]);
 
     }
-    
-    resultArray1.forEach(element=>{
-      temp+=element.trim()+','
+
+    resultArray1.forEach(element => {
+      temp += element.trim() + ','
     })
-    temp=temp.slice(0,-1)
-    var data1 = temp.split(',').filter(u=>u!='"');
-    for(let k=0;k<data1.length;k=k+headers.length){
+    temp = temp.slice(0, -1)
+    var data1 = temp.split(',').filter(u => u != '"');
+    for (let k = 0; k < data1.length; k = k + headers.length) {
       var row = {};
-      for(let l=0;l<headers.length;l++){
-        row[headers[l].trim()] = data1[k+l];
+      for (let l = 0; l < headers.length; l++) {
+        row[headers[l].trim()] = data1[k + l];
       }
       resultArray.push(row);
     }

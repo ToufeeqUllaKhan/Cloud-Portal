@@ -17,15 +17,6 @@
     </div>
   </div>
   <br />
-  <!--<div class="row">
-    <div class="col-lg-12 col-xlg-12 col-md-12">
-      <div class="card">
-        <div class="card-block">
-          <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'" [data]="projects" [settings]="dropdownSettings" (onSelectAll)="onSelectAll($event)" (click)="changeProject()" (onSelect)="onProjectSelect($event)"></ng-multiselect-dropdown>
-        </div>
-      </div>
-    </div>
-  </div>-->
   <div class="row">
     <div class="col-xl-3 col-md-3 hideData">
       <div class="card">
@@ -38,7 +29,7 @@
         </div>
       </div>
     </div>
-    <div class="col-lg-4 col-xlg-4 col-md-4">
+    <div class="col-lg-5 col-xlg-4 col-md-4">
       <div class="card">
         <div class="card-block">
           <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'"
@@ -57,16 +48,13 @@
         </div>
       </div>
     </div>
-    <div class="col-xl-1 col-md-1 hideData">
+    <!-- <div class="col-xl-1 col-md-1 hideData">
       <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
           aria-hidden="true"></i></button>
-    </div>
-    <!-- <div>
-      <button class="btn btn-info float-right"
-        title="Download based on current selection of Ticket or based on filtered data" id="single_download">
-        <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
     </div> -->
     <div>
+      <button class="btn btn-primary" (click)="refreshScreen()"><i class="fa fa-refresh"
+          aria-hidden="true"></i></button>&nbsp;&nbsp;&nbsp;
       <button class="btn btn-info float-right"
         title="Download based on current selection of Ticket or based on filtered data" id="single_download">
         <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
@@ -83,13 +71,6 @@
   <br />
   <div class="row">
     <div class="col-xl-12 col-md-12">
-      <!-- <select></select> -->
-      <!-- <select [(ngModel)]='device'  class="form form-control selectDrop" (change)="onchangestatus()" (ngModelChange)="onModelChange($event)"  style="width:auto;">
-          <option [value]=null hidden> Device </option>
-          <option value=null>All</option>
-          <option value="TV">TV</option>
-          <option value="Audio">Audio</option>
-        </select>&nbsp;&nbsp; -->
       <button id="New" class="btn btn-primary float-right newBtn" data-toggle="modal" data-target="#editDataModal">
         <i class="fa fa-plus" aria-hidden="true"></i>
         New
@@ -118,17 +99,11 @@
             aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
         </div>
         <div class="tab-content">
-          <!--<div class="col-xl-12 col-md-12 hideData">
-            <button class="btn btn-primary float-right" data-toggle="modal" data-target="#editDataModal">
-              <i class="fa fa-plus" aria-hidden="true"></i>
-              New
-            </button>
-          </div>-->
           <div class="col-md-12">&nbsp;</div>
           <div class="row">
-            <div class="example-header">
+            <div class="example-header" style="display: flex;">&nbsp;&nbsp;&nbsp;
               <label>Show
-                <select (change)="onPageSizeChanged()" id="page-size">
+                <select (change)="onPageSizeChanged()" id="page-size" style="height: 34px;">
                   <option value="10">10</option>
                   <option value="100">100</option>
                   <option value="500">500</option>
@@ -136,34 +111,29 @@
                 </select>
                 entries</label>
             </div>
-            <div style="margin-left: auto;">
-              <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue"/>
+            <div title="Selected Columns will be  Visible" style="margin-left: auto;display: flex;">
+              <label style="align-self: center;">Column Filter: </label>&nbsp;
+              <ng-multiselect-dropdown id="column_visible" name="columns_visible" [(ngModel)]="report_visiblity"
+                [placeholder]="'Select Columns to Visible'" [data]="columns_visible" [settings]="columnSettings"
+                (onSelectAll)="onSelectColumnAll($event)" (click)="changecolumns()" (onSelect)="onColumnSelect($event)">
+              </ng-multiselect-dropdown>
+            </div>&nbsp;&nbsp;&nbsp;&nbsp;
+            <div>
+              <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue"
+                  style="height: 34px;" />
               </label>
-            </div>
+            </div>&nbsp;&nbsp;
             <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
-              style="width: 100%; height: 303px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+              style="width: 100%; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
               [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
               [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents">
             </ag-grid-angular>
             <div class="col-md-12">
-              <table *ngIf="noData">
-                <tbody>
-                  <tr>
-                    <td style="padding-top: 2rem;">No Data Available!!!</td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
-
-            <br />
             <br />
             <br />
 
           </div>
-
-
-
-
         </div>
       </div>
       <table *ngIf="noData">
@@ -790,22 +760,14 @@
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-5 col-form-label">Country</label>
                   <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="Country"
-                    formControlName="Country" class="form-control form-control-line col-sm-7"
-                    [ngClass]="{ 'is-invalid': regioncountrysubmitted && n.Country.errors }" />
-                  <!-- <div *ngIf="regioncountrysubmitted && n.Country.errors" class="invalid-feedback">
-                      <div *ngIf="n.Country.errors.required" class="error-defined text-right">Country is required</div>
-                    </div> -->
+                    formControlName="Country" class="form-control form-control-line col-sm-7" />
                 </div>
               </div>
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-5 col-form-label">Country code</label>
                   <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="Countrycode" maxlength="4"
-                    formControlName="Countrycode" class="form-control form-control-line col-sm-7"
-                    [ngClass]="{ 'is-invalid': regioncountrysubmitted && n.Countrycode.errors }" />
-                  <!-- <div *ngIf="regioncountrysubmitted && n.Countrycode.errors" class="invalid-feedback">
-                      <div *ngIf="n.Countrycode.errors.required" class="error-defined text-right">Country code is required</div>
-                    </div> -->
+                    formControlName="Countrycode" class="form-control form-control-line col-sm-7" />
                 </div>
               </div>
             </div>
@@ -817,15 +779,7 @@
               </div>
             </div>
           </form>
-
-
         </div>
-
-
-        <!--<div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save</button>
-        </div>-->
       </div>
     </div>
   </div>
@@ -1539,9 +1493,6 @@
                     <label class="labelsubSpan col-sm-5 col-form-label">Country</label>
                     <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="EditCountry"
                       formControlName="EditCountry" class="form-control form-control-line col-sm-7" />
-                    <!-- <div *ngIf="editregioncountrysubmitted && n1.EditCountry.errors" class="invalid-feedback">
-                        <div *ngIf="n1.EditCountry.errors.required" class="error-defined text-right">Country is required</div>
-                      </div> -->
                   </div>
                 </div>
                 <div class="col-sm-12">
@@ -1549,9 +1500,6 @@
                     <label class="labelsubSpan col-sm-5 col-form-label">Country code</label>
                     <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="EditCountrycode" maxlength="4"
                       formControlName="EditCountrycode" class="form-control form-control-line col-sm-7" />
-                    <!-- <div *ngIf="editregioncountrysubmitted && n1.EditCountrycode.errors" class="invalid-feedback">
-                        <div *ngIf="n1.EditCountrycode.errors.required" class="error-defined text-right">Country code is required</div>
-                      </div> -->
                   </div>
                 </div>
               </div>
@@ -1563,8 +1511,6 @@
                 </div>
               </div>
             </form>
-
-
           </div>
         </div>
       </div>
@@ -1758,22 +1704,14 @@
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-5 col-form-label">Country</label>
                   <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="Country"
-                    formControlName="Country" class="form-control form-control-line col-sm-7"
-                    [ngClass]="{ 'is-invalid': regioncountrysubmitted && n.Country.errors }" />
-                  <!-- <div *ngIf="regioncountrysubmitted && n.Country.errors" class="invalid-feedback">
-                      <div *ngIf="n.Country.errors.required" class="error-defined text-right">Country is required</div>
-                    </div> -->
+                    formControlName="Country" class="form-control form-control-line col-sm-7" />
                 </div>
               </div>
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-5 col-form-label">Country code</label>
                   <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="Countrycode" maxlength="4"
-                    formControlName="Countrycode" class="form-control form-control-line col-sm-7"
-                    [ngClass]="{ 'is-invalid': regioncountrysubmitted && n.Countrycode.errors }" />
-                  <!-- <div *ngIf="regioncountrysubmitted && n.Countrycode.errors" class="invalid-feedback">
-                      <div *ngIf="n.Countrycode.errors.required" class="error-defined text-right">Country code is required</div>
-                    </div> -->
+                    formControlName="Countrycode" class="form-control form-control-line col-sm-7" />
                 </div>
               </div>
             </div>
@@ -1785,15 +1723,7 @@
               </div>
             </div>
           </form>
-
-
         </div>
-
-
-        <!--<div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save</button>
-        </div>-->
       </div>
     </div>
   </div>

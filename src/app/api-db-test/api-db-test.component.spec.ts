@@ -8,9 +8,9 @@ describe('ApiDbTestComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ApiDbTestComponent ]
+      declarations: [ApiDbTestComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

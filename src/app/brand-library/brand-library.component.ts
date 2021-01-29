@@ -22,6 +22,7 @@ import { CodesetDownloadCellRenderer } from "./codesetdownload-cell-renderer.com
 import { EdidviewCellRenderer } from "./edidview-cell-renderer.component";
 declare let alasql;
 var BrandListData = [];
+var lodash = require('lodash');
 
 @Component({
   selector: 'app-brand-library',
@@ -46,7 +47,7 @@ export class BrandLibraryComponent implements OnInit {
   editedidsubmitted: Boolean = false; editcomponentsubmitted: Boolean = false;
   editcrsubmitted: Boolean = false; editceconlysubmitted: Boolean = false; editEdidonlysubmitted: Boolean = false;
   projects: Array<any> = [];
-  dropdownSettings: any = {}; ShowFilter = false;
+  dropdownSettings: any = {}; columnSettings: any = {}; ShowFilter = false;
   limitSelection = false;
   projectNames: any; selectedItems: Array<any> = [];
   brands = []; brand_list: any = null; versions = [];
@@ -102,11 +103,15 @@ export class BrandLibraryComponent implements OnInit {
   Codesets: boolean = false;
   Regioncountry: boolean = false;
   SelectedBrand: string;
+  report_visiblity: any = [];
+  columns_visible: any = [];
+  columns: any = [];
 
   public gridApi;
   public gridColumnApi;
   public frameworkComponents;
   public columnDefs;
+  public columnDef;
   public defaultColDef;
   public rowData;
   public paginationNumberFormatter;
@@ -221,7 +226,16 @@ export class BrandLibraryComponent implements OnInit {
       textField: 'item_text',
       selectAllText: 'Select All',
       unSelectAllText: 'UnSelect All',
-      itemsShowLimit: 3,
+      itemsShowLimit: 2,
+      allowSearchFilter: this.ShowFilter
+    };
+    this.columnSettings = {
+      singleSelection: false,
+      idField: 'item_id',
+      textField: 'item_text',
+      selectAllText: 'Select All',
+      unSelectAllText: 'UnSelect All',
+      itemsShowLimit: 0,
       allowSearchFilter: this.ShowFilter
     };
     /** brand list start */
@@ -537,6 +551,13 @@ export class BrandLibraryComponent implements OnInit {
           e.preventDefault();
       });
     });
+
+    $('#column_visible').click(function (e) {
+      if (!($('.tab-content .dropdown-list').hasClass('hidden'))) {
+        $('.tab-content .dropdown-list').css('width', 'auto')
+      }
+      self.columnvisiblity();
+    })
   }
 
 
@@ -872,9 +893,26 @@ export class BrandLibraryComponent implements OnInit {
     this.projectNames = items;
   }
 
+  onSelectColumnAll(items: any) {
+    this.report_visiblity = items;
+    this.columnvisiblity();
+  }
+
   toogleShowFilter() {
     this.ShowFilter = !this.ShowFilter;
     this.dropdownSettings = Object.assign({}, this.dropdownSettings, { allowSearchFilter: this.ShowFilter });
+    this.columnSettings = Object.assign({}, this.columnSettings, { allowSearchFilter: this.ShowFilter });
+  }
+
+
+  handleLimitSelection() {
+    if (this.limitSelection) {
+      this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: 2 });
+      this.columnSettings = Object.assign({}, this.columnSettings, { limitSelection: 2 });
+    } else {
+      this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: null });
+      this.columnSettings = Object.assign({}, this.columnSettings, { limitSelection: null });
+    }
   }
 
   onchange() {
@@ -920,14 +958,6 @@ export class BrandLibraryComponent implements OnInit {
           })
 
       }
-    }
-  }
-
-  handleLimitSelection() {
-    if (this.limitSelection) {
-      this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: 2 });
-    } else {
-      this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: null });
     }
   }
 
@@ -1147,9 +1177,13 @@ export class BrandLibraryComponent implements OnInit {
       this.noData = true;
       $('.hideData').css('display', 'none');
       $('.tabView').css('display', 'none');
+      $('#single_download').css('display', 'none');
+      $('#New').css('display', 'none');
     } else {
       this.noData = false;
       $('.hideData').css('display', 'block');
+      $('#single_download').css('display', 'block');
+      $('#New').css('display', 'block');
       $('.tabView').css('display', 'block');
       $('.nav-item').removeClass('active');
       $('a#nav-home-tab0').addClass('active');
@@ -1200,9 +1234,13 @@ export class BrandLibraryComponent implements OnInit {
     }
     if (this.brand_list == "null") {
       this.noData = true;
+      $('#single_download').css('display', 'none');
+      $('#New').css('display', 'none');
       $('.tabView').css('display', 'none');
     } else {
       this.noData = false;
+      $('#single_download').css('display', 'block');
+      $('#New').css('display', 'block');
       $('.tabView').css('display', 'block');
       this.selectDatatype();
       this.getViewResponse();
@@ -1233,8 +1271,12 @@ export class BrandLibraryComponent implements OnInit {
         this.changeVersionCount++;
         this.getVersionResponseData();
         this.noData = false;
+        $('#single_download').css('display', 'block');
+        $('#New').css('display', 'block');
         $('.tab-content').css('display', 'block');
       } else {
+        $('#single_download').css('display', 'none');
+        $('#New').css('display', 'none');
         $('.tab-content').css('display', 'none');
         this.noData = true;
       }
@@ -1448,11 +1490,15 @@ export class BrandLibraryComponent implements OnInit {
         this.tabsProject = name;
         this.tabValue = name;
         this.noData = false;
+        $('#single_download').css('display', 'block');
+        $('#New').css('display', 'block');
         $('.tab-content').css('display', 'block');
         this.getTabResponseData();
       } else {
         this.count--;
         this.noData = true;
+        $('#single_download').css('display', 'none');
+        $('#New').css('display', 'none');
         $('.tab-content').css('display', 'none');
       }
       this.tabVersions();
@@ -3069,26 +3115,27 @@ export class BrandLibraryComponent implements OnInit {
     if (this.saveUpdateCecEdidData.invalid) {
       return;
     }
-    let checkEdidData;
-    if (this.ce_edid != null && this.ce_edid != undefined) {
-      checkEdidData = ((this.ce_edid.includes('00 FF FF FF FF FF FF 00') || this.ce_edid.includes('00 ff ff ff ff ff ff 00')) && this.ce_edid.length >= 383);
-    }
-    //let checkEdidData = this.ce_edid.includes('00 FF FF FF FF FF FF 00');
-    if (this.ce_vendorId != undefined || this.ce_osd_string != undefined || this.ce_edid != undefined) {
-      if (this.ce_edid != undefined && checkEdidData == true) {
+    if ((this.ce_vendorId != undefined && this.ce_vendorId != '') || (this.ce_osd_string != undefined && this.ce_osd_string != '') || (this.ce_edid != undefined && this.ce_edid != '')) {
+      var edid128 = this.ce_edid;
+      if (edid128 != null && edid128 != '' && edid128 != undefined) {
+        let checkEdidData = ((edid128.startsWith('00 FF FF FF FF FF FF 00') || edid128.startsWith('00 ff ff ff ff ff ff 00')) && edid128.length >= 383);
+        if (!checkEdidData) {
+          this.edidError = true;
+          this.cecEdidsubmitted = false;
+        }
+        else {
+          $('#checkEdidValid').css('border', '1px solid #ced4da');
+          this.edidError = false;
+          this.cecEdidValidate();
+        }
+      }
+      else {
         $('#checkEdidValid').css('border', '1px solid #ced4da');
         this.edidError = false;
         this.cecEdidValidate();
-      } if (this.ce_edid != undefined && checkEdidData == false) {
-        this.edidError = true;
-        this.cecEdidsubmitted = false;
-      }
-      if (this.ce_edid == undefined) {
-        this.cecEdidValidate();
       }
 
-    }
-    else {
+    } else {
       this.toastr.error('', 'Enter Vendorid or OSD or EDID', { timeOut: 4000 })
     }
   }
@@ -3274,24 +3321,27 @@ export class BrandLibraryComponent implements OnInit {
     if (this.saveEditEdidonlyData.invalid) {
       return;
     }
-    let checkEdidData;
-    if (this.editedEdidonly_EDID128 != null && this.editedEdidonly_EDID128 != undefined) {
-      checkEdidData = ((this.editedEdidonly_EDID128.includes('00 FF FF FF FF FF FF 00') || this.editedEdidonly_EDID128.includes('00 ff ff ff ff ff ff 00')) && this.editedEdidonly_EDID128.length >= 383);
-    }
-    //let checkEdidData = this.ce_edid.includes('00 FF FF FF FF FF FF 00');
     if (this.editedEdidonly_EDID128 != undefined) {
-      if (this.editedEdidonly_EDID128 != undefined && checkEdidData == true) {
-        $('#checkEdidValid').css('border', '1px solid #ced4da');
-        this.edidError = false;
-        this.EdidValidate();
-      } if (this.editedEdidonly_EDID128 != undefined && checkEdidData == false) {
+      var edid128 = this.editedEdidonly_EDID128;
+      if (edid128 != null && edid128 != '' && edid128 != undefined) {
+        let checkEdidData = ((edid128.startsWith('00 FF FF FF FF FF FF 00') || edid128.startsWith('00 ff ff ff ff ff ff 00')) && edid128.length >= 383);
+        if (!checkEdidData) {
+          this.edidError = true;
+          this.cecEdidsubmitted = false;
+        }
+        else {
+          $('#checkEdidValid').css('border', '1px solid #ced4da');
+          this.edidError = false;
+          this.EdidValidate();
+        }
+      }
+      else {
         this.edidError = true;
         this.cecEdidsubmitted = false;
       }
-      if (this.editedEdidonly_EDID128 == undefined) {
-        this.EdidValidate();
-      }
 
+    } else {
+      this.toastr.error('', 'Enter Valid EDID', { timeOut: 4000 })
     }
   }
 
@@ -3325,6 +3375,9 @@ export class BrandLibraryComponent implements OnInit {
         osdstr = null;
       } else {
         osdstr = this.editedCeconly_OSD.toUpperCase();
+      }
+      if ((this.editedCeconly_OSD == null || this.editedCeconly_OSD == '') && (this.editedCeconly_Vendor == null || this.editedCeconly_Vendor == '')) {
+        this.toastr.error('', 'Enter Valid Vendorid or OSD', { timeOut: 4000 })
       }
       this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, null, codeset, null,
         null, region, null, country, null, null, vendorid, osd, osdstr, null, null, null, 7, 3, recordid)
@@ -3945,17 +3998,17 @@ export class BrandLibraryComponent implements OnInit {
     columndefs.forEach(element => {
       columns.push(element['field'])
     });
-    
+
     // for (let i = 0; i < columns.length - 1; i++) {
     //   filteredcolumns.push(columns[i])
     // }
     for (var i = columns.length - 1; i >= 0; --i) {
-          if (columns[i] == "Action") {
-            columns.splice(i, 1);
-          }
-        }
-        // console.log(value.data);
-        filteredcolumns = columns;
+      if (columns[i] == "Action") {
+        columns.splice(i, 1);
+      }
+    }
+    // console.log(value.data);
+    filteredcolumns = columns;
     var excelParams = {
       columnKeys: filteredcolumns,
       allColumns: false,
@@ -3968,189 +4021,200 @@ export class BrandLibraryComponent implements OnInit {
 
   viewdata() {
     this.spinnerService.show();
-    let brandName = this.brand_list;
     this.searchValue = null
     if (this.brand_list === 'Brand') {
-      this.columnDefs = [
-        { field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BrandCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      this.columnDef = [
+        { headerName: 'BrandName', field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'BrandCode', field: "BrandCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         {
-          field: "Action", resizable: true,
+          headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
       this.gridColumnApi.moveColumns(['BrandName', 'BrandCode'], 0)
-      this.defaultColDef = {
-        flex: 1,
-        minWidth: 100,
-      };
     }
     if (this.brand_list === 'Brand Info CEC') {
-      this.columnDefs = [
-        { field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
-        { field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Vendorid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      this.columnDef = [
+        { headerName: 'Device', field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
+        { headerName: 'BrandName', field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Vendorid', field: "Vendorid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         {
-          field: "Action", resizable: true,
+          headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
       this.gridColumnApi.moveColumns(['Device', 'BrandName', 'Vendorid'], 0)
-      this.defaultColDef = {
-        flex: 1,
-        minWidth: 100,
-      };
     }
     if (this.brand_list === 'Brand Info EDID') {
-      this.columnDefs = [
-        { field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
-        { field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "EdidBrand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      this.columnDef = [
+        { headerName: 'Device', field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
+        { headerName: 'BrandName', field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'EdidBrand', field: "EdidBrand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         {
-          field: "Action", resizable: true,
+          headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
       this.gridColumnApi.moveColumns(['Device', 'BrandName', 'EdidBrand'], 0)
-      this.defaultColDef = {
-        flex: 1,
-        minWidth: 100,
-      };
     }
     if (this.brand_list === 'Component Data') {
-      this.columnDefs = [
-        { field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
-        { field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      this.columnDef = [
+        { headerName: 'Device', field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
+        { headerName: 'BrandName', field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Model', field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Country', field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         {
-          field: "Action", resizable: true,
+          headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
       this.gridColumnApi.moveColumns(['Device', 'BrandName', 'Model', 'Codeset', 'Country'], 0)
-      this.defaultColDef = {
-        flex: 1,
-        minWidth: 100,
-      };
     }
     if (this.brand_list === 'Cross Reference By Brands') {
-      this.columnDefs = [
-        { field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
-        { field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "BrandCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Rank", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      this.columnDef = [
+        { headerName: 'Device', field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
+        { headerName: 'BrandName', field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'BrandCode', field: "BrandCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Rank', field: "Rank", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         {
-          field: "Action", resizable: true,
+          headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
       this.gridColumnApi.moveColumns(['Device', 'BrandName', 'BrandCode', 'Codeset', 'Rank'], 0)
-      this.defaultColDef = {
-        flex: 1,
-        minWidth: 100,
-      };
     }
     if (this.brand_list === 'Codesets') {
-      this.columnDefs = [
-        { field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      this.columnDef = [
+        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: 'Binfile', field: "Bindata", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "codesetDownloadCellRenderer" },
-        { field: "Checksum", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Checksum', field: "Checksum", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         {
-          field: "Action", resizable: true,
+          headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
       this.gridColumnApi.moveColumns(['Codeset', 'Bindata', 'Checksum'], 0)
-      this.defaultColDef = {
-        flex: 1,
-        minWidth: 100,
-      };
     }
     if (this.brand_list === 'CEC-EDID Data') {
-      this.columnDefs = [
-        { field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "OSDString", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Edid128", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-        { field: "EdidBrand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      this.columnDef = [
+        { headerName: 'Device', field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Brand', field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Country', field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Model', field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'VendorId', field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'OSDString', field: "OSDString", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Edid128', field: "Edid128", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
+        { headerName: 'EdidBrand', field: "EdidBrand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
       ];
       this.gridColumnApi.moveColumns(['Device', 'Brand', 'Country', 'Model', 'VendorId', 'OSDString', 'Edid128', 'EdidBrand', 'Codeset'], 0)
-      this.defaultColDef = {
-        minWidth: 100,
-      };
     }
     if (this.brand_list == 'CEC Only') {
-      this.columnDefs = [
-        { field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
-        { field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "OSDString", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      this.columnDef = [
+        { headerName: 'Device', field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
+        { headerName: 'Brand', field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Country', field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Model', field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'VendorId', field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'OSDString', field: "OSDString", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         {
-          field: "Action", resizable: true,
+          headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
       this.gridColumnApi.moveColumns(['Device', 'Brand', 'Country', 'Model', 'VendorId', 'OSDString', 'Codeset'], 0)
-      this.defaultColDef = {
-        minWidth: 100,
-      };
     }
     if (this.brand_list == 'EDID Only') {
-      this.columnDefs = [
+      this.columnDef = [
         // { field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter',floatingFilter: true,checkboxSelection: true,headerCheckboxSelection: true },
-        { field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
-        { field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Edid128", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-        { field: "EdidBrand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Device', field: "Device", resizable: true, sortable: false, filter: 'agTextColumnFilter', floatingFilter: true, },
+        { headerName: 'Brand', field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Country', field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Model', field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Edid128', field: "Edid128", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
+        { headerName: 'EdidBrand', field: "EdidBrand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         {
-          field: "Action", resizable: true,
+          headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
       this.gridColumnApi.moveColumns(['Device', 'Brand', 'Country', 'Model', 'Edid128', 'EdidBrand', 'Codeset'], 0)
-      this.defaultColDef = {
-        minWidth: 100,
-      };
     }
     if (this.brand_list == 'Region Country Code') {
-      this.columnDefs = [
-        { field: "Region", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "RegionCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { field: "CountryCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      this.columnDef = [
+        { headerName: 'Region', field: "Region", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'RegionCode', field: "RegionCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Country', field: "Country", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'CountryCode', field: "CountryCode", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         {
-          field: "Action", resizable: true,
+          headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
       this.gridColumnApi.moveColumns(['Region', 'RegionCode', 'Country', 'CountryCode'], 0)
+    }
+    if (this.brand_list === 'Brand' || this.brand_list === 'Brand Info CEC' || this.brand_list === 'Brand Info EDID' || this.brand_list == 'Region Country Code') {
       this.defaultColDef = {
         flex: 1,
         minWidth: 100,
       };
     }
+    if (this.brand_list === 'Component Data' || this.brand_list === 'Cross Reference By Brands' || this.brand_list === 'Codesets') {
+      this.defaultColDef = {
+        flex: 1,
+        minWidth: 100,
+      };
+    }
+    if (this.brand_list === 'CEC-EDID Data' || this.brand_list == 'CEC Only' || this.brand_list == 'EDID Only') {
+      this.defaultColDef = {
+        minWidth: 100,
+      };
+    }
+    let arrData = [];
+    for (var i = 0; i < this.columnDef.length; i++) {
+      arrData.push({ item_id: i, item_text: this.columnDef[i]['headerName'] });
+    }
+    this.report_visiblity = arrData;
+    this.columns_visible = arrData;
+    this.columns = this.columnDef;
+    this.columnvisiblity();
+  }
 
-    // if (this.role === 'Admin') {
-    //   this.columnDefs = this.columnDefs;
-    //   $('#single_download').show();
-    // }
-    // else {
-    //   this.columnDefs=this.columnDefs.filter(u=>u.field!='Action');
-    //   $('#single_download').hide();
-    // }
+
+  columnvisiblity() {
+    let column = this.columns;
+    this.report_visiblity = lodash.sortBy(this.report_visiblity, 'item_id');
+    this.report_visiblity = lodash.uniqWith(this.report_visiblity, lodash.isEqual);
+    let visible = []; let columnvisible = []; let moveColumn = [];
+    for (let i = 0; i < this.report_visiblity.length; i++) {
+      visible.push(column.filter(u => u.headerName === this.report_visiblity[i]['item_text']));
+    }
+    visible = visible.filter(u => u.length > 0);
+    visible.forEach(element => {
+      columnvisible.push(element[0]);
+    })
+    this.columnDefs = columnvisible;
+    this.columnDefs.forEach(element => {
+      moveColumn.push(element['field']);
+    })
+    this.gridColumnApi.moveColumns(moveColumn, 0);
+    this.View();
+  }
+
+  changecolumns() {
+    this.columnvisiblity();
+  }
+
+  onColumnSelect(e) {
+    this.report_visiblity.push(e);
+  }
+
+  View() {
+    let brandName = this.brand_list;
     let crudType = 7;
     this.mainService.getRoleModule(crudType, null, null, null, null)
       .then(value => {
@@ -4339,12 +4403,28 @@ export class BrandLibraryComponent implements OnInit {
           this.spinnerService.hide();
           this.gridApi.setQuickFilter(this.searchValue)
         }
+        if (this.rowData.length < 8) {
+          this.setAutoHeight();
+        }
+        else {
+          this.setFixedHeight();
+        }
 
       });
   }
 
   search() {
     this.gridApi.setQuickFilter(this.searchValue);
+  }
+
+  setAutoHeight() {
+    this.gridApi.setDomLayout('autoHeight');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '';
+  }
+
+  setFixedHeight() {
+    this.gridApi.setDomLayout('normal');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '500px';
   }
 }
 

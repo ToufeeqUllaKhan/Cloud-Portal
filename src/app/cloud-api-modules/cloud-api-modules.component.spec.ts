@@ -8,9 +8,9 @@ describe('CloudApiModulesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CloudApiModulesComponent ]
+      declarations: [CloudApiModulesComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

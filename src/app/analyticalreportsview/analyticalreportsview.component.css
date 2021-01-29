@@ -27,7 +27,6 @@
   margin: 0;
 }
 
-
 .row {
   display: flex;
   flex-wrap: wrap;
@@ -35,43 +34,8 @@
   margin-left: -5px;
 }
 
-.float-right {
-  float: right;
-}
-
-.fa-green {
-  color: #24ce24;
-}
-
-.button-border {
-  border: none;
-  background: none;
-}
-
-.card-label {
-  color: blue;
-}
-
-.zoom-img:hover {
-  -ms-transform: scale(1.1);
-  /* IE 9 */
-  -webkit-transform: scale(1.1);
-  /* Safari 3-8 */
-  transform: scale(1.1);
-}
-
 .card {
   margin-bottom: 30px;
-}
-
-.h4-font {
-  font-size: 1.3rem;
-  text-align: center;
-}
-
-.span-icon {
-  text-align: center;
-  font-size: 1.6rem;
 }
 
 .card-counter {
@@ -88,16 +52,6 @@
 .card-counter:hover {
   box-shadow: 4px 4px 20px #DADADA;
   transition: .3s linear all;
-}
-
-.card-counter.primary {
-  background-color: #007bff;
-  color: #FFF;
-}
-
-.card-counter.danger {
-  background-color: #ef5350;
-  color: #FFF;
 }
 
 .card-counter.success {
@@ -124,36 +78,14 @@
   cursor: pointer;
 }
 
-.card-counter .count-numbers {
-  position: absolute;
-  right: 35px;
-  top: 65px;
-  font-style: italic;
-  text-transform: capitalize;
-  opacity: 0.5;
-  display: block;
-}
-
 .hover-cursor {
   cursor: pointer;
 }
 
-.bg-purple {
-  background-color: #8892d6 !important;
+.bg-blue {
+  background-color: darkslateblue !important;
 }
 
-.bg-red {
-  background-color: rgb(66, 3, 6) !important;
-}
-
-.bg-yellow {
-  background-color: rgba(72, 255, 0, 0.575) !important;
-}
-
-.bg-green {
-  background-color: #64d4bd !important;
-}
-
-.bg-dark-blue {
-  background-color: #4f8bc5e6 !important;
+.bg-brown {
+  background-color: brown !important;
 }

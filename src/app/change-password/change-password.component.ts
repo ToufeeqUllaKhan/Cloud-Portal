@@ -37,7 +37,7 @@ export class ChangePasswordComponent implements OnInit {
   onUpdatePasswordSubmit() {
     this.submitted = false;
 
-    
+
 
     if (this.changepasswordForm.invalid) {
       return;
@@ -61,9 +61,9 @@ export class ChangePasswordComponent implements OnInit {
           if (value.data[0]['result'] == '0') {
             this.toastr.error(value.message, '');
           }
-        }); 
+        });
     }
-    
+
   }
 
   close() {

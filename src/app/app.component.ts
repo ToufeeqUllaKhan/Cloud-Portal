@@ -73,8 +73,8 @@ export class AppComponent {
                       this.isDataUpload2 = false;
                       this.isReports2 = false;
                       $('.menu2Data').css('display', 'block');
-                      $('.menu2Data').click(function(e){
-                        localStorage.setItem('moduleselected','Cloud API Search Tester')
+                      $('.menu2Data').click(function (e) {
+                        localStorage.setItem('moduleselected', 'Cloud API Search Tester')
                       })
 
                     }
@@ -86,8 +86,8 @@ export class AppComponent {
                       this.isCloudApi1 = false;
                       this.isReports1 = false;
                       $('.menu1Data').css('display', 'block');
-                      $('.menu1Data').click(function(e){
-                        localStorage.setItem('moduleselected','Data Management Tool')
+                      $('.menu1Data').click(function (e) {
+                        localStorage.setItem('moduleselected', 'Data Management Tool')
                       })
                     } else {
                       $('.menu1Data').css('display', 'none');
@@ -97,8 +97,8 @@ export class AppComponent {
                       this.isDataUpload3 = false;
                       this.isCloudApi3 = false;
                       $('.menu3Data').css('display', 'block');
-                      $('.menu3Data').click(function(e){
-                        localStorage.setItem('moduleselected','Analytics Report')
+                      $('.menu3Data').click(function (e) {
+                        localStorage.setItem('moduleselected', 'Analytics Report')
                       })
                     }
                     else {

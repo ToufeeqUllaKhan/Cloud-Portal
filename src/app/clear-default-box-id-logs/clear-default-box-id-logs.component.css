@@ -1,52 +1,55 @@
 .page-titles {
-    background: #ffffff;
-    margin: 0 -15px 32px;
-    padding: 15px;
-    box-shadow: 1px 0 5px rgba(0, 0, 0, 0.1) !important;
-  }
-  
-  .row.page-titles {
-    margin-left: -15px;
-    margin-right: -15px;
-  }
-  
-  .page-titles .breadcrumb {
-    padding: 0px;
-    background: transparent;
-  }
-  
-  .breadcrumb {
-    margin-bottom: 0px;
-  }
-  
-  .page-titles .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
-    content: " \2192";
-    color: #a6b7bf;
-  }
-  .darkBlue {
-    color: #2666da;
-  }
-  .row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-right: -5px;
-    margin-left: -5px;
-  }
-  
-  .card {
-    padding: 1rem;
-    padding-bottom: 0rem;
-  }
-  
-  .disable {
-    pointer-events: none;
-    background: #ececec6e;
-  }
-  .enable{
-    pointer-events:auto;
-    background: #fff;
-  }
-  .disabled {
-    display: none;
-  }
-  
+  background: #ffffff;
+  margin: 0 -15px 32px;
+  padding: 15px;
+  box-shadow: 1px 0 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.row.page-titles {
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+.page-titles .breadcrumb {
+  padding: 0px;
+  background: transparent;
+}
+
+.breadcrumb {
+  margin-bottom: 0px;
+}
+
+.page-titles .breadcrumb .breadcrumb-item+.breadcrumb-item::before {
+  content: " \2192";
+  color: #a6b7bf;
+}
+
+.darkBlue {
+  color: #2666da;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -5px;
+  margin-left: -5px;
+}
+
+.card {
+  padding: 1rem;
+  padding-bottom: 0rem;
+}
+
+.disable {
+  pointer-events: none;
+  background: #ececec6e;
+}
+
+.enable {
+  pointer-events: auto;
+  background: #fff;
+}
+
+.disabled {
+  display: none;
+}

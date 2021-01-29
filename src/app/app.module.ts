@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 
+import { NgApexchartsModule } from "ng-apexcharts";
 import { AgGridModule } from 'ag-grid-angular';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -55,7 +56,7 @@ import { AngularSvgIconModule } from 'angular-svg-icon';
 import { ApiCongigurationComponent } from './api-congiguration/api-congiguration.component';
 import { EditApiComponent } from './edit-api/edit-api.component';
 import { AngularResizedEventModule } from 'angular-resize-event';
-import { LogViewComponent } from './log-view/log-view.component';
+// import { LogViewComponent } from './log-view/log-view.component';
 import { ReportConfigurationListComponent } from './report-configuration-list/report-configuration-list.component';
 import { ReportComponent } from './report/report.component';
 import { ChangehistoryComponent } from './changehistory/changehistory.component';
@@ -67,6 +68,8 @@ import { ImportprojfromprodComponent } from './importprojfromprod/importprojfrom
 import { ProdCecEdidDataComponent } from './prod-cec-edid-data/prod-cec-edid-data.component';
 import { ProdCecEdidHistoryComponent } from './prod-cec-edid-history/prod-cec-edid-history.component';
 import { EditRoleModulePermissionComponent } from './edit-role-module-permission/edit-role-module-permission.component';
+import { AnalyticalreportsComponent } from './analyticalreports/analyticalreports.component';
+import { AnalyticalreportsviewComponent } from './analyticalreportsview/analyticalreportsview.component';
 // import { BtnCellRenderer } from './brand-library/btn-cell-renderer.component';
 // import { CodesetDownloadCellRenderer } from "./brand-library/codesetdownload-cell-renderer.component";
 // import { EdidviewCellRenderer } from './brand-library/edidview-cell-renderer.component';
@@ -143,7 +146,7 @@ const customNotifierOptions: NotifierOptions = {
     EditUserDetailsComponent,
     ApiCongigurationComponent,
     EditApiComponent,
-    LogViewComponent,
+    // LogViewComponent,
     ReportConfigurationListComponent,
     ReportComponent,
     ChangehistoryComponent,
@@ -155,6 +158,8 @@ const customNotifierOptions: NotifierOptions = {
     ProdCecEdidDataComponent,
     ProdCecEdidHistoryComponent,
     EditRoleModulePermissionComponent,
+    AnalyticalreportsComponent,
+    AnalyticalreportsviewComponent,
     // BtnCellRenderer,
     // CodesetDownloadCellRenderer,
     // EdidviewCellRenderer
@@ -179,6 +184,7 @@ const customNotifierOptions: NotifierOptions = {
     AngularSvgIconModule.forRoot(),
     AngularResizedEventModule,
     ArchwizardModule,
+    NgApexchartsModule,
     // AgGridModule.withComponents([BtnCellRenderer,CodesetDownloadCellRenderer,EdidviewCellRenderer])
     AgGridModule.withComponents([])
   ],

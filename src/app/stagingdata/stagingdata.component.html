@@ -115,16 +115,12 @@
         </label>
       </div>
       <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
-        style="width: 1075px; height: 380px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+        style="width: 1075px; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
         [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
         [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents"
         [rowSelection]="rowSelection" [suppressRowClickSelection]="true" [rowMultiSelectWithClick]="true"
         (click)="onRowClicked()">
       </ag-grid-angular>
-
-      <br />
-      <br />
-      <br />
 
     </div>
     <button type="button" style="cursor:pointer;background:none;border:none;margin-left: auto;" data-toggle="modal"

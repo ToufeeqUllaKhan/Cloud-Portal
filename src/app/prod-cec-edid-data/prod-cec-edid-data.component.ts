@@ -359,7 +359,12 @@ export class ProdCecEdidDataComponent implements OnInit {
         else {
           this.rowData = [];
         }
-
+        if (this.rowData.length < 8) {
+          this.setAutoHeight();
+        }
+        else {
+          this.setFixedHeight();
+        }
         this.gridApi.setQuickFilter(this.searchValue)
       })
 
@@ -374,4 +379,13 @@ export class ProdCecEdidDataComponent implements OnInit {
     this.edid(values[11]);
   }
 
+  setAutoHeight() {
+    this.gridApi.setDomLayout('autoHeight');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '';
+  }
+
+  setFixedHeight() {
+    this.gridApi.setDomLayout('normal');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '500px';
+  }
 }

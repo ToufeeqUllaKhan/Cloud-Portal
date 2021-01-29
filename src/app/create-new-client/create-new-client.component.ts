@@ -153,33 +153,33 @@ export class CreateNewClientComponent implements OnInit {
       this.newRegName = '';
     }
     else {
-    let RegionLogoPath = '';
-    let StatusFlag = '1';
-    let Crudtype = '1';
-    this.mainService.createNewRegion(this.n.newRegionName.value, RegionLogoPath, StatusFlag, Crudtype)
-      .pipe()
-      .subscribe(value => {
-        if (value.data == '0') {
-          this.toastr.warning(value.message, '');
-          this.NewRegion = true;
-        }
-        if (value.statusCode == '200' && value.data != '' && value.data != '0') {
-          this.NewRegion = true;
-          this.toastr.success(value.message, '');
-        }
+      let RegionLogoPath = '';
+      let StatusFlag = '1';
+      let Crudtype = '1';
+      this.mainService.createNewRegion(this.n.newRegionName.value, RegionLogoPath, StatusFlag, Crudtype)
+        .pipe()
+        .subscribe(value => {
+          if (value.data == '0') {
+            this.toastr.warning(value.message, '');
+            this.NewRegion = true;
+          }
+          if (value.statusCode == '200' && value.data != '' && value.data != '0') {
+            this.NewRegion = true;
+            this.toastr.success(value.message, '');
+          }
 
-        let Region = ''; let Regionlogopath = ''; let Statusflag = 1; let Crudtype = 4;
-        this.mainService.getAllRegions(Region, Regionlogopath, Statusflag, Crudtype)
-          .subscribe(value => {
-            this.regions = [];
-            for (var i = 0; i < value.data.length; i++) {
-              this.regions.push(value.data[i]);
-            }
+          let Region = ''; let Regionlogopath = ''; let Statusflag = 1; let Crudtype = 4;
+          this.mainService.getAllRegions(Region, Regionlogopath, Statusflag, Crudtype)
+            .subscribe(value => {
+              this.regions = [];
+              for (var i = 0; i < value.data.length; i++) {
+                this.regions.push(value.data[i]);
+              }
 
-          });
+            });
 
-        this.isClientDivVisible = false;
-      });
+          this.isClientDivVisible = false;
+        });
     }
   }
 
@@ -205,40 +205,40 @@ export class CreateNewClientComponent implements OnInit {
       this.signature_key = '';
     }
     else {
-    let ConnectionString = "";
-    let Statusflag = 1; let Crudtype = 1;
-    let allowDownload;
-    let checkStatus = $('#allow_download').prop('checked');
-    if (checkStatus == true) {
-      allowDownload = 1;
-    } else {
-      allowDownload = 0;
-    }
-    this.mainService.createClient(this.clientSelected, "", Statusflag, Crudtype)
-      .pipe()
-      .subscribe(value => {
-        console.log(value);
-        this.mainService.createNewProjectDef(this.db_instance, this.clientSelected, this.regionSelected, this.project_name, this.signature_key, this.db_instance, 1, 1, allowDownload)
-          .subscribe(value => {
-            console.log(value.data);
-            if (value.data == "1") {
-              this.toastr.success('Project Created Successfully', '');
-              this.isNextVisible = true;
-              // this.formGroupDirective.resetForm();
-              this.checkboxes.forEach((element) => {
-                element.nativeElement.checked = false;
-              });
-              this.submitted = false;
-            } else {
-              this.toastr.warning(value.message, '');
-              this.submitted = false;
-            }
-            this.mainService.CECEDID_NewProject(1, this.project_name, this.signature_key, this.db_instance, 1,null)
-            .then(value => {
-              this.formGroupDirective.resetForm();
-            }) 
-          });
-      });
+      let ConnectionString = "";
+      let Statusflag = 1; let Crudtype = 1;
+      let allowDownload;
+      let checkStatus = $('#allow_download').prop('checked');
+      if (checkStatus == true) {
+        allowDownload = 1;
+      } else {
+        allowDownload = 0;
+      }
+      this.mainService.createClient(this.clientSelected, "", Statusflag, Crudtype)
+        .pipe()
+        .subscribe(value => {
+          console.log(value);
+          this.mainService.createNewProjectDef(this.db_instance, this.clientSelected, this.regionSelected, this.project_name, this.signature_key, this.db_instance, 1, 1, allowDownload)
+            .subscribe(value => {
+              console.log(value.data);
+              if (value.data == "1") {
+                this.toastr.success('Project Created Successfully', '');
+                this.isNextVisible = true;
+                // this.formGroupDirective.resetForm();
+                this.checkboxes.forEach((element) => {
+                  element.nativeElement.checked = false;
+                });
+                this.submitted = false;
+              } else {
+                this.toastr.warning(value.message, '');
+                this.submitted = false;
+              }
+              this.mainService.CECEDID_NewProject(1, this.project_name, this.signature_key, this.db_instance, 1, null)
+                .then(value => {
+                  this.formGroupDirective.resetForm();
+                })
+            });
+        });
     }
   }
 
@@ -258,27 +258,27 @@ export class CreateNewClientComponent implements OnInit {
     else {
       let Dbinstance = this.new_DB_Instance.trim();
       let Statusflag = 1; let Crudtype = 1;
-    let ConnectionString = "";
-    this.mainService.getAllDbInstance(Crudtype, Dbinstance, ConnectionString, Statusflag)
-      .subscribe(value => {
+      let ConnectionString = "";
+      this.mainService.getAllDbInstance(Crudtype, Dbinstance, ConnectionString, Statusflag)
+        .subscribe(value => {
 
-        if (value.data == '0') {
-          this.toastr.warning(value.message, '');
-        }
-        if (value.statusCode == '200' && value.data != '' && value.data != '0') {
-          this.toastr.success(value.message, '');
-          let Dbinstance = '';
-          let ConnectionString = '';
-          let crudType = 4;
-          this.mainService.getAllDbInstance(crudType, Dbinstance, ConnectionString, Statusflag)
-            .subscribe(value => {
-              this.dbinstance = [];
-              this.dbinstance = value.data;
-            });
-        }
-        this.NewDbInstance = true;
-        this.isClientDivVisible = false;
-      });
+          if (value.data == '0') {
+            this.toastr.warning(value.message, '');
+          }
+          if (value.statusCode == '200' && value.data != '' && value.data != '0') {
+            this.toastr.success(value.message, '');
+            let Dbinstance = '';
+            let ConnectionString = '';
+            let crudType = 4;
+            this.mainService.getAllDbInstance(crudType, Dbinstance, ConnectionString, Statusflag)
+              .subscribe(value => {
+                this.dbinstance = [];
+                this.dbinstance = value.data;
+              });
+          }
+          this.NewDbInstance = true;
+          this.isClientDivVisible = false;
+        });
     }
   }
 

@@ -25,8 +25,8 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
   selectedversion: any;
   ipAddress: any;
   loginid: any;
-  constructor(private mainService: MainService, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService) { 
-    this.loginid=JSON.parse(localStorage.getItem('currentUser'))
+  constructor(private mainService: MainService, private fb: FormBuilder, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService) {
+    this.loginid = JSON.parse(localStorage.getItem('currentUser'))
   }
 
   ngOnInit() {
@@ -135,8 +135,8 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
               if (boxIdData.status === 'success' && boxIdData.statusCode === '200' && (boxIdData.data[0]["result"] === "1" || boxIdData.data[0]["result"] === 1)) {
                 this.toastr.success('', boxIdData.data[0]["message"], { timeOut: 6000 });
                 let Updateadddescription = 'Boxid: ' + BoxId + ' Updated successfully'; let Updatestatus = 100; let Operation = "Update"; let Datasection = 'Default Boxid Updation';
-                let log=JSON.stringify({userName, project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus})+'(Update DefaultBoxid)';
-                let loginid=this.loginid['data'][0]['loginId'];
+                let log = JSON.stringify({ userName, project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus }) + '(Update DefaultBoxid)';
+                let loginid = this.loginid['data'][0]['loginId'];
                 this.mainService.Genericlog(1, loginid, log)
                   .then(value => {
 
@@ -153,12 +153,12 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
                     if (value.status === 'success' && value.statusCode === '200' && (value.data[0]["result"] === "1" || value.data[0]["result"] === 1)) {
                       this.toastr.success('', value.data[0]["message"], { timeOut: 6000 });
                       let Updateadddescription = 'Boxid: ' + BoxId + ' Inserted Successfully'; let Updatestatus = 1; let Operation = "Insert"; let Datasection = 'Default Boxid Insertion';
-                      let log=JSON.stringify({userName, project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus})+'(Update DefaultBoxid)';
-                      let loginid=this.loginid['data'][0]['loginId'];
+                      let log = JSON.stringify({ userName, project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus }) + '(Update DefaultBoxid)';
+                      let loginid = this.loginid['data'][0]['loginId'];
                       this.mainService.Genericlog(1, loginid, log)
-                      .then(value => {
-                        
-                      });
+                        .then(value => {
+
+                        });
                     }
                     else {
                       this.toastr.info('', value.data[0]["message"], { timeOut: 6000 });

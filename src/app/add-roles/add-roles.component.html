@@ -10,11 +10,16 @@
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
         <li class="breadcrumb-item active"><a [routerLink]="['/accessible-modules']">Accessibility</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
-        <li class="breadcrumb-item active" *ngIf="isCreateUsers"><a [routerLink]="['/user-library']">Users</a><i class="fa fa-arrow-right" aria-hidden="true"></i></li>
-        <li class="breadcrumb-item active" *ngIf="isCreateUsers"><a [routerLink]="['/create-users']">Create Users</a><i class="fa fa-arrow-right" aria-hidden="true"></i></li>
-        <li class="breadcrumb-item active" *ngIf="isEditUsers"><a [routerLink]="['/edit-user-details']">Update User Details</a><i class="fa fa-arrow-right" aria-hidden="true"></i></li>
-        <li class="breadcrumb-item active" *ngIf="isroleModules"><a [routerLink]="['/role-module-view']">Role-Module-View</a><i class="fa fa-arrow-right" aria-hidden="true"></i></li>
-        
+        <li class="breadcrumb-item active" *ngIf="isCreateUsers"><a [routerLink]="['/user-library']">Users</a><i
+            class="fa fa-arrow-right" aria-hidden="true"></i></li>
+        <li class="breadcrumb-item active" *ngIf="isCreateUsers"><a [routerLink]="['/create-users']">Create Users</a><i
+            class="fa fa-arrow-right" aria-hidden="true"></i></li>
+        <li class="breadcrumb-item active" *ngIf="isEditUsers"><a [routerLink]="['/edit-user-details']">Update User
+            Details</a><i class="fa fa-arrow-right" aria-hidden="true"></i></li>
+        <li class="breadcrumb-item active" *ngIf="isroleModules"><a
+            [routerLink]="['/role-module-view']">Role-Module-View</a><i class="fa fa-arrow-right"
+            aria-hidden="true"></i></li>
+
         <li class="breadcrumb-item active">Create Role</li>
       </ol>
     </div>
@@ -34,7 +39,8 @@
                 <tbody>
                   <tr>
                     <td>
-                      <input type="text" placeholder="Please Enter the Role" [(ngModel)]="roleName" [ngModelOptions]="{standalone: true}" class="form-control form-control-line" />
+                      <input type="text" placeholder="Please Enter the Role" [(ngModel)]="roleName"
+                        [ngModelOptions]="{standalone: true}" class="form-control form-control-line" />
                     </td>
                   </tr>
                 </tbody>
@@ -51,7 +57,8 @@
                   <tr *ngFor="let list of modulesList;let i=index;">
                     <td>
                       <div class="custom-control custom-checkbox">
-                        <input #checkboxes type="checkbox" class="custom-control-input" id="customCheck-{{i}}" value="{{list}}" (change)="click(list,$event.target.checked)">
+                        <input #checkboxes type="checkbox" class="custom-control-input" id="customCheck-{{i}}"
+                          value="{{list}}" (change)="click(list,$event.target.checked)">
                         <label class="custom-control-label" for="customCheck-{{i}}">&nbsp;&nbsp;{{list}}</label>
                       </div>
                     </td>
@@ -70,6 +77,9 @@
       </div>
     </div>
   </div>
-  <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
+  <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
+    [fullScreen]="true">
+    <p style="color: white"> Loading... </p>
+  </ngx-spinner>
 
 </div>

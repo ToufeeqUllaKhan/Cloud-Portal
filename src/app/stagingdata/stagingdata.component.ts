@@ -108,9 +108,6 @@ export class StagingdataComponent implements OnInit {
       edidviewCellRenderer: EdidviewCellRenderer,
       regionsviewCellRenderer: SupportedRegionsViewCellRenderer
     };
-    this.defaultColDef = {
-      minWidth: 100,
-    };
     this.paginationNumberFormatter = function (params) {
       return '[' + params.value.toLocaleString() + ']';
     };
@@ -1008,27 +1005,28 @@ export class StagingdataComponent implements OnInit {
       this.cecEdidValidate();
     }
     else if (status === 2) {
-      let checkEdidData;
-      if (this.editedEDID128 != null && this.editedEDID128 != undefined) {
-        checkEdidData = ((this.editedEDID128.includes('00 FF FF FF FF FF FF 00') || this.editedEDID128.includes('00 ff ff ff ff ff ff 00')) && this.editedEDID128.length >= 383);
-      }
-      //let checkEdidData = this.editedOSD.includes('00 FF FF FF FF FF FF 00');
-      if (this.editedVendor != undefined || this.editedOSD != undefined || this.editedEDID128 != undefined) {
-        if (this.editedEDID128 != undefined && checkEdidData == true) {
+      if ((this.editedVendor != undefined && this.editedVendor != '') || (this.editedOSD != undefined && this.editedOSD != '') || (this.editedEDID128 != undefined && this.editedEDID128 != '')) {
+        var edid128 = this.editedEDID128;
+        if (edid128 != null && edid128 != '' && edid128 != undefined) {
+          let checkEdidData = ((edid128.startsWith('00 FF FF FF FF FF FF 00') || edid128.startsWith('00 ff ff ff ff ff ff 00')) && edid128.length >= 383);
+          if (!checkEdidData) {
+            this.edidError = true;
+            this.stagingdatasubmitted = false;
+          }
+          else {
+            $('#checkEdidValid').css('border', '1px solid #ced4da');
+            this.edidError = false;
+            this.cecEdidValidate();
+          }
+        }
+        else {
           $('#checkEdidValid').css('border', '1px solid #ced4da');
           this.edidError = false;
           this.cecEdidValidate();
-        } if (this.editedEDID128 != undefined && checkEdidData == false) {
-          this.edidError = true;
-          this.stagingdatasubmitted = false;
-        }
-        if (this.editedEDID128 == undefined) {
-          this.cecEdidValidate();
         }
 
-      }
-      else {
-        this.toastr.error('', 'Enter Vendorid/Vendorid String or OSD or EDID', { timeOut: 4000 })
+      } else {
+        this.toastr.error('', 'Enter Vendorid or OSD or EDID', { timeOut: 4000 })
       }
     }
 
@@ -1040,27 +1038,28 @@ export class StagingdataComponent implements OnInit {
     if (this.saveEditStagingData_1.invalid) {
       return;
     }
-    let checkEdidData;
-    if (this.editedEDID128 != null && this.editedEDID128 != undefined) {
-      checkEdidData = ((this.editedEDID128.includes('00 FF FF FF FF FF FF 00') || this.editedEDID128.includes('00 ff ff ff ff ff ff 00')) && this.editedEDID128.length >= 383);
-    }
-    //let checkEdidData = this.editedOSD.includes('00 FF FF FF FF FF FF 00');
-    if (this.editedVendor != undefined || this.editedOSD != undefined || this.editedEDID128 != undefined) {
-      if ((this.editedEDID128 != undefined && this.editedEDID128 === '') || (this.editedEDID128 != undefined && checkEdidData == true)) {
+    if ((this.editedVendor != undefined && this.editedVendor != '') || (this.editedOSD != undefined && this.editedOSD != '') || (this.editedEDID128 != undefined && this.editedEDID128 != '')) {
+      var edid128 = this.editedEDID128;
+      if (edid128 != null && edid128 != '' && edid128 != undefined) {
+        let checkEdidData = ((edid128.startsWith('00 FF FF FF FF FF FF 00') || edid128.startsWith('00 ff ff ff ff ff ff 00')) && edid128.length >= 383);
+        if (!checkEdidData) {
+          this.edidError = true;
+          this.stagingdatasubmitted_1 = false;
+        }
+        else {
+          $('#checkEdidValid').css('border', '1px solid #ced4da');
+          this.edidError = false;
+          this.cecEdidValidate();
+        }
+      }
+      else {
         $('#checkEdidValid').css('border', '1px solid #ced4da');
         this.edidError = false;
         this.cecEdidValidate();
-      } else if (this.editedEDID128 != undefined && checkEdidData == false) {
-        this.edidError = true;
-        this.stagingdatasubmitted = false;
-      }
-      if (this.editedEDID128 == undefined) {
-        this.cecEdidValidate();
       }
 
-    }
-    else {
-      this.toastr.error('', 'Enter Vendorid/Vendorid String or OSD or EDID', { timeOut: 4000 })
+    } else {
+      this.toastr.error('', 'Enter Vendorid or OSD or EDID', { timeOut: 4000 })
     }
   }
 
@@ -1070,28 +1069,30 @@ export class StagingdataComponent implements OnInit {
     if (this.saveUpdateStagingData.invalid) {
       return;
     }
-    let checkEdidData;
-    if (this.UpdatedEDID128 != null && this.UpdatedEDID128 != undefined) {
-      checkEdidData = ((this.UpdatedEDID128.includes('00 FF FF FF FF FF FF 00') || this.UpdatedEDID128.includes('00 ff ff ff ff ff ff 00')) && this.UpdatedEDID128.length >= 383);
-    }
-
-    if (this.UpdatedVendor != undefined || this.UpdatedOSD != undefined || this.UpdatedEDID128 != undefined) {
-      if ((this.UpdatedEDID128 != undefined && this.UpdatedEDID128 === '') || (this.UpdatedEDID128 != undefined && checkEdidData == true)) {
+    if ((this.UpdatedVendor != undefined && this.UpdatedVendor != '') || (this.UpdatedOSD != undefined && this.UpdatedOSD != '') || (this.UpdatedEDID128 != undefined && this.editedEDID128 != '')) {
+      var edid128 = this.UpdatedEDID128;
+      if (edid128 != null && edid128 != '' && edid128 != undefined) {
+        let checkEdidData = ((edid128.startsWith('00 FF FF FF FF FF FF 00') || edid128.startsWith('00 ff ff ff ff ff ff 00')) && edid128.length >= 383);
+        if (!checkEdidData) {
+          this.edidError = true;
+          this.stagingdatasubmitted_2 = false;
+        }
+        else {
+          $('#checkEdidValid').css('border', '1px solid #ced4da');
+          this.edidError = false;
+          this.cecEdidValidate_1();
+        }
+      }
+      else {
         $('#checkEdidValid').css('border', '1px solid #ced4da');
         this.edidError = false;
         this.cecEdidValidate_1();
-      } else if ((this.UpdatedEDID128 != undefined && this.UpdatedEDID128 === '') && checkEdidData == false) {
-        this.edidError = true;
-        this.stagingdatasubmitted_2 = false;
-      }
-      if (this.UpdatedEDID128 == undefined) {
-        this.cecEdidValidate_1();
       }
 
+    } else {
+      this.toastr.error('', 'Enter Vendorid or OSD or EDID', { timeOut: 4000 })
     }
-    else {
-      this.toastr.error('', 'Enter Vendorid/Vendorid String or OSD or EDID', { timeOut: 4000 })
-    }
+
   }
   /** Vendor Validation in CEC EDID add Option start **/
   vendorMod() {
@@ -1194,7 +1195,7 @@ export class StagingdataComponent implements OnInit {
         "cecenabled": parseInt(iscecenabled),
         "vendoridhex": vendorid,
         "vendorid": this.editedVendorstr,
-        "osdhex": osd.trim(),
+        "osdhex": osd,
         "osd": osdstr,
         "edid": this.editedEDID128,
         "regioncountrymodelref": Regioncountry,
@@ -1211,7 +1212,7 @@ export class StagingdataComponent implements OnInit {
         "cecenabled": parseInt(iscecenabled),
         "vendoridhex": vendorid,
         "vendorid": this.editedVendorstr,
-        "osdhex": osd.trim(),
+        "osdhex": osd,
         "osd": osdstr,
         "edid": this.editedEDID128,
         "regioncountrymodelref": Regioncountry,
@@ -1348,7 +1349,7 @@ export class StagingdataComponent implements OnInit {
       }
       let directtostag = [];
 
-      this.mainService.getRemoteUID(Brand, Model, Device)
+      this.mainService.getRemoteUID(Brand, Model.toString(), Device)
         .subscribe(value => {
           if (value.data != [] || value.data != '[]') {
             let UpdatedUid = ''; let UpdatedUID = [];
@@ -1543,13 +1544,14 @@ export class StagingdataComponent implements OnInit {
       if (file != undefined) {
         reader.onload = (event) => {
           let data = reader.result;
+          self.spinnerService.show();
           workBook = XLSX.read(data, { type: 'binary' });
           jsonData = workBook.SheetNames.reduce((initial, name) => {
             let sheet = workBook.Sheets[name];
             initial[name] = XLSX.utils.sheet_to_json(sheet);
             return initial[name];
           }, {});
-          const newArray = [];
+          const newArray = []; let count = 0;
           for (var j = 0; j < jsonData.length; j++) {
             const keys = Object.keys(jsonData[j]);
             const newObject = {};
@@ -1559,7 +1561,6 @@ export class StagingdataComponent implements OnInit {
             })
             newArray.push(newObject);
           }
-
           newArray.forEach(element => {
 
             if (element['brand'] === undefined) {
@@ -1610,8 +1611,9 @@ export class StagingdataComponent implements OnInit {
             if (element['uid'] === undefined || element['uid'] != undefined) {
               element['uid'] = ''
             }
-            this.mainService.getRemoteUID(element['brand'], element['targetmodel'], element['device'])
+            this.mainService.getRemoteUID(element['brand'], (element['targetmodel']).toString(), element['device'])
               .subscribe(value => {
+                count++;
                 let UpdatedUID = []; let UpdatedUIDs = '';
                 if (value.data != [] || value.data != '[]') {
 
@@ -1629,6 +1631,9 @@ export class StagingdataComponent implements OnInit {
                   self.Uid = '';
                 }
                 element['uid'] = self.Uid;
+                if (count === newArray.length) {
+                  self.spinnerService.hide();
+                }
               })
           });
           self.clicker = newArray;
@@ -1680,6 +1685,9 @@ export class StagingdataComponent implements OnInit {
 
   viewdata() {
     this.searchValue = null;
+    this.defaultColDef = {
+      minWidth: 100,
+    };
     this.columnDefs = [
       { field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
       { field: "Subdevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
@@ -1696,13 +1704,16 @@ export class StagingdataComponent implements OnInit {
       { field: "Osdhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
       { field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
       { field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true },
-      {
-        field: "Action", resizable: true,
-        cellRenderer: "btnCellRenderer"
-      }
+      { field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
+      { field: "Action", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
     ];
     this.rowData = this.stagingdatacapture;
+    if (this.rowData.length < 8) {
+      this.setAutoHeight();
+    }
+    else {
+      this.setFixedHeight();
+    }
     this.gridApi.setQuickFilter(this.searchValue)
   }
 
@@ -1742,6 +1753,7 @@ export class StagingdataComponent implements OnInit {
   async changeProject() {
     this.spinnerService.show();
     if (this.projectNames == null || this.projectNames == "null" || this.projectNames == undefined) {
+      this.spinnerService.hide();
       this.toastr.warning('', 'Please Select the Project');
       $('#upload').css('display', 'none');
     } else {
@@ -2090,7 +2102,7 @@ export class StagingdataComponent implements OnInit {
         }
       });
       for (let i = 0; i < proddata.length; i++) {
-        this.mainService.getRemoteUID(proddata[i]['Brand'], proddata[i]['Model'], proddata[i]['Device'])
+        this.mainService.getRemoteUID(proddata[i]['Brand'], proddata[i]['Model'].toString(), proddata[i]['Device'])
           .subscribe(value => {
             let UpdatedUID = []; let UpdatedUIDs = '';
             if (value.data != [] || value.data != '[]') {
@@ -2193,5 +2205,15 @@ export class StagingdataComponent implements OnInit {
       skipHeader: false
     }
     this.gridApi.exportDataAsCsv(excelParams);
+  }
+
+  setAutoHeight() {
+    this.gridApi.setDomLayout('autoHeight');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '';
+  }
+
+  setFixedHeight() {
+    this.gridApi.setDomLayout('normal');
+    (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '500px';
   }
 }

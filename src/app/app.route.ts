@@ -26,7 +26,7 @@ import { EditUserDetailsComponent } from './edit-user-details/edit-user-details.
 import { RoleGuardService } from './guard/role-guard-service';
 import { ApiCongigurationComponent } from './api-congiguration/api-congiguration.component';
 import { EditApiComponent } from './edit-api/edit-api.component';
-import { LogViewComponent } from './log-view/log-view.component';
+// import { LogViewComponent } from './log-view/log-view.component';
 import { ReportConfigurationListComponent } from './report-configuration-list/report-configuration-list.component';
 import { ReportComponent } from './report/report.component';
 import { ChangehistoryComponent } from './changehistory/changehistory.component';
@@ -38,6 +38,8 @@ import { ImportprojfromprodComponent } from './importprojfromprod/importprojfrom
 import { ProdCecEdidDataComponent } from './prod-cec-edid-data/prod-cec-edid-data.component';
 import { ProdCecEdidHistoryComponent } from './prod-cec-edid-history/prod-cec-edid-history.component';
 import { EditRoleModulePermissionComponent } from './edit-role-module-permission/edit-role-module-permission.component';
+import { AnalyticalreportsComponent } from './analyticalreports/analyticalreports.component';
+import { AnalyticalreportsviewComponent } from './analyticalreportsview/analyticalreportsview.component';
 
 //const routes: Routes = [
 const appRoutes: Routes = [
@@ -66,7 +68,7 @@ const appRoutes: Routes = [
   { path: 'edit-user-details', component: EditUserDetailsComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
   { path: 'api-configuration', component: ApiCongigurationComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
   { path: 'edit-api', component: EditApiComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
-  { path: 'log-view', component: LogViewComponent, canActivate: [Authguard] },
+  // { path: 'log-view', component: LogViewComponent, canActivate: [Authguard] },
   { path: 'Report-configuration-list', component: ReportConfigurationListComponent, canActivate: [Authguard] },
   { path: 'history', component: ReportComponent, canActivate: [Authguard] },
   { path: 'changeHistory', component: ChangehistoryComponent, canActivate: [Authguard] },
@@ -77,7 +79,9 @@ const appRoutes: Routes = [
   { path: 'importfromprod', component: ImportprojfromprodComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
   { path: 'prod_CEC-EDID_data', component: ProdCecEdidDataComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
   { path: 'prod_CEC-EDID_History', component: ProdCecEdidHistoryComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
-  { path: 'update-permission', component: EditRoleModulePermissionComponent, canActivate: [Authguard]},
+  { path: 'update-permission', component: EditRoleModulePermissionComponent, canActivate: [Authguard] },
+  { path: 'Analyticalreports', component: AnalyticalreportsComponent, canActivate: [Authguard] },
+  { path: 'reports-view', component: AnalyticalreportsviewComponent, canActivate: [Authguard] },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/dashboard' }
 ];

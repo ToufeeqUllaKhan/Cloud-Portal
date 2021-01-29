@@ -24,9 +24,9 @@
                 <thead>
                   <tr>
                     <th class="colorBlue">Role
-                    <span (click)="newRole()" class="float-right oval col-sm-1" title="Add Role">
-                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
-                    </span>
+                      <span (click)="newRole()" class="float-right oval col-sm-1" title="Add Role">
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                      </span>
                     </th>
                     <th class="colorBlue">Actions</th>
                   </tr>
@@ -62,6 +62,9 @@
       </div>
     </div>
   </div>
-  <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
+  <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
+    [fullScreen]="true">
+    <p style="color: white"> Loading... </p>
+  </ngx-spinner>
 
 </div>

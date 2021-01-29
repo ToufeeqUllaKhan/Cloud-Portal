@@ -15,7 +15,7 @@ export class CreateUsersComponent implements OnInit {
   createUserForm: FormGroup;
   submitted: Boolean = false;
   user: User = new User();
-  roles :any=null;
+  roles: any = null;
   role: any = null; username: any; firstname: any; lastname: any;
   email: any; phonenumber: any; password: any; selectedproject: any;
   projects: Array<any> = [];

@@ -8,9 +8,9 @@ describe('ChangehistoryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ChangehistoryComponent ]
+      declarations: [ChangehistoryComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

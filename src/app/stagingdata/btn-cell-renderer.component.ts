@@ -26,7 +26,7 @@ export class BtnCellRenderer implements ICellRendererAngularComp {
     if (this.status === 'null' || this.status === null) {
       this.showbutton = false;
     }
-    else if (this.status === '1' || this.status === 1 ||this.status === '2' || this.status === 2) {
+    else if (this.status === '1' || this.status === 1 || this.status === '2' || this.status === 2) {
       this.showbutton = true;
     }
     else {
@@ -37,10 +37,10 @@ export class BtnCellRenderer implements ICellRendererAngularComp {
   }
 
   invokeParentMethod() {
-    if (this.status === '1' || this.status === 1 ) {
+    if (this.status === '1' || this.status === 1) {
       this.params.context.componentParent.methodFromParent_edituid(this.params.node.data);
     }
-    if(this.status === '2' || this.status === 2) {
+    if (this.status === '2' || this.status === 2) {
       this.params.context.componentParent.methodFromParent_edit(this.params.node.data);
     }
   }

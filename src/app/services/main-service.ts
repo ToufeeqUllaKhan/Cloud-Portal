@@ -96,11 +96,13 @@ export class MainService {
       ).toPromise();
   }
 
-  getRoleModules(crudtype: any, role: any, module: any, user: any, project: any, readpermission: any,writepermission: any,downloadpermission: any): Observable<any> {
+  getRoleModules(crudtype: any, role: any, module: any, user: any, project: any, readpermission: any, writepermission: any, downloadpermission: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/CRUD_RoleModuleMapping`,
-      { "crudtype": crudtype, "role": role, "module": module, "user": user, "project": project, 
-      "readpermission":readpermission, "writepermission":writepermission, "downloadpermission":downloadpermission })
+      {
+        "crudtype": crudtype, "role": role, "module": module, "user": user, "project": project,
+        "readpermission": readpermission, "writepermission": writepermission, "downloadpermission": downloadpermission
+      })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -1195,6 +1197,18 @@ export class MainService {
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/Notifications`,
       {
         "crudtype": Crudtype, "projectname": Projectname, "dbversion": dbversion, "dbpath": dbpath, "data": data, "loginid": loginid, "recordid": recordid, "notificationid": notificationid, "statusflag": statusflag
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      ).toPromise();
+  }
+
+  GetReports(dbinstance: any, Crudtype: any,): Promise<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/Report/GetReports`,
+      {
+        "dbinstance": dbinstance, "reporttype": Crudtype
       })
       .pipe(
         retry(1),

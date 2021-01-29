@@ -63,16 +63,16 @@ export class AdminDashboardComponent implements OnInit {
     this.router.navigate(['/UpdateDefaultBoxIdLogs']);
   }
 
-  importprojectfromprod(){
+  importprojectfromprod() {
     this.router.navigate(['/importfromprod']);
   }
 
-  cec_ediddata(){
+  cec_ediddata() {
     localStorage.setItem('TicketSelected', 'CEC-EDID Data');
     this.router.navigate(['/admin-clients']);
   }
 
-  cec_edidHistory(){
+  cec_edidHistory() {
     this.router.navigate(['/prod_CEC-EDID_History']);
   }
 }

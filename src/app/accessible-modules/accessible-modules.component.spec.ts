@@ -8,9 +8,9 @@ describe('AccessibleModulesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AccessibleModulesComponent ]
+      declarations: [AccessibleModulesComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

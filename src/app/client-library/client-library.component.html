@@ -19,9 +19,8 @@
         New Client
       </button>
     </div> -->
-    <select [(ngModel)]='status' class="form form-control selectDrop" 
-    (change)="onchangestatus()"
-    style="width:auto; margin-left: auto;">
+    <select [(ngModel)]='status' class="form form-control selectDrop" (change)="onchangestatus()"
+      style="width:auto; margin-left: auto;">
       <option [value]=null hidden>Status </option>
       <!-- <option value='null'>All</option> -->
       <option value=1>Staging Projects</option>
@@ -34,7 +33,8 @@
     </button>
     <div class="col-xl-12 col-md-12">&nbsp;</div>
     <div class="col-xl-12 col-md-12">
-      <table id="projectView" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="dataTable" style="width:100%">
+      <table id="projectView" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="dataTable"
+        style="width:100%">
         <thead>
           <tr>
             <th>SL No.</th>
@@ -51,9 +51,12 @@
             <td class="signatureData">{{client.signatureKey}}</td>
             <td class="">{{client.allowDownload}}</td>
             <td class="pr-btn">
-              <button type="button" id="edit" *ngIf="showeditbutton" (click)="editSignatureKey(client,client.allowDownload)" style="cursor:pointer;background:none;border:none;"><u><strong>Edit</strong></u></button>&nbsp;
-              <button type="button" id="delete" *ngIf="showunlinkbutton" style="cursor:pointer;background:none;border:none;" value={{client.projectId}}
-              data-toggle="modal" data-target="#deleteconfirmation">&nbsp;&nbsp;<u><strong>Unlink</strong></u>
+              <button type="button" id="edit" *ngIf="showeditbutton"
+                (click)="editSignatureKey(client,client.allowDownload)"
+                style="cursor:pointer;background:none;border:none;"><u><strong>Edit</strong></u></button>&nbsp;
+              <button type="button" id="delete" *ngIf="showunlinkbutton"
+                style="cursor:pointer;background:none;border:none;" value={{client.projectId}} data-toggle="modal"
+                data-target="#deleteconfirmation">&nbsp;&nbsp;<u><strong>Unlink</strong></u>
               </button>
             </td>
           </tr>
@@ -62,7 +65,8 @@
       <br /><br />
       <button class="btn-deactive" id="btn-active" data-toggle="modal" data-target="#editDataModal">
       </button>
-      <div class="modal fade" id="editDataModal" tabindex="-1" role="dialog" aria-labelledby="editDataModalLabel" aria-hidden="true">
+      <div class="modal fade" id="editDataModal" tabindex="-1" role="dialog" aria-labelledby="editDataModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -77,10 +81,14 @@
                 <div class="row">
                   <div class="col-sm-12">
                     <div class="form-group form-inline">
-                      <label class="labelsubSpan col-sm-4 col-form-label">Signature Key<span class="color-red">*</span></label>
-                      <input type="text" [(ngModel)]="editedSignature" formControlName="editSignatureKey" class="form-control form-control-line col-sm-8" [ngClass]="{ 'is-invalid': submitted && f.editSignatureKey.errors }" />
+                      <label class="labelsubSpan col-sm-4 col-form-label">Signature Key<span
+                          class="color-red">*</span></label>
+                      <input type="text" [(ngModel)]="editedSignature" formControlName="editSignatureKey"
+                        class="form-control form-control-line col-sm-8"
+                        [ngClass]="{ 'is-invalid': submitted && f.editSignatureKey.errors }" />
                       <div *ngIf="submitted && f.editSignatureKey.errors" class="invalid-feedback">
-                        <div *ngIf="f.editSignatureKey.errors.required" class="error-defined text-right">Signature Key is required</div>
+                        <div *ngIf="f.editSignatureKey.errors.required" class="error-defined text-right">Signature Key
+                          is required</div>
                       </div>
                     </div>
                   </div>
@@ -93,7 +101,8 @@
                 </div>
                 <div class="form-group row text-right">
                   <div class="col-sm-12">
-                    <button type="button" (click)="modalClose()" class="btn btn-secondary" data-dismiss="modal">Close</button>&nbsp;
+                    <button type="button" (click)="modalClose()" class="btn btn-secondary"
+                      data-dismiss="modal">Close</button>&nbsp;
                     <button type="submit" class="btn btn-primary">Save</button>
                   </div>
                 </div>
@@ -103,29 +112,29 @@
         </div>
       </div>
 
-      <div class="modal fade" id="deleteconfirmation" tabindex="-1" role="dialog" aria-labelledby="deleteconfirmationLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title h5-color" id="deleteconfirmationLabel"><b> Please Confirm..</b></h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="col-sm-12">
-            <p>Please take a backup before deletion. </p>
-            <p>Are you sure you want to delete the Project from Portalconfig: <b>{{projectName}}</b></p>
-          </div>
-          <div class="form-group row text-right" style="margin-top: 10px;">
-            <div class="col-sm-12">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>&nbsp;
-              <button type="submit" id="ModuleSubmit" class="btn btn-secondary">Yes</button>
+      <div class="modal fade" id="deleteconfirmation" tabindex="-1" role="dialog"
+        aria-labelledby="deleteconfirmationLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title h5-color" id="deleteconfirmationLabel"><b> Please Confirm..</b></h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="col-sm-12">
+                <p>Please take a backup before deletion. </p>
+                <p>Are you sure you want to delete the Project from Portalconfig: <b>{{projectName}}</b></p>
+              </div>
+              <div class="form-group row text-right" style="margin-top: 10px;">
+                <div class="col-sm-12">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>&nbsp;
+                  <button type="submit" id="ModuleSubmit" class="btn btn-secondary">Yes</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-    </div>
-   </div>
-  </div>
+</div>

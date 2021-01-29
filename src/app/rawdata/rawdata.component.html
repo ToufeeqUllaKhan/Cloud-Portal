@@ -39,8 +39,7 @@
 
     </select>&nbsp;&nbsp;
     <div>
-      <button class="btn btn-info float-right"
-        title="Download based on filtered data" id="single_download">
+      <button class="btn btn-info float-right" title="Download based on filtered data" id="single_download">
         <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
     </div>
     &nbsp;&nbsp;
@@ -73,12 +72,16 @@
         </label>
       </div>
       <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
-        style="width: 1075px; height: 380px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+        style="width: 1075px; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
         [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
         [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents"
-        [rowSelection]="rowSelection" [suppressRowClickSelection]="true" [rowMultiSelectWithClick]="true" (click)="onRowClicked()">
+        [rowSelection]="rowSelection" [suppressRowClickSelection]="true" [rowMultiSelectWithClick]="true"
+        (click)="onRowClicked()">
       </ag-grid-angular>
-
+      <div class="col-md-12">
+      </div>
+      <br />
+      <br />
     </div>
   </div>
 
