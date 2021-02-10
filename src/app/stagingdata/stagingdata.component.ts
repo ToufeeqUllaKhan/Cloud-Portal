@@ -124,6 +124,7 @@ export class StagingdataComponent implements OnInit {
     let subdevice = this.subdevice;
     this.mainService.getProjectNames(null, null, null, null, null, 1)
       .subscribe(value => {
+        this.spinnerService.show();
         this.filterProjects = value.data.filter(u =>
           (u.statusFlag != 2 || u.statusFlag != '2'));
         const uniqueProjects = [...new Set(this.filterProjects.map(item => item.projectname))];
@@ -137,9 +138,8 @@ export class StagingdataComponent implements OnInit {
         formData.append("statusflag", "1");
         formData.append("recordid", "");
         self.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData)
-          .subscribe((val) => {
-            this.spinnerService.hide();
-            if (val.data != '0') {
+          .subscribe(val => {
+            if (val.data != '0' && val.data != 0) {
               let fileselected = val.data[0]['filePath'].toString();
               this.fileselected = fileselected.replace(';', '');
               const docFile = new XMLHttpRequest();
@@ -152,6 +152,7 @@ export class StagingdataComponent implements OnInit {
               };
             }
             else {
+              this.spinnerService.hide();
               this.toastr.error('', 'Earlier No Codesetinclude.xml file uploaded to the selected project', { timeOut: 3000 })
             }
           })
@@ -1705,7 +1706,7 @@ export class StagingdataComponent implements OnInit {
       { field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
       { field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
       { field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
-      { field: "Action", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
+      { headerName: "Action", field: "Status", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
     ];
     this.rowData = this.stagingdatacapture;
     if (this.rowData.length < 8) {
@@ -1774,7 +1775,6 @@ export class StagingdataComponent implements OnInit {
       formData.append("recordid", "");
       this.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData
       ).subscribe((val) => {
-        this.spinnerService.hide();
         if (val.data != '0') {
           let fileselected = val.data[0]['filePath'].toString();
           this.fileselected = fileselected.replace(';', '');
@@ -1788,6 +1788,7 @@ export class StagingdataComponent implements OnInit {
           };
         }
         else {
+          this.spinnerService.hide();
           (<HTMLInputElement>document.getElementById("upload")).value = null;
           this.toastr.error('', 'Earlier No Codesetinclude.xml file uploaded to the selected project', { timeOut: 3000 });
         }
@@ -1808,6 +1809,7 @@ export class StagingdataComponent implements OnInit {
       }
       else {
         try {
+          this.spinnerService.show();
           this.fileselected = file;
           this.onFileupload(ev);
         } catch (error) {
@@ -1821,16 +1823,6 @@ export class StagingdataComponent implements OnInit {
   }
 
   onFileupload(ev) {
-    let reader = new FileReader();
-    let file = ev.target.files[0];
-    if (ev.target.files.length != 0) {
-      if (file != undefined) {
-        reader.onload = (event) => {
-          this.convertxml(reader.result);
-        }
-        reader.readAsBinaryString(file);
-      }
-    }
     if ($('#upload').val() === '' || $('#projectname').val() === null) {
       this.toastr.error('Select Projectname and Upload a valid file')
     }
@@ -1843,10 +1835,19 @@ export class StagingdataComponent implements OnInit {
       formData.append("statusflag", "1");
       formData.append("recordid", "");
       this.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData
-      ).subscribe((val) => {
+      ).subscribe(val => {
         if (val.data[0]['status'] != 0 && val.data[0]['status'] != '0') {
-          this.spinnerService.hide();
           this.toastr.success('', val.data[0]['message']);
+          let reader = new FileReader();
+          let file = ev.target.files[0];
+          if (ev.target.files.length != 0) {
+            if (file != undefined) {
+              reader.onload = (event) => {
+                this.convertxml(reader.result);
+              }
+              reader.readAsBinaryString(file);
+            }
+          }
           (<HTMLInputElement>document.getElementById("upload")).value = null;
         }
         else {
@@ -1857,13 +1858,23 @@ export class StagingdataComponent implements OnInit {
           formData.append("statusflag", "1");
           formData.append("recordid", "");
           this.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData
-          ).subscribe((val) => {
-            this.spinnerService.hide();
+          ).subscribe(val => {
             if (val.data[0]['status'] != 0 && val.data[0]['status'] != '0') {
+              let reader = new FileReader();
+              let file = ev.target.files[0];
+              if (ev.target.files.length != 0) {
+                if (file != undefined) {
+                  reader.onload = (event) => {
+                    this.convertxml(reader.result);
+                  }
+                  reader.readAsBinaryString(file);
+                }
+              }
               this.toastr.success('', val.data[0]['message']);
             }
             else {
               this.toastr.info('', val.data[0]['message']);
+              this.spinnerService.hide();
             }
             (<HTMLInputElement>document.getElementById("upload")).value = null;
           })
@@ -1922,6 +1933,7 @@ export class StagingdataComponent implements OnInit {
 
     }
     this.xmlDataResult = diviceArrayForm;
+    this.spinnerService.hide();
     console.log(this.xmlDataResult)
   }
 
@@ -1958,7 +1970,7 @@ export class StagingdataComponent implements OnInit {
               if (this.successinsert != 0) {
                 this.toastr.success('', ' ' + 'Records inserted/updated successfully', { timeOut: 4000 });
                 let loginid = this.loginid['data'][0]['loginId'];
-                let log = ' ' + 'Records already exist(Staging to Prod)'
+                let log = ' ' + 'Records inserted/updated successfully(Staging to Prod)'
                 this.mainService.Genericlog(1, loginid, log).then(value => {
                 })
               }
@@ -2124,13 +2136,16 @@ export class StagingdataComponent implements OnInit {
             }
             let codesets = this.xmlDataResult.filter(u => (u.uid === this.Uid) && (u.device === proddata[i]['Device']))
             if (codesets.length > 1) {
+              let UpdatedCodesets = ''
+              this.Uid = UpdatedUIDs.slice(0, -1)
               codesets.forEach(element => {
-                Multiplecodesetassigned.push({
-                  Device: proddata[i]['Device'], Subdevice: proddata[i]['Subdevice'], Brand: proddata[i]['Brand'],
-                  Model: proddata[i]['Model'], Region: proddata[i]['Region'], Country: proddata[i]['Country'],
-                  Cecpresent: proddata[i]['Cecpresent'], Cecenabled: proddata[i]['Cecenabled'], Vendorid: proddata[i]['Vendorid'], Osd: proddata[i]['Osd'], Edid: proddata[i]['Edid'], UID: this.Uid, codeset: element['codeset']
-                })
+                UpdatedCodesets += element['codeset'] + ';'
               });
+              Multiplecodesetassigned.push({
+                Device: proddata[i]['Device'], Subdevice: proddata[i]['Subdevice'], Brand: proddata[i]['Brand'],
+                Model: proddata[i]['Model'], Region: proddata[i]['Region'], Country: proddata[i]['Country'],
+                Cecpresent: proddata[i]['Cecpresent'], Cecenabled: proddata[i]['Cecenabled'], Vendorid: proddata[i]['Vendorid'], Osd: proddata[i]['Osd'], Edid: proddata[i]['Edid'], UID: this.Uid, codeset: UpdatedCodesets
+              })
             }
             if (codesets.length === 1) {
               Singlecodesetassigned.push({
@@ -2180,7 +2195,8 @@ export class StagingdataComponent implements OnInit {
             else {
               this.show = false;
             }
-            if (i + 1 === proddata.length) {
+            let count = this.singlecodesetassigned.length + this.multiplecodesetassigned.length + this.nocodesetassigned.length;
+            if (proddata.length === count) {
               this.spinnerService.hide();
             }
           })

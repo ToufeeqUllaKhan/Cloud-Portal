@@ -175,7 +175,6 @@ export class EditApiComponent implements OnInit {
   /** Add Modules save functionality */
 
   async onsaveModules() {
-    this.spinnerService.show();
     this.successData = [];
     this.failedData = [];
     this.failCount = 0; this.successCount = 0;
@@ -187,7 +186,9 @@ export class EditApiComponent implements OnInit {
     this.addressValid();
     this.checkUrlValidation();
     if (this.invalidUrl == false && this.address != '' && this.address != undefined) {
+      this.spinnerService.show();
       if (this.selectedItems.length == 0) {
+        this.spinnerService.hide();
         this.toastr.warning('', 'Please select one or more modules to proceed further');
       } else {
         let crudType = 1;

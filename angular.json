@@ -57,7 +57,8 @@
               "xlsx",
               "jquery",
               "hammerjs",
-              "css-element-queries"
+              "css-element-queries",
+              "apexcharts"
            ]
           },
           "configurations": {

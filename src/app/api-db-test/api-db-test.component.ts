@@ -133,7 +133,6 @@ export class ApiDbTestComponent implements OnInit {
           arrData.push({ item_id: i, item_text: unique[i] });
         }
         //this.projects = arrData;
-        this.getDevices();
         this.ProjectList = arrData;
         let RoleLevel = localStorage.getItem('AccessRole');
         /** List of Projects and projects version list based on role */
@@ -173,7 +172,16 @@ export class ApiDbTestComponent implements OnInit {
                 }
                 var uniqueVersions = this.versionArr.filter((v, i, a) => a.indexOf(v) === i);
                 this.dbVersion = uniqueVersions;
-                this.version_list = this.dbVersion[0];
+                let datatype = 21;
+                let versionArr = [];
+                this.mainService.getProjectNames(null, null, ProjectSel, null, null, datatype)
+                  .subscribe(value => {
+                    if (value.data.length != 0) {
+                      versionArr.push(value.data[0]['version']);
+                      this.version_list = versionArr[0];
+                    }
+
+                  });
               }
             });
         } else {
@@ -199,7 +207,17 @@ export class ApiDbTestComponent implements OnInit {
             }
             var uniqueVersions = this.versionArr.filter((v, i, a) => a.indexOf(v) === i);
             this.dbVersion = uniqueVersions;
-            this.version_list = this.dbVersion[0];
+            let datatype = 21;
+            let versionArr = [];
+            this.mainService.getProjectNames(null, null, Project, null, null, datatype)
+              .subscribe(value => {
+                if (value.data.length != 0) {
+                  versionArr.push(value.data[0]['version']);
+                  this.version_list = versionArr[0];
+                }
+
+              });
+            // this.version_list = this.dbVersion[0];
           }
         }
 
@@ -291,7 +309,7 @@ export class ApiDbTestComponent implements OnInit {
       u.projectname == projectname);
     let version; let dbInstance;
     if (filterProjects.length != 0) {
-      version = filterProjects[0]['embeddedDbVersion'];
+      version = this.version_list;
       dbInstance = filterProjects[0]['dbinstance'];
     }
     this.mainService.getDevicesList(dbInstance, this.user, projectname, version)
@@ -578,6 +596,7 @@ export class ApiDbTestComponent implements OnInit {
     await this.mainService.getAPIListData(sessionToken, Dbname, Project)
       .then(value => {
         if (this.api_list != 'REGISTRATION' && this.api_list != 'LOGIN') {
+          this.getDevices();
           let crudType = 2; let BoxId;
           BoxId = null; let dbversion = this.version_list;
           this.mainService.getBoxId(crudType, Project, SignatureKey, BoxId, Dbname, dbversion)
@@ -733,13 +752,20 @@ export class ApiDbTestComponent implements OnInit {
   changeApi() {
     this.ApiForm = this.api_list;
     this.responsetime = ' '
-    this.tabVersions();
-    this.checkApiForm();
-    this.resetFiles();
-    // if (JSON.parse(localStorage.getItem('token')) == null) {
-    this.getRegisterLogin();
-    // }
-    this.showSpinner();
+    let datatype = 21;
+    let versionArr = [];
+    this.mainService.getProjectNames(null, null, this.tabName, null, null, datatype)
+      .subscribe(value => {
+        if (value.data.length != 0) {
+          versionArr.push(value.data[0]['version']);
+          this.version_list = versionArr[0];
+        }
+        this.tabVersions();
+        this.checkApiForm();
+        this.resetFiles();
+        this.getRegisterLogin();
+        this.showSpinner();
+      });
   }
 
   /** If Project are deselected and empty in Multiselect Dropdown to hide the entire section until project selects */
@@ -815,8 +841,13 @@ export class ApiDbTestComponent implements OnInit {
       let filterVersion: any = this.mainArr.filter(u =>
         u.projectname == projectName && u.embeddedDbVersion == this.version_list && (u.statusFlag != 2 || u.statusFlag != '2'));
       if (filterVersion.length != 0) {
-        this.changeApi();
+
+        this.ApiForm = this.api_list;
+        this.responsetime = ' '
         this.tabVersions();
+        this.checkApiForm();
+        // this.changeApi();
+        // this.tabVersions();
         this.getRegisterLogin();
         $('.noDataExists').show();
       } else {
@@ -912,7 +943,6 @@ export class ApiDbTestComponent implements OnInit {
     this.resetSubmission();
     this.tabName = tabs;
     this.selected_tab = this.tabName;
-    this.getDevices();
     if (this.api_list == 'LOGIN') {
       this.api_list = 'REGISTRATION';
     }
@@ -921,12 +951,20 @@ export class ApiDbTestComponent implements OnInit {
     if (tabs != undefined && tabs != '') {
       let versionArray: any = this.mainArr.filter(u =>
         (u.projectname == tabs) && (u.statusFlag != 2 || u.statusFlag != '2'));
-      this.version_list = versionArray[0]['embeddedDbVersion'];
-      this.tabVersions();
-      this.checkApiForm();
-      if (this.api_list != 'REGISTRATION' && this.api_list != 'LOGIN') {
-        this.getRegisterLogin();
-      }
+      let datatype = 21;
+      let versionArr = [];
+      this.mainService.getProjectNames(null, null, this.tabName, null, null, datatype)
+        .subscribe(value => {
+          if (value.data.length != 0) {
+            versionArr.push(value.data[0]['version']);
+            this.version_list = versionArr[0];
+          }
+          this.tabVersions();
+          this.checkApiForm();
+          if (this.api_list != 'REGISTRATION' && this.api_list != 'LOGIN') {
+            this.getRegisterLogin();
+          }
+        });
     }
     this.spinnerService.hide();
   }

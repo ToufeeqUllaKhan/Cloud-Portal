@@ -78,7 +78,7 @@ const appRoutes: Routes = [
   { path: 'UpdateDefaultBoxIdLogs', component: ClearDefaultBoxIdLogsComponent, canActivate: [Authguard] },
   { path: 'importfromprod', component: ImportprojfromprodComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
   { path: 'prod_CEC-EDID_data', component: ProdCecEdidDataComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
-  { path: 'prod_CEC-EDID_History', component: ProdCecEdidHistoryComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
+  { path: 'Data Update History', component: ProdCecEdidHistoryComponent, canActivate: [RoleGuardService], data: { role: 'Admin' } },
   { path: 'update-permission', component: EditRoleModulePermissionComponent, canActivate: [Authguard] },
   { path: 'Analyticalreports', component: AnalyticalreportsComponent, canActivate: [Authguard] },
   { path: 'reports-view', component: AnalyticalreportsviewComponent, canActivate: [Authguard] },

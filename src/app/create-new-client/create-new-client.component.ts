@@ -7,7 +7,6 @@ import { ToastrService } from 'ngx-toastr';
 import * as alertify from 'alertify.js';
 import { Title } from '@angular/platform-browser';
 
-
 @Component({
   selector: 'app-create-new-client',
   templateUrl: './create-new-client.component.html',
@@ -17,27 +16,25 @@ import { Title } from '@angular/platform-browser';
 export class CreateNewClientComponent implements OnInit {
 
   isClientDivVisible: Boolean = false;
-  isDBInstanceVisible: Boolean = true; NewRegion: Boolean = true;
+  isDBInstanceVisible: Boolean = true; NewRegion: Boolean = true; NewClient: Boolean = true;
   isClientDetailsVisible: Boolean = false;
   createClientForm: FormGroup;
-  newregionForm: FormGroup;
+  newregionForm: FormGroup; newclientForm: FormGroup;
   newdbInstanceForm: FormGroup;
   createNewProjectForm: FormGroup;
   submitted: Boolean = false;
   projectSubmitted: Boolean = false;
-  newRegSubmitted: Boolean = false; dbNewsubmitted: Boolean = false;
-  clientSelected: any; db_instance: any = null; regionSelected: any = null;
-  new_DB_Instance: String; regionDetails: any; project_name: any;
-  project_version: any; embed_version: any; db_version: any; sw_version: any;
-  signature_key: any; setClientName: any;
+  newRegSubmitted: Boolean = false; newCliSubmitted: Boolean = false; dbNewsubmitted: Boolean = false;
+  clientSelected: any = null; db_instance: any = null; regionSelected: any = null;
+  new_DB_Instance: String; project_name: any;
+  signature_key: any;
   createProject: Boolean = true; isNextVisible: Boolean = false;
-  regions: Array<any> = [];
+  regions: Array<any> = []; clients: Array<any> = [];
   dbinstance: Array<any> = [];
 
   NewDbInstance: Boolean = true;
-  ClientNameChoosen: String;
   dbPageInstance: [];
-  dbPageRegion: []; newRegName: String; finalItem = []; delItem = [];
+  dbPageRegion: []; newRegName: String; newCliName: String; finalItem = []; delItem = [];
 
   @ViewChild(FormGroupDirective, { static: false }) formGroupDirective: FormGroupDirective;
   @ViewChildren("checkboxes") checkboxes: QueryList<ElementRef>;
@@ -52,6 +49,10 @@ export class CreateNewClientComponent implements OnInit {
   ngOnInit(): void {
     /** List of Regions */
     let Region = ''; let Regionlogopath = ''; let Statusflag = 1; let Crudtype = 4;
+    this.mainService.createClient('', '', Statusflag, Crudtype)
+      .subscribe(value => {
+        this.clients = value.data;
+      });
     this.mainService.getAllRegions(Region, Regionlogopath, Statusflag, Crudtype)
       .subscribe(value => {
         this.regions = value.data;
@@ -77,33 +78,34 @@ export class CreateNewClientComponent implements OnInit {
     this.newregionForm = this.fb.group({
       newRegionName: ['', Validators.required]
     });
-
+    this.newclientForm = this.fb.group({
+      newClientName: ['', Validators.required]
+    });
     this.newdbInstanceForm = this.fb.group({
       newDBInstance: ['', Validators.required]
     });
 
-    this.createNewProjectForm = this.fb.group({
-      regionSelected: ['', Validators.required],
-      projectName: ['', Validators.required],
-      projectVersion: ['', Validators.required],
-      embeddedDBversion: ['', Validators.required],
-      dbversion: ['', Validators.required],
-      swversion: ['', Validators.required],
-      signatureKey: ['', Validators.required],
-      allowDownload: ['', null]
-    });
 
   }
 
-
+  get o() { return this.newclientForm.controls; }
   get n() { return this.newregionForm.controls; }
   get f() { return this.createClientForm.controls; }
   get g() { return this.newdbInstanceForm.controls; }
-  get p() { return this.createNewProjectForm.controls; }
 
+  /** Trigger the new Client Div Form if New Client button is Clicked */
+
+  newClient() {
+    this.NewClient = false;
+    this.NewRegion = true;
+    this.newCliName = '';
+    this.NewDbInstance = true;
+    this.isClientDivVisible = true;
+  }
   /** Trigger the new Region Div Form if New Region button is Clicked */
 
   newRegion() {
+    this.NewClient = true;
     this.NewRegion = false;
     this.newRegName = '';
     this.NewDbInstance = true;
@@ -114,6 +116,7 @@ export class CreateNewClientComponent implements OnInit {
 
   newDbInstances() {
     this.NewDbInstance = false;
+    this.NewClient = true;
     this.NewRegion = true;
     this.new_DB_Instance = '';
     this.isClientDivVisible = true;
@@ -122,6 +125,7 @@ export class CreateNewClientComponent implements OnInit {
   /** display of main create client page by hiding the new option div element */
 
   regBack() {
+    this.NewClient = true;
     this.NewRegion = true;
     this.NewDbInstance = true;
     this.isClientDivVisible = false;
@@ -130,6 +134,7 @@ export class CreateNewClientComponent implements OnInit {
   /** display of main create client page by hiding the new option div element */
 
   dbBack() {
+    this.NewClient = true;
     this.NewDbInstance = true;
     this.NewRegion = true;
     this.isClientDivVisible = false;
@@ -137,6 +142,42 @@ export class CreateNewClientComponent implements OnInit {
 
   close() {
     this.router.navigate(['/client-library']);
+  }
+
+  /** New Client Creation Submit Operation */
+  onNewClientSubmit() {
+
+    this.newCliSubmitted = true;
+    // stop here if form is invalid
+    if (this.newclientForm.invalid) {
+      return;
+    }
+    let StatusFlag = '1';
+    let Crudtype = '1';
+    this.mainService.createClient(this.o.newClientName.value, '', StatusFlag, Crudtype)
+      .pipe()
+      .subscribe(value => {
+        if (value.data == '0') {
+          this.toastr.warning(value.message, '');
+          this.NewClient = true;
+        }
+        if (value.statusCode == '200' && value.data != '' && value.data != '0') {
+          this.NewClient = true;
+          this.toastr.success(value.message, '');
+        }
+
+        let Statusflag = 1; let Crudtype = 4;
+        this.mainService.createClient('', '', Statusflag, Crudtype)
+          .subscribe(value => {
+            this.clients = [];
+            for (var i = 0; i < value.data.length; i++) {
+              this.clients.push(value.data[i]);
+            }
+
+          });
+
+        this.isClientDivVisible = false;
+      });
   }
 
   /** New Region Creation Submit Operation */
@@ -148,98 +189,76 @@ export class CreateNewClientComponent implements OnInit {
     if (this.newregionForm.invalid) {
       return;
     }
-    else if (this.newRegName.trim() === '') {
-      this.toastr.error('', 'Please enter Region');
-      this.newRegName = '';
-    }
-    else {
-      let RegionLogoPath = '';
-      let StatusFlag = '1';
-      let Crudtype = '1';
-      this.mainService.createNewRegion(this.n.newRegionName.value, RegionLogoPath, StatusFlag, Crudtype)
-        .pipe()
-        .subscribe(value => {
-          if (value.data == '0') {
-            this.toastr.warning(value.message, '');
-            this.NewRegion = true;
-          }
-          if (value.statusCode == '200' && value.data != '' && value.data != '0') {
-            this.NewRegion = true;
-            this.toastr.success(value.message, '');
-          }
+    let RegionLogoPath = '';
+    let StatusFlag = '1';
+    let Crudtype = '1';
+    this.mainService.createNewRegion(this.n.newRegionName.value, RegionLogoPath, StatusFlag, Crudtype)
+      .pipe()
+      .subscribe(value => {
+        if (value.data == '0') {
+          this.toastr.warning(value.message, '');
+          this.NewRegion = true;
+        }
+        if (value.statusCode == '200' && value.data != '' && value.data != '0') {
+          this.NewRegion = true;
+          this.toastr.success(value.message, '');
+        }
 
-          let Region = ''; let Regionlogopath = ''; let Statusflag = 1; let Crudtype = 4;
-          this.mainService.getAllRegions(Region, Regionlogopath, Statusflag, Crudtype)
-            .subscribe(value => {
-              this.regions = [];
-              for (var i = 0; i < value.data.length; i++) {
-                this.regions.push(value.data[i]);
-              }
+        let Region = ''; let Regionlogopath = ''; let Statusflag = 1; let Crudtype = 4;
+        this.mainService.getAllRegions(Region, Regionlogopath, Statusflag, Crudtype)
+          .subscribe(value => {
+            this.regions = [];
+            for (var i = 0; i < value.data.length; i++) {
+              this.regions.push(value.data[i]);
+            }
 
-            });
+          });
 
-          this.isClientDivVisible = false;
-        });
-    }
+        this.isClientDivVisible = false;
+      });
   }
 
+  keyPressHandler(e) {
+    if (e.keyCode === 32 && !e.target.value.length) {
+      return false;
+    }
+  }
   /** Create Client Submit Operation */
 
   oncreateClientSubmit() {
     this.submitted = true;
-
     // stop here if form is invalid
     if (this.createClientForm.invalid) {
       return;
     }
-    else if (this.clientSelected.trim() === '') {
-      this.toastr.error('', 'Please enter Client');
-      this.clientSelected = '';
+
+    let allowDownload;
+    let checkStatus = $('#allow_download').prop('checked');
+    if (checkStatus == true) {
+      allowDownload = 1;
+    } else {
+      allowDownload = 0;
     }
-    else if (this.project_name.trim() === '') {
-      this.toastr.error('', 'Please enter Projectname');
-      this.project_name = '';
-    }
-    else if (this.signature_key.trim() === '') {
-      this.toastr.error('', 'Please enter Signature Key');
-      this.signature_key = '';
-    }
-    else {
-      let ConnectionString = "";
-      let Statusflag = 1; let Crudtype = 1;
-      let allowDownload;
-      let checkStatus = $('#allow_download').prop('checked');
-      if (checkStatus == true) {
-        allowDownload = 1;
-      } else {
-        allowDownload = 0;
-      }
-      this.mainService.createClient(this.clientSelected, "", Statusflag, Crudtype)
-        .pipe()
-        .subscribe(value => {
-          console.log(value);
-          this.mainService.createNewProjectDef(this.db_instance, this.clientSelected, this.regionSelected, this.project_name, this.signature_key, this.db_instance, 1, 1, allowDownload)
-            .subscribe(value => {
-              console.log(value.data);
-              if (value.data == "1") {
-                this.toastr.success('Project Created Successfully', '');
-                this.isNextVisible = true;
-                // this.formGroupDirective.resetForm();
-                this.checkboxes.forEach((element) => {
-                  element.nativeElement.checked = false;
-                });
-                this.submitted = false;
-              } else {
-                this.toastr.warning(value.message, '');
-                this.submitted = false;
-              }
-              this.mainService.CECEDID_NewProject(1, this.project_name, this.signature_key, this.db_instance, 1, null)
-                .then(value => {
-                  this.formGroupDirective.resetForm();
-                })
-            });
-        });
-    }
+    this.mainService.createNewProjectDef(this.db_instance, this.clientSelected, this.regionSelected, this.project_name, this.signature_key, this.db_instance, 1, 1, allowDownload)
+      .subscribe(value => {
+        console.log(value.data);
+        if (value.data == "1") {
+          this.toastr.success('Project Created Successfully', '');
+          this.isNextVisible = true;
+          // this.formGroupDirective.resetForm();
+          this.checkboxes.forEach((element) => {
+            element.nativeElement.checked = false;
+          });
+          this.submitted = false;
+        } else {
+          this.toastr.warning(value.message, '');
+          this.submitted = false;
+        }
+        this.mainService.CECEDID_NewProject(1, this.project_name, this.signature_key, this.db_instance, 1, null)
+          .then(value => {
+            this.formGroupDirective.resetForm();
+          })
+      });
   }
 
   /** New DB Instance Creation Submit Operation */
@@ -251,35 +270,29 @@ export class CreateNewClientComponent implements OnInit {
     if (this.newdbInstanceForm.invalid) {
       return;
     }
-    else if (this.new_DB_Instance.trim() === '') {
-      this.toastr.error('', 'Please enter DBInstance');
-      this.new_DB_Instance = '';
-    }
-    else {
-      let Dbinstance = this.new_DB_Instance.trim();
-      let Statusflag = 1; let Crudtype = 1;
-      let ConnectionString = "";
-      this.mainService.getAllDbInstance(Crudtype, Dbinstance, ConnectionString, Statusflag)
-        .subscribe(value => {
+    let Dbinstance = this.new_DB_Instance.trim();
+    let Statusflag = 1; let Crudtype = 1;
+    let ConnectionString = "";
+    this.mainService.getAllDbInstance(Crudtype, Dbinstance, ConnectionString, Statusflag)
+      .subscribe(value => {
 
-          if (value.data == '0') {
-            this.toastr.warning(value.message, '');
-          }
-          if (value.statusCode == '200' && value.data != '' && value.data != '0') {
-            this.toastr.success(value.message, '');
-            let Dbinstance = '';
-            let ConnectionString = '';
-            let crudType = 4;
-            this.mainService.getAllDbInstance(crudType, Dbinstance, ConnectionString, Statusflag)
-              .subscribe(value => {
-                this.dbinstance = [];
-                this.dbinstance = value.data;
-              });
-          }
-          this.NewDbInstance = true;
-          this.isClientDivVisible = false;
-        });
-    }
+        if (value.data == '0') {
+          this.toastr.warning(value.message, '');
+        }
+        if (value.statusCode == '200' && value.data != '' && value.data != '0') {
+          this.toastr.success(value.message, '');
+          let Dbinstance = '';
+          let ConnectionString = '';
+          let crudType = 4;
+          this.mainService.getAllDbInstance(crudType, Dbinstance, ConnectionString, Statusflag)
+            .subscribe(value => {
+              this.dbinstance = [];
+              this.dbinstance = value.data;
+            });
+        }
+        this.NewDbInstance = true;
+        this.isClientDivVisible = false;
+      });
   }
 
 }

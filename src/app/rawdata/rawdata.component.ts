@@ -886,7 +886,7 @@ export class RawdataComponent implements OnInit {
       { field: "Remarks", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "remarksviewCellRenderer" },
       { field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
       { field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
-      { field: "Action", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
+      { headerName: "Action", field: "Status", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
     ];
     this.rowData = this.rawdatacapture;
     if (this.rowData.length < 8) {

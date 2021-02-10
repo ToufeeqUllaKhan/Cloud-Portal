@@ -48,13 +48,14 @@
           </div>
           <div class="row">
             <div class="col-sm-4">
+              <label class="colorBlue">Direct to Staging<span class="color-red">*</span></label>
               <input id="file-upload" class="form-control" type="file" accept=".xls,.xlsx,.csv"
                 (change)="onFileChange($event)" style="overflow: hidden;" />
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-4" style="margin-top: auto">
               <button class="btn btn-primary" id="transfer" (click)=directtostaging()>Transfer to Staging</button>
             </div>
-            <div style="width:auto;margin-left: auto;">
+            <div style="width:auto;margin-left: auto;margin-top: auto">
               <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
                   aria-hidden="true"></i></button>
             </div>&nbsp;&nbsp;
@@ -70,14 +71,14 @@
               <option value=null>All</option>
               <option *ngFor="let list of filter_Subdevice" value={{list}}>{{list}}</option>
             </select>&nbsp;&nbsp; -->
-            <select [(ngModel)]='status' class="form form-control selectDrop" (change)="onchangestatus()"
-              (ngModelChange)="onModelChange($event)" style="width:auto;">
+            <!-- <select [(ngModel)]='status' class="form form-control selectDrop" (change)="onchangestatus()"
+              (ngModelChange)="onModelChange($event)" style="width:auto;margin-top: auto">
               <option [value]=null hidden>Status </option>
               <option value=null>All</option>
               <option value=1>Imported from Raw</option>
               <option value=2>Imported from Excel</option>
-            </select>&nbsp;&nbsp;
-            <button class="btn btn-primary float-right newBtn" data-toggle="modal" data-target="#StagingModal_1">
+            </select>&nbsp;&nbsp; -->
+            <button class="btn btn-primary float-right newBtn" data-toggle="modal" data-target="#StagingModal_1" style="margin-top: auto">
               <i class="fa fa-plus" aria-hidden="true"></i>
               New
             </button>

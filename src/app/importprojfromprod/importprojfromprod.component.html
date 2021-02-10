@@ -40,11 +40,12 @@
                   <div class="col-md-12">
                     <div class="form-group form-inline">
                       <label class="col-form-label col-sm-4">DB Instance<span class="color-red">*</span></label>
-                      <input type="text" [(ngModel)]="new_DB_Instance" formControlName="newDBInstance"
-                        class="form-control form-control-line col-sm-8"
-                        [ngClass]="{ 'is-invalid': dbNewsubmitted && g.newDBInstance.errors }"/>
+                      <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="new_DB_Instance"
+                        formControlName="newDBInstance" class="form-control form-control-line col-sm-8"
+                        [ngClass]="{ 'is-invalid': dbNewsubmitted && g.newDBInstance.errors }" />
                       <div *ngIf="dbNewsubmitted && g.newDBInstance.errors" class="invalid-feedback">
-                        <div *ngIf="g.newDBInstance.errors.required" style="font-size: 12pt;text-align: center;float: right;">
+                        <div *ngIf="g.newDBInstance.errors.required"
+                          style="font-size: 12pt;text-align: center;float: right;">
                           DB Instance is required</div>
                       </div>
                     </div>
@@ -65,7 +66,7 @@
       </div>
     </aw-wizard-step>
     <aw-wizard-step stepTitle="Create an Instance in Cloud service" awOptionalStep>
-        <div class="row">
+      <div class="row">
         <div class="card" style="width: 18rem;">
           <div class="card-body">
             <p class="card-text">Create an Instance in Cloud service with same instance name.</p>
@@ -89,11 +90,17 @@
                       <div class="col-md-6 form-material form-custom">
                         <div class="form-group">
                           <label class="col-form-label">Client Name<span class="color-red">*</span></label>
-                          <input type="text" formControlName="clientName" [(ngModel)]="clientSelected"
-                            class="form-control form-control-line"
+                          <!-- <span (click)="newClient()" class="float-right oval" title="Add Client">
+                            <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                          </span> -->
+                          <select [(ngModel)]='clientSelected' formControlName="clientName" class="form-control"
                             [ngClass]="{ 'is-invalid': submitted && f.clientName.errors }">
+                            <option [value]=null hidden>Select</option>
+                            <option *ngFor="let list of clients" value={{list.name}}>{{list.name}}</option>
+                          </select>
                           <div *ngIf="submitted && f.clientName.errors" class="invalid-feedback">
-                            <div *ngIf="f.clientName.errors.required" style="font-size: 12pt;text-align: center;float: right;">Client Name is required</div>
+                            <div *ngIf="f.clientName.errors.required"
+                              style="font-size: 12pt;text-align: center;float: right;">Client Name is required</div>
                           </div>
                         </div>
                       </div>
@@ -105,11 +112,12 @@
                           </span>
                           <select [(ngModel)]='regionSelected' formControlName="regionName" class="form-control"
                             [ngClass]="{ 'is-invalid': submitted && f.regionName.errors }">
-                            <option [value]=null>Select</option>
+                            <option [value]=null hidden>Select</option>
                             <option *ngFor="let list of regions" value={{list.name}}>{{list.name}}</option>
                           </select>
                           <div *ngIf="submitted && f.regionName.errors" class="invalid-feedback">
-                            <div *ngIf="f.regionName.errors.required" style="font-size: 12pt;text-align: center;float: right;">Region is required</div>
+                            <div *ngIf="f.regionName.errors.required"
+                              style="font-size: 12pt;text-align: center;float: right;">Region is required</div>
                           </div>
                         </div>
                       </div>
@@ -117,26 +125,30 @@
                         <div class="form-group">
                           <label class="col-form-label">DB Instance<span class="color-red">*</span></label>
                           <select [(ngModel)]='db_instance' formControlName="dbInstance" class="form-control"
-                            [ngClass]="{ 'is-invalid': submitted && f.dbInstance.errors }" (change)="onchangedbinstance()">
-                            <option [value]=null>Select</option>
+                            [ngClass]="{ 'is-invalid': submitted && f.dbInstance.errors }"
+                            (change)="onchangedbinstance()">
+                            <option [value]=null hidden>Select</option>
                             <option *ngFor="let list of dbinstance" value={{list.dbInstance}}>{{list.dbInstance}}
                             </option>
                           </select>
                           <div *ngIf="submitted && f.dbInstance.errors" class="invalid-feedback">
-                            <div *ngIf="f.dbInstance.errors.required" style="font-size: 12pt;text-align: center;float: right;">DB Instance is required</div>
+                            <div *ngIf="f.dbInstance.errors.required"
+                              style="font-size: 12pt;text-align: center;float: right;">DB Instance is required</div>
                           </div>
                         </div>
                       </div>
                       <div class="col-md-6 form-material form-custom">
                         <div class="form-group">
                           <label class="col-form-label">Project Name<span class="color-red">*</span></label>
-                          <select [(ngModel)]='project_name' formControlName="projectName" class="form-control" 
-                          [ngClass]="{ 'is-invalid': submitted && f.projectName.errors }" (change)="onchangeproject()">
-                            <option [value]=null>Select</option>
+                          <select [(ngModel)]='project_name' formControlName="projectName" class="form-control"
+                            [ngClass]="{ 'is-invalid': submitted && f.projectName.errors }"
+                            (change)="onchangeproject()">
+                            <option [value]=null hidden>Select</option>
                             <option *ngFor="let list of projectnames" value={{list}}>{{list}}</option>
                           </select>
                           <div *ngIf="submitted && f.projectName.errors" class="invalid-feedback">
-                            <div *ngIf="f.projectName.errors.required" style="font-size: 12pt;text-align: center;float: right;">Project Name is required</div>
+                            <div *ngIf="f.projectName.errors.required"
+                              style="font-size: 12pt;text-align: center;float: right;">Project Name is required</div>
                           </div>
                         </div>
                       </div>
@@ -167,11 +179,12 @@
                   <div class="col-md-12">
                     <div class="form-group form-inline">
                       <label class="col-form-label col-sm-4">Region Name</label>
-                      <input type="text" [(ngModel)]="newRegName" formControlName="newRegionName"
-                        class="form-control form-control-line col-sm-8"
+                      <input type="text" (keypress)="keyPressHandler($event)" [(ngModel)]="newRegName"
+                        formControlName="newRegionName" class="form-control form-control-line col-sm-8"
                         [ngClass]="{ 'is-invalid': newRegSubmitted && n.newRegionName.errors }" />
                       <div *ngIf="newRegSubmitted && n.newRegionName.errors" class="invalid-feedback">
-                        <div *ngIf="n.newRegionName.errors.required" style="font-size: 12pt;text-align: center;float: right;">
+                        <div *ngIf="n.newRegionName.errors.required"
+                          style="font-size: 12pt;text-align: center;float: right;">
                           Region Name is required</div>
                       </div>
                     </div>
@@ -190,6 +203,9 @@
       </div>
     </aw-wizard-step>
   </aw-wizard>
-  
+
 </div>
-<ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "ball-spin-clockwise-fade-rotating" [fullScreen] = "true"><p style="color: white" > Loading... </p></ngx-spinner>
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
+  [fullScreen]="true">
+  <p style="color: white"> Loading... </p>
+</ngx-spinner>

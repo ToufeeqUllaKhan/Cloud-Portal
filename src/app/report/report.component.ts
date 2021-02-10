@@ -446,7 +446,7 @@ export class ReportComponent implements OnInit {
 
   /** Project Selection */
   async onProjectSelect(e) {
-    if (this.projectNames.length > 1) {
+    if (this.projectNames.length > 0) {
       this.isSearchDataVisible = true;
       this.device_list = [];
       this.versions = [];
@@ -490,7 +490,7 @@ export class ReportComponent implements OnInit {
       $('.col-lg-12').css('display', 'none');
       $('#single_download').hide();
       $('#all_download').hide();
-      this.toastr.warning('Please Select Single Project to proceed further');
+      this.toastr.warning('Please Select Project to proceed further');
     }
   }
 
@@ -517,7 +517,7 @@ export class ReportComponent implements OnInit {
       $('#all_download').hide();
       this.toastr.warning('Please Select the Project to Activate the fields', '');
     }
-    if (this.projectNames.length > 0) {
+    else {
       this.noData = false;
       $('.hideData').css('display', 'block');
       $('.tabView').css('display', 'block');
@@ -868,6 +868,9 @@ export class ReportComponent implements OnInit {
       this.selectDatatype();
       this.SearchHistory();
       this.refreshScreen();
+    }
+    if (this.checked) {
+      $('input[type="checkbox"]:checked').trigger('click');
     }
   }
 
@@ -1269,6 +1272,7 @@ export class ReportComponent implements OnInit {
 
   check(e) {
     let check = e.target.checked;
+    this.checked=check;
     if (check == true) {
       this.rowData = this.datasource.filter(u => !u.BoxId.startsWith('Portal_'))
     }

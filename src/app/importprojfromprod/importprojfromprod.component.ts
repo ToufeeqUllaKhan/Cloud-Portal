@@ -18,13 +18,12 @@ export class ImportprojfromprodComponent implements OnInit {
   dbNewsubmitted: Boolean = false; newRegSubmitted: boolean = false; projectdetails: any = [];
   new_DB_Instance: any;
   dbinstance: any[];
-  regions: any[];
+  regions: any[]; clients: any = [];
   isClientDivVisible: boolean = false; NewRegion: boolean = true;
   submitted: boolean = false;
   newRegName: string;
-  clientSelected: any; db_instance: any = null; regionSelected: any = null;
+  clientSelected: any = null; db_instance: any = null; regionSelected: any = null;
   project_name: any = null;
-  signature_key: any;
   isNextVisible: boolean = false; projectnames: any[];
 
   @ViewChild(FormGroupDirective, { static: false }) formGroupDirective: FormGroupDirective;
@@ -36,6 +35,10 @@ export class ImportprojfromprodComponent implements OnInit {
   ngOnInit(): void {
     /** List of Regions */
     let Region = ''; let Regionlogopath = ''; let Statusflag = 1; let Crudtype = 4;
+    this.mainService.createClient('', '', Statusflag, Crudtype)
+      .subscribe(value => {
+        this.clients = value.data;
+      });
     this.mainService.getAllRegions(Region, Regionlogopath, Statusflag, Crudtype)
       .subscribe(value => {
         this.regions = value.data;
@@ -108,39 +111,33 @@ export class ImportprojfromprodComponent implements OnInit {
     if (this.newregionForm.invalid) {
       return;
     }
-    else if (this.newRegName.trim() === '') {
-      this.toastr.error('', 'Please enter the Region');
-      this.newRegName = '';
-    }
-    else {
-      let RegionLogoPath = '';
-      let StatusFlag = '1';
-      let Crudtype = '1';
-      this.mainService.createNewRegion(this.newRegName, RegionLogoPath, StatusFlag, Crudtype)
-        .pipe()
-        .subscribe(value => {
-          if (value.data == '0') {
-            this.toastr.warning(value.message, '');
-            this.NewRegion = true;
-          }
-          if (value.statusCode == '200' && value.data != '' && value.data != '0') {
-            this.NewRegion = true;
-            this.toastr.success(value.message, '');
-          }
+    let RegionLogoPath = '';
+    let StatusFlag = '1';
+    let Crudtype = '1';
+    this.mainService.createNewRegion(this.newRegName, RegionLogoPath, StatusFlag, Crudtype)
+      .pipe()
+      .subscribe(value => {
+        if (value.data == '0') {
+          this.toastr.warning(value.message, '');
+          this.NewRegion = true;
+        }
+        if (value.statusCode == '200' && value.data != '' && value.data != '0') {
+          this.NewRegion = true;
+          this.toastr.success(value.message, '');
+        }
 
-          let Region = ''; let Regionlogopath = ''; let Statusflag = 1; let Crudtype = 4;
-          this.mainService.getAllRegions(Region, Regionlogopath, Statusflag, Crudtype)
-            .subscribe(value => {
-              this.regions = [];
-              for (var i = 0; i < value.data.length; i++) {
-                this.regions.push(value.data[i]);
-              }
+        let Region = ''; let Regionlogopath = ''; let Statusflag = 1; let Crudtype = 4;
+        this.mainService.getAllRegions(Region, Regionlogopath, Statusflag, Crudtype)
+          .subscribe(value => {
+            this.regions = [];
+            for (var i = 0; i < value.data.length; i++) {
+              this.regions.push(value.data[i]);
+            }
 
-            });
+          });
 
-          this.isClientDivVisible = false;
-        });
-    }
+        this.isClientDivVisible = false;
+      });
   }
 
   /** Create Client Submit Operation */
@@ -153,34 +150,31 @@ export class ImportprojfromprodComponent implements OnInit {
       return;
     }
     for (let i = 0; i < this.filterproject.length; i++) {
-      let Dbname = this.db_instance; let Client = this.clientSelected; let Region = this.regionSelected; let Dbpath = this.db_instance; 
-      let Projectname = this.filterproject[i]['projectName']; let Signaturekey = this.filterproject[i]['signatureKey']; 
-      let Embeddeddbversion = this.filterproject[i]['embeddedDBVersion']; let Dbversion = this.filterproject[i]['dbVersion']; 
-      let Statusflag = 2; let Flagtype = 6; let Projectversion = this.filterproject[i]['projectVersion']; 
-      let Swversion = this.filterproject[i]['swVersion'];let Allowdownload = this.filterproject[i]['allowDownloads'];
-      let bin_file = this.filterproject[i]['binFile'];let Binfilechecksum = this.filterproject[i]['binChecksum']; 
+      let Dbname = this.db_instance; let Client = this.clientSelected; let Region = this.regionSelected; let Dbpath = this.db_instance;
+      let Projectname = this.filterproject[i]['projectName']; let Signaturekey = this.filterproject[i]['signatureKey'];
+      let Embeddeddbversion = this.filterproject[i]['embeddedDBVersion']; let Dbversion = this.filterproject[i]['dbVersion'];
+      let Statusflag = 2; let Flagtype = 6; let Projectversion = this.filterproject[i]['projectVersion'];
+      let Swversion = this.filterproject[i]['swVersion']; let Allowdownload = this.filterproject[i]['allowDownloads'];
+      let bin_file = this.filterproject[i]['binFile']; let Binfilechecksum = this.filterproject[i]['binChecksum'];
       let zip_file = this.filterproject[i]['zipFile']; let Zipfilechecksum = this.filterproject[i]['zipChecksum'];
-      this.mainService.createClient(Client, "", 1, 1).pipe()
-      .subscribe(value => {
-        this.mainService.CreateNewProjectWithVersion(Dbname, Client, Region, Projectname, Signaturekey, Dbpath, Embeddeddbversion, Dbversion, Statusflag, Flagtype,
-          Projectversion, Swversion, Allowdownload, bin_file, Binfilechecksum, zip_file, Zipfilechecksum)
-          .subscribe(value => {
-            if (value.statusCode == "200" || value.statusCode == 200) {
-              this.toastr.success('Project created or updated Successfully', '');
-              this.isNextVisible = true;
-              this.spinnerService.show();
-              this.clientSelected=null;
-              this.regionSelected=null;
-              this.db_instance=null;
-              this.projectnames=null;
-              this.submitted = false;
-              this.spinnerService.hide();
-            } else {
-              this.toastr.warning(value.message, '');
-              this.submitted = false;
-            }
-          });
-      })
+      this.mainService.CreateNewProjectWithVersion(Dbname, Client, Region, Projectname, Signaturekey, Dbpath, Embeddeddbversion, Dbversion, Statusflag, Flagtype,
+        Projectversion, Swversion, Allowdownload, bin_file, Binfilechecksum, zip_file, Zipfilechecksum)
+        .subscribe(value => {
+          if (value.statusCode == "200" || value.statusCode == 200) {
+            this.toastr.success('Project created or updated Successfully', '');
+            this.isNextVisible = true;
+            this.spinnerService.show();
+            this.clientSelected = null;
+            this.regionSelected = null;
+            this.db_instance = null;
+            this.projectnames = null;
+            this.submitted = false;
+            this.spinnerService.hide();
+          } else {
+            this.toastr.warning(value.message, '');
+            this.submitted = false;
+          }
+        });
     }
   }
 
@@ -231,17 +225,17 @@ export class ImportprojfromprodComponent implements OnInit {
     let projectnames = [];
     this.mainService.getAllprojectdetails(dbname)
       .subscribe(value => {
-        if(value.statusCode==='200' ||value.statusCode===200 ){
+        if (value.statusCode === '200' || value.statusCode === 200) {
           this.projectdetails = value.data;
           for (let i = 0; i < value.data.length; i++) {
             projectnames.push(value.data[i]['projectName']);
           }
           this.projectnames = projectnames.filter((v, i, a) => a.indexOf(v) === i);
         }
-        else{
-          this.projectnames=null;
+        else {
+          this.projectnames = null;
         }
-        
+
       });
   }
 
@@ -249,5 +243,11 @@ export class ImportprojfromprodComponent implements OnInit {
     let filterProject: any = this.projectdetails.filter(u =>
       u.projectName == this.project_name);
     this.filterproject = filterProject;
+  }
+
+  keyPressHandler(e) {
+    if (e.keyCode === 32 && !e.target.value.length) {
+      return false;
+    }
   }
 }

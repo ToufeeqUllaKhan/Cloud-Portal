@@ -22,25 +22,31 @@ export class BtnCellRenderer implements ICellRendererAngularComp {
   showbutton: boolean = true; status: any;
   public params: any;
   agInit(params: any): void {
-    this.status = localStorage.getItem('StagingStatus');
-    if (this.status === 'null' || this.status === null) {
-      this.showbutton = false;
-    }
-    else if (this.status === '1' || this.status === 1 || this.status === '2' || this.status === 2) {
-      this.showbutton = true;
-    }
-    else {
-      this.showbutton = false;
-    }
+    // this.status = localStorage.getItem('StagingStatus');
+    // if (this.status === 'null' || this.status === null) {
+    //   this.showbutton = false;
+    // }
+    // else if (this.status === '1' || this.status === 1 || this.status === '2' || this.status === 2) {
+    //   this.showbutton = true;
+    // }
+    // else {
+    //   this.showbutton = false;
+    // }
 
     this.params = params;
   }
 
   invokeParentMethod() {
-    if (this.status === '1' || this.status === 1) {
+    // if (this.status === '1' || this.status === 1) {
+    //   this.params.context.componentParent.methodFromParent_edituid(this.params.node.data);
+    // }
+    // if (this.status === '2' || this.status === 2) {
+    //   this.params.context.componentParent.methodFromParent_edit(this.params.node.data);
+    // }
+    if (this.params.value === 'Imported from Raw') {
       this.params.context.componentParent.methodFromParent_edituid(this.params.node.data);
     }
-    if (this.status === '2' || this.status === 2) {
+    if (this.params.value === 'Imported from Excel') {
       this.params.context.componentParent.methodFromParent_edit(this.params.node.data);
     }
   }

@@ -62,10 +62,10 @@ export class AppComponent {
               this.mainService.sidebarLists()
                 .subscribe(value => {
                   if (value.data.length > 0) {
-                    this.mainMenu1 = value.data[0]['mainmenu'];
-                    this.datas = value.data[0]['submenu'];
-                    this.mainMenu2 = value.data[1]['mainmenu'];
-                    this.searchApi = value.data[1]['submenu'];
+                    this.mainMenu1 = value.data[1]['mainmenu'];
+                    this.datas = value.data[1]['submenu'];
+                    this.mainMenu2 = value.data[0]['mainmenu'];
+                    this.searchApi = value.data[0]['submenu'];
                     this.mainMenu3 = value.data[2]['mainmenu'];
                     this.searchReports = value.data[2]['submenu'];
                     if (mainModules.indexOf('Cloud API Search Tester') > -1) {
@@ -486,6 +486,10 @@ export class AppComponent {
       .then(() => {
         location.reload();
       });
+  }
+
+  report() {
+    this.router.navigate(['/reports-view']);
   }
 
   @HostListener("window:onbeforeunload", ["$event"])

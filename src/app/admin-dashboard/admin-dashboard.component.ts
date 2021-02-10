@@ -73,6 +73,6 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   cec_edidHistory() {
-    this.router.navigate(['/prod_CEC-EDID_History']);
+    this.router.navigate(['/Data Update History']);
   }
 }

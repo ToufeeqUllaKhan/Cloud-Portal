@@ -22,15 +22,14 @@ export class BtnCellRenderer implements ICellRendererAngularComp {
   showbutton: boolean = true; status: any;
   public params: any;
   agInit(params: any): void {
-    this.status = localStorage.getItem('RawStatus');
-    if (this.status === 'null' || this.status === null || this.status === '2') {
-      this.showbutton = false;
-    }
-    else {
+    this.params = params;
+    if (this.params.value === 'Not Exported to Staging') {
       this.showbutton = true;
     }
+    else if (this.params.value === 'Exported to Staging') {
+      this.showbutton = false;
+    }
 
-    this.params = params;
   }
 
   invokeParentMethod() {

@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MainService } from '../services/main-service';
 import { Title } from '@angular/platform-browser';
-import { DataTableDirective } from 'angular-datatables';
 import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Observable, Subject, merge } from 'rxjs';
@@ -11,16 +10,13 @@ declare var $: any;
 import 'datatables.net';
 import { Data } from '../model/data';
 import { User } from '../model/user';
-import { UpperCasePipe } from '@angular/common';
 import { NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
-import { environment } from '../../environments/environment.prod';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham.css";
 import { BtnCellRenderer } from "./btn-cell-renderer.component";
 import { CodesetDownloadCellRenderer } from "./codesetdownload-cell-renderer.component";
 import { EdidviewCellRenderer } from "./edidview-cell-renderer.component";
-declare let alasql;
 var BrandListData = [];
 var lodash = require('lodash');
 
@@ -36,7 +32,7 @@ export class BrandLibraryComponent implements OnInit {
   saveEditCodesets: FormGroup;
   saveUpdateBrandInfoCec: FormGroup; saveUpdateBrandInfoEdid: FormGroup;
   saveUpdateComponentData: FormGroup; saveUpdateCrossReferenceBrands: FormGroup;
-  saveUpdateCecEdidData: FormGroup; saveUpdateRegionData: FormGroup;
+  saveUpdateCecEdidData: FormGroup; saveEditCecEdidData: FormGroup; saveUpdateRegionData: FormGroup;
   saveEditBrand: FormGroup; saveEditBrandInfoCec: FormGroup; saveEditBrandInfoEdid: FormGroup;
   saveEditComponentData: FormGroup; saveEditCrossReferenceBrands: FormGroup; saveEditRegionData: FormGroup;
   saveEditCeconlyData: FormGroup; saveEditEdidonlyData: FormGroup;
@@ -69,10 +65,10 @@ export class BrandLibraryComponent implements OnInit {
   isCecOnly: Boolean = false; isEdidOnly: Boolean = false; isedidOnly: Boolean = true;
   brand_name: any; brand_code: any; codesetFileName: any; device_data: any = null; cec_brandName: any; cec_brandcode: any = null; cec_vendorId: any;
   edid_device: any = null; edid_brandName: any = null; edid_brandcode: any = null; edid_brand: any; component_device: any = null; component_brandName: any = null;
-  component_model: any; component_modelx: any; component_country: any; cr_device: any = null; cr_brandName: any = null; cr_codeset: any = null; cs_rank: any;
+  component_model: any; component_modelx: any; component_country: any = null; cr_device: any = null; cr_brandName: any = null; cr_codeset: any = null; cs_rank: any;
   codesetFile: any; codesetDataValue: any; codesetChecksum: any; component_codeset: any = null; codeSetsData = [];
-  tabValue: any; noData: Boolean = false; ce_device: any = null; ce_region: any; ce_country: any; ce_model: any; ce_vendorId: any;
-  ce_osd_string: any; ce_edid: any; ce_codeset: any = null; cec_enabled: any = null; cec_present: any = null;
+  tabValue: any; noData: Boolean = false; ce_device: any = null; ce_region: any = null; ce_country: any = null; ce_model: any; ce_vendorId: any;
+  ce_osd: any; ce_edid: any; ce_codeset: any = null; cec_enabled: any = null; cec_present: any = null;
   brandTable: Boolean = false; CecTable: Boolean = false; EdidTable: Boolean = false;
   CodesetTable: Boolean = false; CrossRefTable: Boolean = false; ComponentTable: Boolean = false;
   EdidData: any; vendorError: Boolean = false; edidError: Boolean = false;
@@ -93,7 +89,7 @@ export class BrandLibraryComponent implements OnInit {
   CeconlyrecordId: any; editedEdidonlyDevice: any; editedEdidonlyBrandname: any; editedEdidonlyCountry: any;
   editedEdidonlyModel: any; editedEdidonly_EDID128: any; editedEdidonly_EDIDBrand: any; editedEdidonlyCodeset: any;
   EdidonlyrecordId: any; editedEdidonlyregion: any; editedCeconlyregion: any; regionlist = []; countrylist = [];
-  ipAddress: any; role: any; Actions: boolean = false; parameters: any;
+  ipAddress: any; role: any; Actions: boolean = false; parameters: any; editcountrylist = [];
   @ViewChild('instance', { static: true }) instance: NgbTypeahead;
 
   focus$ = new Subject<string>();
@@ -119,6 +115,18 @@ export class BrandLibraryComponent implements OnInit {
   public context;
   searchValue: any;
   module: string;
+  editedceDevice: any;
+  editedceBrand: any;
+  editedceRegion: any = null;
+  editedceCountry: any = null;
+  editedceModel: any;
+  editedceVendorId: any;
+  editedceOSD: any;
+  editedceEdid: any;
+  editedceCodeset: any = null;
+  UpdateosdHeader: any;
+  EditosdHeader: any; osdstring: any; osdhex: any
+  checked: boolean;
 
 
   constructor(private fb: FormBuilder, private router: Router, private mainService: MainService, private titleService: Title, private toastr: ToastrService, private spinnerService: NgxSpinnerService, private data: Data) {
@@ -402,6 +410,8 @@ export class BrandLibraryComponent implements OnInit {
                           let parameter = [dbName, projectName, dbVersion, 1, temp, search, order, dataType]
                           this.parameters = parameter;
                           this.viewdata();
+                          this.getDropdownValues();
+                          this.getCodeSets();
                         })
                     });
 
@@ -409,6 +419,8 @@ export class BrandLibraryComponent implements OnInit {
                 if (this.SelectedBrandName != '') {
                   this.getDropdownValues();
                   this.getCodeSets();
+                  $('#osd_string').click();
+                  $('#String').click();
                   $("select").prop("disabled", false);
                   $("a").css('pointer-events', 'auto');
                 } else {
@@ -505,11 +517,22 @@ export class BrandLibraryComponent implements OnInit {
       ceCountry: ['', Validators.required],
       ceModel: ['', Validators.required],
       ceVendorId: ['', null],
-      ceOSDString: ['', null],
+      ceOSD: ['', null],
       ceEdid: ['', null],
       ceCodeset: ['', Validators.required],
       cecPresent: ['', Validators.required],
       cecEnabled: ['', Validators.required]
+    });
+
+    this.saveEditCecEdidData = this.fb.group({
+      EditceBrand: ['', Validators.required],
+      EditceRegion: ['', Validators.required],
+      EditceCountry: ['', Validators.required],
+      EditceModel: ['', Validators.required],
+      EditceVendorId: ['', null],
+      EditceOSD: ['', null],
+      EditceEdid: ['', null],
+      EditceCodeset: ['', Validators.required]
     });
 
     this.saveUpdateRegionData = this.fb.group({
@@ -758,6 +781,55 @@ export class BrandLibraryComponent implements OnInit {
     this.viewEdidOnlyData(str, str1, str2, str3, str4, str5, str6, str7, str8);
   };
 
+  cecedidDataView(ret) {
+    var str = ret[0];
+    var str1 = ret[1];
+    var str2 = ret[2];
+    var str3 = ret[3];
+    var str4 = ret[4];
+    var str5 = ret[5];
+    var str6 = ret[6];
+    var str7 = ret[7];
+    var str8 = ret[8];
+    var str9 = ret[9];
+    var str10 = ret[10];
+    var str11 = ret[11];
+    if (str1 == 'null') {
+      str1 = ''
+    }
+    if (str2 == 'null') {
+      str2 = ''
+    }
+    if (str3 == 'null') {
+      str3 = ''
+    }
+    if (str4 == 'null') {
+      str4 = ''
+    }
+    if (str5 == 'null') {
+      str5 = ''
+    }
+    if (str6 == 'null') {
+      str6 = ''
+    }
+    if (str7 == 'null') {
+      str7 = ''
+    }
+    if (str8 == 'null') {
+      str8 = ''
+    }
+    if (str9 == 'null') {
+      str9 = ''
+    }
+    if (str10 == 'null') {
+      str10 = ''
+    }
+    if (str11 == 'null') {
+      str11 = ''
+    }
+    this.viewCecEdidData(str, str1, str2, str3, str4, str5, str6, str7, str8, str9, str10, str11);
+  };
+
   codesetdownload(binData) {
     this.downloadBin(binData[2], binData[1]);
   }
@@ -769,7 +841,7 @@ export class BrandLibraryComponent implements OnInit {
   }
 
   ViewEdid(setEdid) {
-    this.viewEdidData(setEdid[6]);
+    this.viewEdidData(setEdid[7]);
   };
 
   ViewEdid128(setEdid) {
@@ -885,6 +957,24 @@ export class BrandLibraryComponent implements OnInit {
     this.countrylist = a;
   }
 
+  viewCecEdidData(value, value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11) {
+    this.editedceDevice = value
+    this.editedceBrand = value1;
+    this.editedceRegion = value2;
+    this.editedceCountry = value3;
+    this.editedceModel = value4;
+    this.editedceVendorId = value5;
+    this.editedceOSD = value6;
+    this.osdstring = value6;
+    this.editedceEdid = value7;
+    this.editedceCodeset = value9;
+    this.CeconlyrecordId = value10;
+    this.EdidonlyrecordId = value11;
+    let a = [];
+    a.push(value3);
+    this.countrylist = a;
+    this.editcountrylist = a;
+  }
   /** Multiselect project selection functions start **/
   onInstanceSelect(item: any) {
   }
@@ -946,15 +1036,19 @@ export class BrandLibraryComponent implements OnInit {
         let filtcount = [];
         this.mainService.getProjectNames(null, null, null, null, Dbinstance, 18)
           .subscribe(value => {
-            let b = [];
+            let b = []; let c = [];
             let filtercountry: any = value.data.filter(u =>
               u.region == region);
-            filtcount.push(filtercountry);
-
             for (var j = 0; j < filtercountry.length; j++) {
               b.push(filtercountry[j]['country']);
             }
+            let filtcountry: any = value.data.filter(u =>
+              u.region == this.editedceRegion);
+            for (var j = 0; j < filtcountry.length; j++) {
+              c.push(filtcountry[j]['country']);
+            }
             this.countrylist = b;
+            this.editcountrylist = c;
           })
 
       }
@@ -1052,42 +1146,36 @@ export class BrandLibraryComponent implements OnInit {
       this.iscecOnly = true; this.isedidOnly = true;
       this.iscomponentData = true; this.iscodeSets = true; this.isMasterBrand = true;
       this.isbrandInfoCec = true; this.isbrandInfoEdid = true; this.isCecEdid = true; this.isregion = true
-      $('.newBtn').css('display', 'block');
     } if (this.brand_list == 'Component Data') {
       this.Datatype = 9;
       this.iscomponentData = false;
       this.iscecOnly = true; this.isedidOnly = true;
       this.iscrossReferenceBrands = true; this.iscodeSets = true; this.isMasterBrand = true;
       this.isbrandInfoCec = true; this.isbrandInfoEdid = true; this.isCecEdid = true; this.isregion = true
-      $('.newBtn').css('display', 'block');
     } if (this.brand_list == 'Codesets') {
       this.Datatype = 10;
       this.iscodeSets = false;
       this.iscecOnly = true; this.isedidOnly = true;
       this.iscrossReferenceBrands = true; this.iscomponentData = true; this.isMasterBrand = true;
       this.isbrandInfoCec = true; this.isbrandInfoEdid = true; this.isCecEdid = true; this.isregion = true
-      $('.newBtn').css('display', 'block');
     } if (this.brand_list == 'Brand') {
       this.Datatype = 11;
       this.isMasterBrand = false;
       this.iscecOnly = true; this.isedidOnly = true;
       this.iscrossReferenceBrands = true; this.iscomponentData = true; this.iscodeSets = true;
       this.isbrandInfoCec = true; this.isbrandInfoEdid = true; this.isCecEdid = true; this.isregion = true
-      $('.newBtn').css('display', 'block');
     } if (this.brand_list == 'Brand Info CEC') {
       this.Datatype = 12;
       this.isbrandInfoCec = false;
       this.iscecOnly = true; this.isedidOnly = true;
       this.iscrossReferenceBrands = true; this.iscomponentData = true; this.iscodeSets = true;
       this.isMasterBrand = true; this.isbrandInfoEdid = true; this.isCecEdid = true; this.isregion = true
-      $('.newBtn').css('display', 'block');
     } if (this.brand_list == 'Brand Info EDID') {
       this.Datatype = 13;
       this.isbrandInfoEdid = false;
       this.iscecOnly = true; this.isedidOnly = true;
       this.iscrossReferenceBrands = true; this.iscomponentData = true; this.iscodeSets = true;
       this.isMasterBrand = true; this.isbrandInfoCec = true; this.isCecEdid = true; this.isregion = true
-      $('.newBtn').css('display', 'block');
     }
     if (this.brand_list == 'CEC-EDID Data') {
       this.Datatype = 17;
@@ -1101,8 +1189,6 @@ export class BrandLibraryComponent implements OnInit {
       this.iscecOnly = false; this.isedidOnly = true;
       this.isCecEdid = true; this.isbrandInfoEdid = true; this.iscrossReferenceBrands = true; this.iscomponentData = true;
       this.iscodeSets = true; this.isMasterBrand = true; this.isbrandInfoCec = true; this.isregion = true
-      $('.newBtn').css('display', 'none');
-
     }
     if (this.brand_list == 'EDID Only') {
       this.Datatype = 15;
@@ -1110,7 +1196,6 @@ export class BrandLibraryComponent implements OnInit {
       this.isCecEdid = true; this.iscecOnly = true;
       this.isbrandInfoEdid = true; this.iscrossReferenceBrands = true; this.iscomponentData = true;
       this.iscodeSets = true; this.isMasterBrand = true; this.isbrandInfoCec = true; this.isregion = true
-      $('.newBtn').css('display', 'none');
     }
     if (this.brand_list == 'Region Country Code') {
       this.Datatype = 18;
@@ -1119,7 +1204,6 @@ export class BrandLibraryComponent implements OnInit {
       this.iscecOnly = true; this.isedidOnly = true;
       this.iscrossReferenceBrands = true; this.iscomponentData = true; this.isMasterBrand = true;
       this.isbrandInfoCec = true; this.isbrandInfoEdid = true; this.isCecEdid = true;
-      $('.newBtn').css('display', 'block');
     }
   }
   /** datatype selection based on selection of brands list start **/
@@ -1177,13 +1261,11 @@ export class BrandLibraryComponent implements OnInit {
       this.noData = true;
       $('.hideData').css('display', 'none');
       $('.tabView').css('display', 'none');
-      $('#single_download').css('display', 'none');
-      $('#New').css('display', 'none');
+      $('.newBtn').css('display', 'none');
     } else {
       this.noData = false;
       $('.hideData').css('display', 'block');
-      $('#single_download').css('display', 'block');
-      $('#New').css('display', 'block');
+      $('.newBtn').css('display', 'block');
       $('.tabView').css('display', 'block');
       $('.nav-item').removeClass('active');
       $('a#nav-home-tab0').addClass('active');
@@ -1199,10 +1281,19 @@ export class BrandLibraryComponent implements OnInit {
   hexaOnly(event: any) {
 
     const pattern = /^[0-9A-Fa-f]+$/;
-
-    let inputChar = String.fromCharCode(event.charCode);
-    if (event.keyCode != 8 && !pattern.test(inputChar)) {
-      event.preventDefault();
+    if (this.brand_list == 'CEC-EDID Data' || this.brand_list == 'CEC Only') {
+      if ((this.EditosdHeader === 'OSD Hex') || (this.UpdateosdHeader === 'OSD Hex')) {
+        let inputChar = String.fromCharCode(event.charCode);
+        if (event.keyCode != 8 && !pattern.test(inputChar)) {
+          event.preventDefault();
+        }
+      }
+    }
+    if (this.brand_list == 'Brand Info CEC') {
+      let inputChar = String.fromCharCode(event.charCode);
+      if (event.keyCode != 8 && !pattern.test(inputChar)) {
+        event.preventDefault();
+      }
     }
   }
 
@@ -1227,20 +1318,16 @@ export class BrandLibraryComponent implements OnInit {
     } else {
       this.isVersionDataVisible = true;
     }
-    if (this.brand_list == 'CEC Only' || this.brand_list == 'EDID Only') {
-      $('.newBtn').css('display', 'none');
-    } else {
-      $('.newBtn').css('display', 'block');
-    }
+    // if (this.brand_list == 'CEC Only' || this.brand_list == 'EDID Only') {
+    //   $('.newBtn').css('display', 'none');
+    // } else {
+    //   $('.newBtn').css('display', 'block');
+    // }
     if (this.brand_list == "null") {
       this.noData = true;
-      $('#single_download').css('display', 'none');
-      $('#New').css('display', 'none');
       $('.tabView').css('display', 'none');
     } else {
       this.noData = false;
-      $('#single_download').css('display', 'block');
-      $('#New').css('display', 'block');
       $('.tabView').css('display', 'block');
       this.selectDatatype();
       this.getViewResponse();
@@ -1271,12 +1358,10 @@ export class BrandLibraryComponent implements OnInit {
         this.changeVersionCount++;
         this.getVersionResponseData();
         this.noData = false;
-        $('#single_download').css('display', 'block');
-        $('#New').css('display', 'block');
+        $('.newBtn').css('display', 'block');
         $('.tab-content').css('display', 'block');
       } else {
-        $('#single_download').css('display', 'none');
-        $('#New').css('display', 'none');
+        $('.newBtn').css('display', 'none');
         $('.tab-content').css('display', 'none');
         this.noData = true;
       }
@@ -1362,6 +1447,8 @@ export class BrandLibraryComponent implements OnInit {
     }
     if (this.SelectedBrandName == 'CEC-EDID Data') {
       this.isCecEdidData = true;
+      this.UpdateosdHeader = 'OSD String';
+      this.EditosdHeader = 'OSD String';
       this.isCrossReferencebyBrands = false;
       this.isBrandModel = false;
       this.isBrandInfoCec = false;
@@ -1491,14 +1578,12 @@ export class BrandLibraryComponent implements OnInit {
         this.tabValue = name;
         this.noData = false;
         $('#single_download').css('display', 'block');
-        $('#New').css('display', 'block');
         $('.tab-content').css('display', 'block');
         this.getTabResponseData();
       } else {
         this.count--;
         this.noData = true;
         $('#single_download').css('display', 'none');
-        $('#New').css('display', 'none');
         $('.tab-content').css('display', 'none');
       }
       this.tabVersions();
@@ -2222,6 +2307,8 @@ export class BrandLibraryComponent implements OnInit {
         }
         this.getDropdownValues();
         this.getCodeSets();
+        $('#osd_string').click();
+        $('#String').click();
         $("select").prop("disabled", false);
         $("a").css('pointer-events', 'auto');
         //this.spinnerService.hide();      
@@ -2317,6 +2404,8 @@ export class BrandLibraryComponent implements OnInit {
         }
         this.getDropdownValues();
         this.getCodeSets();
+        $('#osd_string').click();
+        $('#String').click();
         $("select").prop("disabled", false);
         $("a").css('pointer-events', 'auto');
         //this.spinnerService.hide();      
@@ -2411,6 +2500,8 @@ export class BrandLibraryComponent implements OnInit {
         }
         this.getDropdownValues();
         this.getCodeSets();
+        $('#osd_string').click();
+        $('#String').click();
         $("select").prop("disabled", false);
         $("a").css('pointer-events', 'auto');
         //this.spinnerService.hide();      
@@ -2552,6 +2643,7 @@ export class BrandLibraryComponent implements OnInit {
   get r1() { return this.saveEditCrossReferenceBrands.controls; }
   get m1() { return this.saveEditCeconlyData.controls; }
   get m2() { return this.saveEditEdidonlyData.controls; }
+  get m3() { return this.saveEditCecEdidData.controls; }
   get n1() { return this.saveEditRegionData.controls; }
 
   /** Save Functionality for Brand if new Brand is added using New Option start  **/
@@ -3115,7 +3207,7 @@ export class BrandLibraryComponent implements OnInit {
     if (this.saveUpdateCecEdidData.invalid) {
       return;
     }
-    if ((this.ce_vendorId != undefined && this.ce_vendorId != '') || (this.ce_osd_string != undefined && this.ce_osd_string != '') || (this.ce_edid != undefined && this.ce_edid != '')) {
+    if ((this.ce_vendorId != undefined && this.ce_vendorId != '') || (this.ce_osd != undefined && this.ce_osd != '') || (this.ce_edid != undefined && this.ce_edid != '')) {
       var edid128 = this.ce_edid;
       if (edid128 != null && edid128 != '' && edid128 != undefined) {
         let checkEdidData = ((edid128.startsWith('00 FF FF FF FF FF FF 00') || edid128.startsWith('00 ff ff ff ff ff ff 00')) && edid128.length >= 383);
@@ -3140,9 +3232,8 @@ export class BrandLibraryComponent implements OnInit {
     }
   }
 
-
   cecEdidValidate() {
-    if (this.ce_vendorId != undefined || this.ce_osd_string != undefined || this.ce_edid != undefined) {
+    if (this.ce_vendorId != undefined || this.ce_osd != undefined || this.ce_edid != undefined) {
       let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
       let RowId = 1; let device = this.ce_device; let brand = this.ce_brand; let model = this.ce_model;
       if (model != undefined) {
@@ -3199,15 +3290,38 @@ export class BrandLibraryComponent implements OnInit {
       let iscecpresent = parseInt(this.cec_present);
       let iscecenabled = parseInt(this.cec_enabled); let codeset = this.ce_codeset;
       let osd;
-      if (this.ce_osd_string != undefined && this.ce_osd_string != null) {
-        osd = this.convertHexa(this.ce_osd_string);
-      } else {
-        osd = null;
+      if (this.UpdateosdHeader === 'OSD Hex') {
+        let ce_osd = this.ce_osd;
+        var modOsdString; var str = '';
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.ce_osd.trim();
+          if (ce_osd == '') {
+            ce_osd = '';
+            modOsdString = '';
+          } else {
+            ce_osd = ce_osd.replace(/[^a-zA-Z0-9]/g, '');
+            modOsdString = ce_osd;
+            for (var i = 0; i < modOsdString.length; i += 2)
+              str += String.fromCharCode(parseInt(modOsdString.substr(i, 2), 16));
+          }
+          osd = ce_osd;
+          osdstr = str;
+        }
+        else if (ce_osd == undefined || ce_osd == null) {
+          osd = null;
+          osdstr = null;
+        }
       }
-      if (this.ce_osd_string == undefined || this.ce_osd_string == null) {
-        osdstr = null;
-      } else {
-        osdstr = this.ce_osd_string.toUpperCase();
+      if (this.UpdateosdHeader === 'OSD String') {
+        let ce_osd = this.ce_osd;
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.ce_osd.trim();
+          osd = this.convertHexa(ce_osd);
+          osdstr = ce_osd;
+        } else if (ce_osd == undefined || ce_osd == null) {
+          osd = null;
+          osdstr = null;
+        }
       }
       let Projectname = this.tabValue; let Dbversion = this.version_list;
 
@@ -3232,10 +3346,180 @@ export class BrandLibraryComponent implements OnInit {
               });
             this.getTabResponseData();
             this.toastr.success('Value Inserted Successfully', '');
+            this.UpdateosdHeader = 'OSD String';
+            $('#osd_string').click();
           } else {
             this.toastr.warning(value.message, '');
           }
         });
+    } else {
+      $('#checkInputValid').css('border', '1px solid #bb2a38');
+      this.vendorError = true;
+    }
+  }
+
+  onsaveEditCecEdidDataSubmit() {
+    this.cecEdidsubmitted = true;
+    if (this.saveEditCecEdidData.invalid) {
+      return;
+    }
+    if ((this.editedceVendorId != undefined && this.editedceVendorId != '') || (this.editedceOSD != undefined && this.editedceOSD != '') || (this.editedceEdid != undefined && this.editedceEdid != '')) {
+      var edid128 = this.editedceEdid;
+      if (edid128 != null && edid128 != '' && edid128 != undefined) {
+        let checkEdidData = ((edid128.startsWith('00 FF FF FF FF FF FF 00') || edid128.startsWith('00 ff ff ff ff ff ff 00')) && edid128.length >= 383);
+        if (!checkEdidData) {
+          this.edidError = true;
+          this.cecEdidsubmitted = false;
+        }
+        else {
+          $('#checkEdidValid').css('border', '1px solid #ced4da');
+          this.edidError = false;
+          this.EditcecEdidValidate();
+        }
+      }
+      else {
+        $('#checkEdidValid').css('border', '1px solid #ced4da');
+        this.edidError = false;
+        this.EditcecEdidValidate();
+      }
+
+    } else {
+      this.toastr.error('', 'Enter Vendorid or OSD or EDID', { timeOut: 4000 })
+    }
+  }
+
+  EditcecEdidValidate() {
+    if (this.editedceVendorId != undefined || this.editedceOSD != undefined || this.editedceEdid != undefined) {
+      let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
+      let device = this.editedceDevice; let brand = this.editedceBrand; let model = this.editedceModel;
+      if (model != undefined) {
+        var filterChars = model.replace(/[^a-zA-Z0-9]/g, '');
+      }
+      let modelx = filterChars;
+      let region = this.editedceRegion; let country = this.editedceCountry;
+      let edid;
+      if (this.editedceEdid == undefined) {
+        edid = null;
+      } else {
+        edid = this.editedceEdid;
+      }
+
+      let edid128 = '';
+      if (edid != undefined) {
+        if (edid.length < 383) {
+          edid128 = '';
+        } else {
+          edid128 = edid.slice(0, 383);
+        }
+      } else {
+        edid128 = null;
+      }
+      var edidBrand = edid;
+      let finalBit;
+      if (edidBrand != undefined && edidBrand != null && edidBrand != '') {
+        var filterHex = edidBrand.replace(/[^a-zA-Z0-9]/g, '');
+        if (filterHex.length >= 128) {
+          var finalString = filterHex.slice(16, 20);
+          let getBit = (parseInt(finalString, 16)).toString(2);
+          if (finalString[0] == '0') {
+            getBit = '0000' + getBit;
+          }
+          if (finalString[0] == '1' || finalString[0] == '3' || finalString[0] == '2') {
+            getBit = '00' + getBit;
+          }
+          if (getBit.length > 15) {
+            getBit = getBit.slice(1, 16);
+          }
+          finalBit = this.convertAlpha(getBit.slice(0, 5)) + '' + this.convertAlpha(getBit.slice(5, 10)) + '' + this.convertAlpha(getBit.slice(10, 15));
+        }
+      } else {
+        finalBit = null;
+      }
+      let edidbrand = finalBit;
+      let vendorid; let osdstr;
+      if (this.editedceVendorId == undefined) {
+        vendorid = null;
+      } else {
+        vendorid = this.editedceVendorId.toUpperCase();
+      }
+      let codeset = this.editedceCodeset;
+      let osd;
+      if (this.EditosdHeader === 'OSD Hex') {
+        let ce_osd = this.editedceOSD;
+        var modOsdString; var str = '';
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.editedceOSD.trim();
+          if (ce_osd == '') {
+            ce_osd = '';
+            modOsdString = '';
+          } else {
+            ce_osd = ce_osd.replace(/[^a-zA-Z0-9]/g, '');
+            modOsdString = ce_osd;
+            for (var i = 0; i < modOsdString.length; i += 2)
+              str += String.fromCharCode(parseInt(modOsdString.substr(i, 2), 16));
+          }
+          osd = ce_osd;
+          osdstr = str;
+        }
+        else if (ce_osd == undefined || ce_osd == null) {
+          osd = null;
+          osdstr = null;
+        }
+      }
+      if (this.EditosdHeader === 'OSD String') {
+        let ce_osd = this.editedceOSD;
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.editedceOSD.trim();
+          osd = this.convertHexa(ce_osd);
+          osdstr = ce_osd;
+        } else if (ce_osd == undefined || ce_osd == null) {
+          osd = null;
+          osdstr = null;
+        }
+      }
+      // if(((vendorid != null ||vendorid != '') && (osdstr != '' && osdstr != null))||(edid != '' && edid != null)){}
+      let Projectname = this.tabValue; let Dbversion = this.version_list;
+      let Dbname = searchDbName[0]['dbinstance'];
+      this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
+        null, region, null, country, null, null, null, null, null, edid, edid128, edidbrand, 8, 3, this.EdidonlyrecordId)
+        .subscribe(value => {
+          $("#edidBrandModal .close").click()
+          if (value.data === '1') {
+            let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
+            let recordCount = 1;
+            let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + edid + ',' + edidbrand + ',' + edid128 + ',' + this.CeconlyrecordId + ',' + this.EdidonlyrecordId + '';
+            let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
+            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+              .subscribe(value => {
+
+              });
+            this.getTabResponseData();
+            this.toastr.success(value.message, '');
+          } else {
+            this.toastr.warning(value.message, '');
+          }
+        });
+
+      setTimeout(() => {
+        this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
+          null, region, null, country, null, null, vendorid, osd, osdstr, null, null, null, 7, 3, this.CeconlyrecordId)
+          .subscribe(value => {
+            if (value.data === '1') {
+              let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
+              let recordCount = 1;
+              let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + vendorid + ',' + osd + ',' + osdstr + ',' + this.CeconlyrecordId + '';
+              let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
+              this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+                .subscribe(value => {
+
+                });
+              this.getTabResponseData();
+              this.toastr.success(value.message, '');
+            } else {
+              this.toastr.warning(value.message, '');
+            }
+          });
+      }, 3000);
     } else {
       $('#checkInputValid').css('border', '1px solid #bb2a38');
       this.vendorError = true;
@@ -3250,6 +3534,10 @@ export class BrandLibraryComponent implements OnInit {
       let device = this.editedEdidonlyDevice; let brand = this.editedEdidonlyBrandname;
       let model = this.editedEdidonlyModel; let codeset = this.editedEdidonlyCodeset; let country = this.editedEdidonlyCountry;
       let region = this.editedEdidonlyregion;
+      if (model != undefined) {
+        var filterChars = model.replace(/[^a-zA-Z0-9]/g, '');
+      }
+      let modelx = filterChars;
       let edid;
       if (this.editedEdidonly_EDID128 == undefined) {
         edid = null;
@@ -3290,14 +3578,14 @@ export class BrandLibraryComponent implements OnInit {
       }
       let edidbrand = finalBit;
 
-      this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, null, codeset, null,
+      this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
         null, region, null, country, null, null, null, null, null, edid, edid128, edidbrand, 8, 3, recordid)
         .subscribe(value => {
           $("#edidBrandModal .close").click()
           if (value.data === '1') {
             let userName = localStorage.getItem('userName'); let Datasection = 'EDID Only';
             let recordCount = 1;
-            let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + region + ',' + country + ',' + edid +
+            let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + region + ',' + country + ',' + edid +
               ',' + edidbrand + ',' + edid128 + ',' + codeset + ',' + recordid + '';
             let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
             this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
@@ -3336,10 +3624,10 @@ export class BrandLibraryComponent implements OnInit {
         }
       }
       else {
-        this.edidError = true;
-        this.cecEdidsubmitted = false;
+        $('#checkEdidValid').css('border', '1px solid #ced4da');
+        this.edidError = false;
+        this.EdidValidate();
       }
-
     } else {
       this.toastr.error('', 'Enter Valid EDID', { timeOut: 4000 })
     }
@@ -3357,7 +3645,10 @@ export class BrandLibraryComponent implements OnInit {
       let device = this.editedCeconlyDevice; let brand = this.editedCeconlyBrandname;
       let model = this.editedCeconlyModel; let codeset = this.editedCeconlyCodeset; let country = this.editedCeconlyCountry;
       let region = this.editedCeconlyregion;
-
+      if (model != undefined) {
+        var filterChars = model.replace(/[^a-zA-Z0-9]/g, '');
+      }
+      let modelx = filterChars;
       let vendorid; let osdstr;
       if (this.editedCeconly_Vendor == undefined) {
         vendorid = null;
@@ -3366,6 +3657,39 @@ export class BrandLibraryComponent implements OnInit {
       }
 
       let osd;
+      if (this.EditosdHeader === 'OSD Hex') {
+        let ce_osd = this.editedCeconly_OSD;
+        var modOsdString; var str = '';
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.editedCeconly_OSD.trim();
+          if (ce_osd == '') {
+            ce_osd = '';
+            modOsdString = '';
+          } else {
+            ce_osd = ce_osd.replace(/[^a-zA-Z0-9]/g, '');
+            modOsdString = ce_osd;
+            for (var i = 0; i < modOsdString.length; i += 2)
+              str += String.fromCharCode(parseInt(modOsdString.substr(i, 2), 16));
+          }
+          osd = ce_osd;
+          osdstr = str;
+        }
+        else if (ce_osd == undefined || ce_osd == null) {
+          osd = null;
+          osdstr = null;
+        }
+      }
+      if (this.EditosdHeader === 'OSD String') {
+        let ce_osd = this.editedCeconly_OSD;
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.editedCeconly_OSD.trim();
+          osd = this.convertHexa(ce_osd);
+          osdstr = ce_osd;
+        } else if (ce_osd == undefined || ce_osd == null) {
+          osd = null;
+          osdstr = null;
+        }
+      }
       if (this.editedCeconly_OSD != undefined && this.editedCeconly_OSD != null) {
         osd = this.convertHexa(this.editedCeconly_OSD);
       } else {
@@ -3379,14 +3703,14 @@ export class BrandLibraryComponent implements OnInit {
       if ((this.editedCeconly_OSD == null || this.editedCeconly_OSD == '') && (this.editedCeconly_Vendor == null || this.editedCeconly_Vendor == '')) {
         this.toastr.error('', 'Enter Valid Vendorid or OSD', { timeOut: 4000 })
       }
-      this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, null, codeset, null,
+      this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
         null, region, null, country, null, null, vendorid, osd, osdstr, null, null, null, 7, 3, recordid)
         .subscribe(value => {
           $("#edidBrandModal .close").click()
           if (value.data === '1') {
-            let userName = localStorage.getItem('userName'); let Datasection = 'EDID Only';
+            let userName = localStorage.getItem('userName'); let Datasection = 'CEC Only';
             let recordCount = 1;
-            let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + region + ',' + country + ',' + vendorid +
+            let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + model + ',' + region + ',' + country + ',' + vendorid +
               ',' + osd + ',' + osdstr + ',' + codeset + ',' + recordid + '';
             let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
             this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
@@ -3506,7 +3830,7 @@ export class BrandLibraryComponent implements OnInit {
       this.vendorError = false;
       $('#checkInputValid').css('border', '1px solid #ced4da');
     }
-    if (this.ce_osd_string != undefined && this.ce_osd_string != null) {
+    if (this.ce_osd != undefined && this.ce_osd != null) {
       this.vendorError = false;
       $('#checkInputValid').css('border', '1px solid #ced4da');
     }
@@ -3523,7 +3847,7 @@ export class BrandLibraryComponent implements OnInit {
         this.edidError = true;
       }
     }
-    if (this.ce_edid == undefined && this.ce_vendorId != undefined || this.ce_osd_string != undefined) {
+    if (this.ce_edid == undefined && this.ce_vendorId != undefined || this.ce_osd != undefined) {
       this.edidError = false;
     }
   }
@@ -3545,6 +3869,10 @@ export class BrandLibraryComponent implements OnInit {
     this.codesetFileName = null;
     this.cecEdidsubmitted = false;
     this.saveUpdateCecEdidData.reset();
+    this.UpdateosdHeader = 'OSD String';
+    this.EditosdHeader = 'OSD String';
+    $('#osd_string').click();
+    $('#String').click();
     this.regioncountrysubmitted = false;
     this.saveUpdateRegionData.reset();
     $('#codeset-upload-file-info').html('');
@@ -3938,6 +4266,7 @@ export class BrandLibraryComponent implements OnInit {
   methodFromParent(cell) {
     let values = Object.values(cell);
     // alert('Parent Component Method from ' + cell + '!');
+    console.log(values)
     if (this.brand_list === 'Brand') {
       this.BrandView(values)
       $('#editBrand').click();
@@ -3974,6 +4303,10 @@ export class BrandLibraryComponent implements OnInit {
       this.regionView(values);
       $('#editRegion').click();
     }
+    if (this.brand_list === 'CEC-EDID Data') {
+      this.cecedidDataView(values);
+      $('#editcecedidData').click();
+    }
   }
 
   methodFromParent_downloadcodeset(cell) {
@@ -3985,6 +4318,7 @@ export class BrandLibraryComponent implements OnInit {
 
   methodFromParent_viewEdid(cell) {
     let values = Object.values(cell);
+    console.log(values)
     if (this.brand_list === 'CEC-EDID Data') {
       this.ViewEdid(values);
     }
@@ -4107,7 +4441,11 @@ export class BrandLibraryComponent implements OnInit {
         { headerName: 'OSDString', field: "OSDString", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: 'Edid128', field: "Edid128", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
         { headerName: 'EdidBrand', field: "EdidBrand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        {
+          headerName: 'Action', field: "Action", resizable: true,
+          cellRenderer: "btnCellRenderer"
+        }
       ];
       this.gridColumnApi.moveColumns(['Device', 'Brand', 'Country', 'Model', 'VendorId', 'OSDString', 'Edid128', 'EdidBrand', 'Codeset'], 0)
     }
@@ -4236,13 +4574,13 @@ export class BrandLibraryComponent implements OnInit {
           (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0)) {
           this.columnDefs = this.columnDefs.filter(u => u.field != 'Action');
           $('#single_download').hide();
-          $('#New').hide();
+          $('.newBtn').hide();
         }
         if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
           (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0)) {
           this.columnDefs = this.columnDefs.filter(u => u.field != 'Action');
           $('#single_download').show();
-          $('#New').hide();
+          $('.newBtn').hide();
         }
         if ((permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1) ||
           (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
@@ -4250,7 +4588,10 @@ export class BrandLibraryComponent implements OnInit {
           (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1)) {
           this.columnDefs = this.columnDefs;
           $('#single_download').show();
-          $('#New').show();
+          $('.newBtn').show();
+        }
+        if (this.brand_list === 'CEC Only' || this.brand_list === 'EDID Only') {
+          $('.newBtn').css('display', 'none');
         }
         console.log(permission)
       })
@@ -4346,7 +4687,7 @@ export class BrandLibraryComponent implements OnInit {
           if (brandName === 'CEC-EDID Data') {
             if (newArray.length > 0) {
               for (let i = 0; i < newArray.length; i++) {
-                pushData.push({ Device: newArray[i][0], Brand: newArray[i][1], Country: newArray[i][2], Model: newArray[i][3], VendorId: newArray[i][4], OSDString: newArray[i][5], Edid128: newArray[i][6], EdidBrand: newArray[i][7], Codeset: newArray[i][8] })
+                pushData.push({ Device: newArray[i][0], Brand: newArray[i][1], Region: newArray[i][11], Country: newArray[i][2], Model: newArray[i][3], VendorId: newArray[i][4], OSDString: newArray[i][5], Edid128: newArray[i][6], EdidBrand: newArray[i][7], Codeset: newArray[i][8], CecRecordId: newArray[i][9], EdidRecordId: newArray[i][10] })
                 temp = pushData;
               }
             }
@@ -4426,5 +4767,102 @@ export class BrandLibraryComponent implements OnInit {
     this.gridApi.setDomLayout('normal');
     (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '500px';
   }
-}
 
+  changeosd(ev) {
+    this.UpdateosdHeader = ev.target.value;
+    this.EditosdHeader = ev.target.value;
+    let osd;
+    if (this.brand_list == 'CEC-EDID Data') {
+      if (this.EditosdHeader === 'OSD Hex') {
+        this.osdstring = this.editedceOSD;
+        let ce_osd = this.osdstring;
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.osdstring.trim();
+          osd = this.convertHexa(ce_osd);
+          this.osdhex = osd;
+        }
+        this.editedceOSD = this.osdhex;
+      }
+      if (this.EditosdHeader === 'OSD String') {
+        this.osdhex = this.editedceOSD;
+        let ce_osd = this.osdhex;
+        var modOsdString; var str = '';
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.osdhex.trim();
+          if (ce_osd == '') {
+            ce_osd = '';
+            modOsdString = '';
+          } else {
+            ce_osd = ce_osd.replace(/[^a-zA-Z0-9]/g, '');
+            modOsdString = ce_osd;
+            for (var i = 0; i < modOsdString.length; i += 2)
+              str += String.fromCharCode(parseInt(modOsdString.substr(i, 2), 16));
+          }
+          this.osdstring = str;
+        }
+        this.editedceOSD = this.osdstring;
+      }
+      if (this.UpdateosdHeader === 'OSD Hex') {
+        this.osdstring = this.ce_osd;
+        let ce_osd = this.osdstring;
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.osdstring.trim();
+          osd = this.convertHexa(ce_osd);
+          this.osdhex = osd;
+        }
+        this.ce_osd = this.osdhex;
+      }
+      if (this.UpdateosdHeader === 'OSD String') {
+        this.osdhex = this.ce_osd;
+        let ce_osd = this.osdhex;
+        var modOsdString; var str = '';
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.osdhex.trim();
+          if (ce_osd == '') {
+            ce_osd = '';
+            modOsdString = '';
+          } else {
+            ce_osd = ce_osd.replace(/[^a-zA-Z0-9]/g, '');
+            modOsdString = ce_osd;
+            for (var i = 0; i < modOsdString.length; i += 2)
+              str += String.fromCharCode(parseInt(modOsdString.substr(i, 2), 16));
+          }
+          this.osdstring = str;
+        }
+        this.ce_osd = this.osdstring;
+      }
+    }
+    if (this.brand_list == 'CEC Only') {
+      if (this.EditosdHeader === 'OSD Hex') {
+        this.osdstring = this.editedCeconly_OSD;
+        let ce_osd = this.osdstring;
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.osdstring.trim();
+          osd = this.convertHexa(ce_osd);
+          this.osdhex = osd;
+        }
+        this.editedCeconly_OSD = this.osdhex;
+      }
+      if (this.EditosdHeader === 'OSD String') {
+        this.osdhex = this.editedCeconly_OSD;
+        let ce_osd = this.osdhex;
+        var modOsdString; var str = '';
+        if (ce_osd != undefined && ce_osd != null) {
+          ce_osd = this.osdhex.trim();
+          if (ce_osd == '') {
+            ce_osd = '';
+            modOsdString = '';
+          } else {
+            ce_osd = ce_osd.replace(/[^a-zA-Z0-9]/g, '');
+            modOsdString = ce_osd;
+            for (var i = 0; i < modOsdString.length; i += 2)
+              str += String.fromCharCode(parseInt(modOsdString.substr(i, 2), 16));
+          }
+          this.osdstring = str;
+        }
+        this.editedCeconly_OSD = this.osdstring;
+      }
+    }
+
+  }
+}

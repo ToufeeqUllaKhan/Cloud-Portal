@@ -322,7 +322,7 @@ export class ReportConfigurationListComponent implements OnInit {
       $('.scroll-x').css('display', 'none')
       this.toastr.warning('Please Select the Project to Activate the fields', '');
     }
-    if (this.projectNames.length > 1) {
+    else {
       this.listofbrands();
       $('.scroll-x').show();
     }
