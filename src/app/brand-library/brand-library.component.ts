@@ -395,7 +395,7 @@ export class BrandLibraryComponent implements OnInit {
                     projectName = this.projectNames[0]['item_text'];
                   }
                   let versionArr = [];
-                  this.mainService.getProjectNames(null, null, projectName, null, null, datatype)
+                  this.mainService.getProjectNames(Client, Region, projectName, null, dbName, datatype)
                     .subscribe(value => {
                       if (value.data.length != 0) {
                         versionArr.push(value.data[0]['version']);
@@ -1090,14 +1090,25 @@ export class BrandLibraryComponent implements OnInit {
         projectName = this.projectNames[0]['item_text'];
       }
       let versionArr = [];
-      this.mainService.getProjectNames(null, null, projectName, null, null, datatype)
+      let data_type = 1;
+      this.mainService.getProjectNames(null, null, null, null, null, data_type)
         .subscribe(value => {
-          if (value.data.length != 0) {
-            versionArr.push(value.data[0]['version']);
-            this.versions = versionArr;
-            this.version_list = versionArr[0];
-          }
-        });
+          this.mainArr = value.data;
+          let filterProject: any = value.data.filter(u =>
+            (u.projectname == projectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
+          let Client = filterProject[0]['client']; let Region = filterProject[0]['region'];
+          let Dbinstance = filterProject[0]['dbinstance'];
+          this.mainService.getProjectNames(Client, Region, projectName, null, Dbinstance, datatype)
+            .subscribe(value => {
+              if (value.data.length != 0) {
+                versionArr.push(value.data[0]['version']);
+                this.versions = versionArr;
+                this.version_list = versionArr[0];
+              }
+            });
+
+        })
+
     } else {
       let filtProj = [];
       let projectName;
@@ -1111,7 +1122,7 @@ export class BrandLibraryComponent implements OnInit {
         .subscribe(value => {
           this.mainArr = value.data;
           let filterProject: any = value.data.filter(u =>
-            u.projectname == projectName);
+            (u.projectname == projectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
           filtProj.push(filterProject);
           if (this.versions.length == 0) {
             for (var j = 0; j < filterProject.length; j++) {
@@ -1276,9 +1287,18 @@ export class BrandLibraryComponent implements OnInit {
     }
   }
 
-  /** Validation to accept only hexa characters only **/
+  /** Validation to accept only hexa characters only  **/
 
   hexaOnly(event: any) {
+
+    const pattern = /^[0-9A-Fa-f]+$/;
+    let inputChar = String.fromCharCode(event.charCode);
+    if (event.keyCode != 8 && !pattern.test(inputChar)) {
+      event.preventDefault();
+    }
+  }
+
+  hexaOnlyforosd(event: any) {
 
     const pattern = /^[0-9A-Fa-f]+$/;
     if (this.brand_list == 'CEC-EDID Data' || this.brand_list == 'CEC Only') {
@@ -1289,14 +1309,7 @@ export class BrandLibraryComponent implements OnInit {
         }
       }
     }
-    if (this.brand_list == 'Brand Info CEC') {
-      let inputChar = String.fromCharCode(event.charCode);
-      if (event.keyCode != 8 && !pattern.test(inputChar)) {
-        event.preventDefault();
-      }
-    }
   }
-
   /** Validation to accept only alphanumeric characters only **/
 
   alphaOnly(event: any) {
@@ -1970,12 +1983,15 @@ export class BrandLibraryComponent implements OnInit {
     //this.spinnerService.show();
     if (this.tabsProject != undefined) {
       let resultFetchArrTabs: any = this.mainArr.filter(u =>
-        u.projectname == this.tabsProject && u.embeddedDbVersion == this.version_list);
+        (u.projectname == this.tabsProject && u.embeddedDbVersion == this.version_list) && (u.statusFlag != 2 || u.statusFlag != '2'));
       this.resultProjArr = resultFetchArrTabs;
     }
     let project = this.resultProjArr[0]['projectname']; let datatype = 21;
+    let Client = this.resultProjArr[0]['client'];
+    let Region = this.resultProjArr[0]['region'];
+    let Dbinstance = this.resultProjArr[0]['dbinstance'];
     let versionArr = [];
-    this.mainService.getProjectNames(null, null, project, null, null, datatype)
+    this.mainService.getProjectNames(Client, Region, project, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -2238,7 +2254,10 @@ export class BrandLibraryComponent implements OnInit {
     }
     let project = this.resultProjArr[0]['projectname']; let datatype = 21;
     let versionArr = [];
-    this.mainService.getProjectNames(null, null, project, null, null, datatype)
+    let Client = this.resultProjArr[0]['client'];
+    let Region = this.resultProjArr[0]['region'];
+    let Dbinstance = this.resultProjArr[0]['dbinstance'];
+    this.mainService.getProjectNames(Client, Region, project, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -2335,7 +2354,10 @@ export class BrandLibraryComponent implements OnInit {
     }
     let project = this.resultProjArr[0]['projectname']; let datatype = 21;
     let versionArr = [];
-    this.mainService.getProjectNames(null, null, project, null, null, datatype)
+    let Client = this.resultProjArr[0]['client'];
+    let Region = this.resultProjArr[0]['region'];
+    let Dbinstance = this.resultProjArr[0]['dbinstance'];
+    this.mainService.getProjectNames(Client, Region, project, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -2431,7 +2453,10 @@ export class BrandLibraryComponent implements OnInit {
     }
     let project = this.resultProjArr[0]['projectname']; let datatype = 21;
     let versionArr = [];
-    this.mainService.getProjectNames(null, null, project, null, null, datatype)
+    let Client = this.resultProjArr[0]['client'];
+    let Region = this.resultProjArr[0]['region'];
+    let Dbinstance = this.resultProjArr[0]['dbinstance'];
+    this.mainService.getProjectNames(Client, Region, project, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -3482,44 +3507,40 @@ export class BrandLibraryComponent implements OnInit {
       let Dbname = searchDbName[0]['dbinstance'];
       this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
         null, region, null, country, null, null, null, null, null, edid, edid128, edidbrand, 8, 3, this.EdidonlyrecordId)
-        .subscribe(value => {
+        .subscribe(async value => {
           $("#edidBrandModal .close").click()
           if (value.data === '1') {
-            let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
-            let recordCount = 1;
-            let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + edid + ',' + edidbrand + ',' + edid128 + ',' + this.CeconlyrecordId + ',' + this.EdidonlyrecordId + '';
-            let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
-              .subscribe(value => {
+            await this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
+              null, region, null, country, null, null, vendorid, osd, osdstr, null, null, null, 7, 3, this.CeconlyrecordId)
+              .subscribe(async value => {
+                if (value.data === '1') {
+                  let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
+                  let recordCount = 1;
+                  let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + vendorid + ',' + osd + ',' + osdstr + ',' + edid + ',' + edidbrand + ',' + edid128 + ',' + this.CeconlyrecordId + ',' + this.EdidonlyrecordId + '';
+                  let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
+                  await this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+                    .subscribe(value => {
 
+                    });
+                  this.getTabResponseData();
+                  this.toastr.success(value.message, '');
+                } else {
+                  let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
+                  let recordCount = 1;
+                  let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + edid + ',' + edidbrand + ',' + edid128 + ',' + this.EdidonlyrecordId + '';
+                  let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
+                  this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+                    .subscribe(value => {
+
+                    });
+                  this.getTabResponseData();
+                  this.toastr.warning(value.message, '');
+                }
               });
-            this.getTabResponseData();
-            this.toastr.success(value.message, '');
           } else {
             this.toastr.warning(value.message, '');
           }
         });
-
-      setTimeout(() => {
-        this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
-          null, region, null, country, null, null, vendorid, osd, osdstr, null, null, null, 7, 3, this.CeconlyrecordId)
-          .subscribe(value => {
-            if (value.data === '1') {
-              let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
-              let recordCount = 1;
-              let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + vendorid + ',' + osd + ',' + osdstr + ',' + this.CeconlyrecordId + '';
-              let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-              this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
-                .subscribe(value => {
-
-                });
-              this.getTabResponseData();
-              this.toastr.success(value.message, '');
-            } else {
-              this.toastr.warning(value.message, '');
-            }
-          });
-      }, 3000);
     } else {
       $('#checkInputValid').css('border', '1px solid #bb2a38');
       this.vendorError = true;
@@ -4774,6 +4795,7 @@ export class BrandLibraryComponent implements OnInit {
     let osd;
     if (this.brand_list == 'CEC-EDID Data') {
       if (this.EditosdHeader === 'OSD Hex') {
+        this.osdhex = '';
         this.osdstring = this.editedceOSD;
         let ce_osd = this.osdstring;
         if (ce_osd != undefined && ce_osd != null) {
@@ -4784,6 +4806,7 @@ export class BrandLibraryComponent implements OnInit {
         this.editedceOSD = this.osdhex;
       }
       if (this.EditosdHeader === 'OSD String') {
+        this.osdstring = '';
         this.osdhex = this.editedceOSD;
         let ce_osd = this.osdhex;
         var modOsdString; var str = '';
@@ -4803,6 +4826,7 @@ export class BrandLibraryComponent implements OnInit {
         this.editedceOSD = this.osdstring;
       }
       if (this.UpdateosdHeader === 'OSD Hex') {
+        this.osdhex = '';
         this.osdstring = this.ce_osd;
         let ce_osd = this.osdstring;
         if (ce_osd != undefined && ce_osd != null) {
@@ -4813,6 +4837,7 @@ export class BrandLibraryComponent implements OnInit {
         this.ce_osd = this.osdhex;
       }
       if (this.UpdateosdHeader === 'OSD String') {
+        this.osdstring = '';
         this.osdhex = this.ce_osd;
         let ce_osd = this.osdhex;
         var modOsdString; var str = '';
@@ -4834,6 +4859,7 @@ export class BrandLibraryComponent implements OnInit {
     }
     if (this.brand_list == 'CEC Only') {
       if (this.EditosdHeader === 'OSD Hex') {
+        this.osdhex = '';
         this.osdstring = this.editedCeconly_OSD;
         let ce_osd = this.osdstring;
         if (ce_osd != undefined && ce_osd != null) {
@@ -4844,6 +4870,7 @@ export class BrandLibraryComponent implements OnInit {
         this.editedCeconly_OSD = this.osdhex;
       }
       if (this.EditosdHeader === 'OSD String') {
+        this.osdstring = '';
         this.osdhex = this.editedCeconly_OSD;
         let ce_osd = this.osdhex;
         var modOsdString; var str = '';

@@ -651,7 +651,7 @@
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-4 col-form-label">{{UpdateosdHeader}}</label>
-                  <input type="text" (keypress)="hexaOnly($event)" [(ngModel)]="ce_osd" (change)="vendorMod()"
+                  <input type="text" (keypress)="hexaOnlyforosd($event)" [(ngModel)]="ce_osd" (change)="vendorMod()"
                     formControlName="ceOSD" class="form-control form-control-line col-sm-7"
                     [ngClass]="{ 'is-invalid': cecEdidsubmitted && m.ceOSD.errors }" />
                   <div *ngIf="cecEdidsubmitted && m.ceOSD.errors" class="invalid-feedback">
@@ -1314,8 +1314,8 @@
                 <div class="col-sm-12">
                   <div class="form-group form-inline">
                     <label class="labelsubSpan col-sm-4 col-form-label">{{EditosdHeader}}</label>
-                    <input type="text" (keypress)="hexaOnly($event)" [(ngModel)]="editedceOSD" (change)="vendorMod()"
-                      formControlName="EditceOSD" class="form-control form-control-line col-sm-7"
+                    <input type="text" (keypress)="hexaOnlyforosd($event)" [(ngModel)]="editedceOSD"
+                      (change)="vendorMod()" formControlName="EditceOSD" class="form-control form-control-line col-sm-7"
                       [ngClass]="{ 'is-invalid': cecEdidsubmitted && m3.EditceOSD.errors }" />
                     <div *ngIf="cecEdidsubmitted && m3.EditceOSD.errors" class="invalid-feedback">
                       <div *ngIf="m3.EditceOSD.errors.required" class="error-defined text-right">{{EditosdHeader}} is
@@ -1474,7 +1474,7 @@
                 <div class="col-sm-12">
                   <div class="form-group form-inline">
                     <label class="labelsubSpan col-sm-4 col-form-label">{{EditosdHeader}}</label>
-                    <input type="text" (keypress)="hexaOnly($event)" [(ngModel)]="editedCeconly_OSD"
+                    <input type="text" (keypress)="hexaOnlyforosd($event)" [(ngModel)]="editedCeconly_OSD"
                       (change)="vendorMod()" formControlName="ceconlyOSDString"
                       class="form-control form-control-line col-sm-7"
                       [ngClass]="{ 'is-invalid': editceconlysubmitted && m1.ceconlyOSDString.errors }" />

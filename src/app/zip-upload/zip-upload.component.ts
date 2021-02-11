@@ -299,7 +299,12 @@ export class ZipUploadComponent implements OnInit {
     let datatype = 21;
     let projectName = this.projectNames[0]['item_text'];
     let versionArr = [];
-    this.mainService.getProjectNames(null, null, projectName, null, null, datatype)
+    let filterProjects: any = this.finalArray.filter(u =>
+      (u.projectname == projectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
+
+    let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region']; let ProjectName = filterProjects[0]['projectname'];
+    let Dbinstance = filterProjects[0]['dbinstance'];
+    this.mainService.getProjectNames(Client, Region, ProjectName, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);

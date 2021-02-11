@@ -869,7 +869,7 @@ export class MainService {
 
   CreateNewProjectWithVersion(Dbname: any, Client: any, Region: any, Projectname: any, Signaturekey: any, Dbpath: any, Embeddeddbversion: any,
     Dbversion: any, Statusflag: any, Flagtype: any, Projectversion: any, Swversion: any, Allowdownload: any,
-    Binfile: any, Binfilechecksum: any, Zipfile: any, Zipfilechecksum: any): Observable<any> {
+    Binfile: any, Binfilechecksum: any, Zipfile: any, Zipfilechecksum: any): Promise<any> {
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/CreateNewProjectWithVersion`,
       {
         "Dbname": Dbname, "Client": Client, "Region": Region, "Projectname": Projectname, "Signaturekey": Signaturekey, "Dbpath": Dbpath,
@@ -880,7 +880,7 @@ export class MainService {
       .pipe(
         retry(1),
         catchError(this.handleError)
-      );
+      ).toPromise();
   }
 
   Unlinkanddeletetheproject(Projectname: any): Observable<any> {

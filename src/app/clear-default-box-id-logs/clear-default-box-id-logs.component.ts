@@ -118,7 +118,9 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
     let filterProject: any = this.filterProjects.filter(u =>
       (u.projectname == this.projectNames) && (u.statusFlag != 2 || u.statusFlag != '2'));
     // var self=this;
-    this.mainService.getProjectNames(null, null, this.projectNames, null, null, 21)
+    let Client = filterProject[0]['client']; let Region = filterProject[0]['region']; let ProjectName = filterProject[0]['projectname'];
+    let Dbinstance = filterProject[0]['dbinstance'];
+    this.mainService.getProjectNames(Client, Region, ProjectName, null, Dbinstance, 21)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionarr.push(value.data[0]['version']);

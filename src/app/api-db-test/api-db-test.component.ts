@@ -111,7 +111,8 @@ export class ApiDbTestComponent implements OnInit {
           (u.statusFlag != 2 || u.statusFlag != '2'));
         let resultFetchArr: any = this.mainArr.filter(u =>
           u.projectname == this.projectNames[0]);
-        let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = this.projectNames[0];
+        let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath'];
+        let Project = this.projectNames[0];
         this.sign_key = resultFetchArr[0]['signatureKey'];
         let defaultboxid = resultFetchArr[0]['defaultBoxId'];
         if (defaultboxid != null) {
@@ -174,7 +175,11 @@ export class ApiDbTestComponent implements OnInit {
                 this.dbVersion = uniqueVersions;
                 let datatype = 21;
                 let versionArr = [];
-                this.mainService.getProjectNames(null, null, ProjectSel, null, null, datatype)
+
+                let Client = filterProject[0]['client'];
+                let Region = filterProject[0]['region'];
+                let dbInstance = filterProject[0]['dbinstance'];
+                this.mainService.getProjectNames(Client, Region, ProjectSel, null, dbInstance, datatype)
                   .subscribe(value => {
                     if (value.data.length != 0) {
                       versionArr.push(value.data[0]['version']);
@@ -209,7 +214,10 @@ export class ApiDbTestComponent implements OnInit {
             this.dbVersion = uniqueVersions;
             let datatype = 21;
             let versionArr = [];
-            this.mainService.getProjectNames(null, null, Project, null, null, datatype)
+            let Client = filterProject[0]['client'];
+            let Region = filterProject[0]['region'];
+            let dbInstance = filterProject[0]['dbinstance'];
+            this.mainService.getProjectNames(Client, Region, Project, null, dbInstance, datatype)
               .subscribe(value => {
                 if (value.data.length != 0) {
                   versionArr.push(value.data[0]['version']);
@@ -754,7 +762,12 @@ export class ApiDbTestComponent implements OnInit {
     this.responsetime = ' '
     let datatype = 21;
     let versionArr = [];
-    this.mainService.getProjectNames(null, null, this.tabName, null, null, datatype)
+    let filterProject: any = this.mainArr.filter(u =>
+      u.projectname == this.tabName);
+    let Client = filterProject[0]['client'];
+    let Region = filterProject[0]['region'];
+    let dbInstance = filterProject[0]['dbinstance'];
+    this.mainService.getProjectNames(Client, Region, this.tabName, null, dbInstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -953,7 +966,10 @@ export class ApiDbTestComponent implements OnInit {
         (u.projectname == tabs) && (u.statusFlag != 2 || u.statusFlag != '2'));
       let datatype = 21;
       let versionArr = [];
-      this.mainService.getProjectNames(null, null, this.tabName, null, null, datatype)
+      let Client = versionArray[0]['client'];
+      let Region = versionArray[0]['region'];
+      let dbInstance = versionArray[0]['dbinstance'];
+      this.mainService.getProjectNames(Client, Region, this.tabName, null, dbInstance, datatype)
         .subscribe(value => {
           if (value.data.length != 0) {
             versionArr.push(value.data[0]['version']);

@@ -159,7 +159,7 @@ export class ImportprojfromprodComponent implements OnInit {
       let zip_file = this.filterproject[i]['zipFile']; let Zipfilechecksum = this.filterproject[i]['zipChecksum'];
       this.mainService.CreateNewProjectWithVersion(Dbname, Client, Region, Projectname, Signaturekey, Dbpath, Embeddeddbversion, Dbversion, Statusflag, Flagtype,
         Projectversion, Swversion, Allowdownload, bin_file, Binfilechecksum, zip_file, Zipfilechecksum)
-        .subscribe(value => {
+        .then(value => {
           if (value.statusCode == "200" || value.statusCode == 200) {
             this.toastr.success('Project created or updated Successfully', '');
             this.isNextVisible = true;
