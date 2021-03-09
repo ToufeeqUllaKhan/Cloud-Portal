@@ -37,6 +37,8 @@ export class ProdCecEdidDataComponent implements OnInit {
   DecodeedidDataView: boolean;
   keys: any;
   Values: any;
+  role: string;
+  module: string;
   constructor(private mainService: MainService, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService, private fb: FormBuilder, private http: HttpClient) {
     this.paginationPageSize = 10;
     this.rowSelection = 'multiple';
@@ -54,6 +56,8 @@ export class ProdCecEdidDataComponent implements OnInit {
 
   ngOnInit(): void {
     var getClientProjects = JSON.parse(localStorage.getItem('choosenProjects'));
+    this.role = localStorage.getItem('AccessRole');
+    this.module = localStorage.getItem('moduleselected');
     this.switchRoute = localStorage.getItem('TicketSelected');
     if (getClientProjects != null) {
       this.projectNames = getClientProjects;
@@ -62,23 +66,54 @@ export class ProdCecEdidDataComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        // this.mainArr = value.data;
-        this.mainArr = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        this.mainArr = value.data;
+        this.mainArr.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const unique = [...new Set(this.mainArr.map(item => item.projectname))];
 
         let arrData = [];
         for (var i = 0; i < unique.length; i++) {
           arrData.push({ item_id: i, item_text: unique[i] });
         }
-        this.projects = arrData;
-        if (this.projectNames != '') {
-          for (var i = 0; i < this.projectNames.length; i++) {
-            var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[i]);
-
-            this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[i] });
+        this.ProjectList = arrData;
+        let RoleLevel = localStorage.getItem('AccessRole');
+        if (RoleLevel != 'Admin') {
+          let userName = localStorage.getItem('userName');
+          this.mainService.getRoleModule(8, null, null, userName, null)
+            .then(value => {
+              let filterProjects = []; let clientArray = [];
+              clientArray = value.data;
+              clientArray.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+              for (var i = 0; i < clientArray.length; i++) {
+                let clientsArray: any = this.ProjectList.filter(u =>
+                  (u.item_text == clientArray[i]['name']));
+                filterProjects.push(...clientsArray);
+              }
+              let modifyItems = [];
+              for (var j = 0; j < filterProjects.length; j++) {
+                modifyItems.push({ item_id: j, item_text: filterProjects[j]['item_text'] });
+              }
+              this.projects = modifyItems;
+              if (this.projectNames != '') {
+                for (var k = 0; k < this.projectNames.length; k++) {
+                  var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[k]);
+                  this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[k] });
+                }
+                this.projectNames = this.selectedItems;
+              }
+            });
+        } else {
+          this.projects = this.ProjectList;
+          if (this.projectNames != '') {
+            for (var i = 0; i < this.projectNames.length; i++) {
+              var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[i]);
+              this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[i] });
+            }
+            this.projectNames = this.selectedItems;
           }
-          this.projectNames = this.selectedItems;
         }
       });
 
@@ -96,7 +131,7 @@ export class ProdCecEdidDataComponent implements OnInit {
     this.tabslist = Projectname;
     this.tabValue = this.projectNames[0];
 
-    this.viewdata(2, Projectname[0])
+    this.viewdata(2, this.tabValue)
     $(document).ready(function () {
       $(".pop-menu").click(function () {
         $(this).toggleClass("transition");
@@ -154,8 +189,9 @@ export class ProdCecEdidDataComponent implements OnInit {
     await this.mainService.getProjectNamesWaitReq(null, null, null, null, null, datatype)
       .then(value => {
         for (var i = 0; i < this.projectNames.length; i++) {
-          let filterClient: any = value.data.filter(u =>
-            (u.projectname == this.projectNames[i]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+          let projectname = this.projectNames[i]['item_text'];
+          let filterClient: any = this.mainArr.filter(u =>
+            (u.projectname == projectname));
           this.projArr.push(filterClient);
           projectSelectedList.push(this.projectNames[i]['item_text']);
         }
@@ -234,12 +270,6 @@ export class ProdCecEdidDataComponent implements OnInit {
     this.viewdata(2, projectName);
   }
 
-  AdminClients() {
-    this.router.navigate(['/admin-clients'])
-      .then(() => {
-        window.location.reload();
-      });
-  }
 
   dashboard() {
     this.router.navigate(['/dashboard'])
@@ -304,7 +334,7 @@ export class ProdCecEdidDataComponent implements OnInit {
   }
 
 
-  viewdata(dataType, projectNames) {
+  viewdata(dataType, val) {
     this.spinnerService.hide()
     this.searchValue = null;
     this.columnDefs = [
@@ -322,10 +352,16 @@ export class ProdCecEdidDataComponent implements OnInit {
       { headerName: "EDID", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
       { headerName: "Id", field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
     ];
-    this.mainService.StagingToProd(dataType, projectNames, null, null, null, null, null, null, null, null, null, null, null, null, null)
+    let split = val.split('_');
+    let projectNames = split[1];
+    let dbinstance = split[0];
+    this.mainService.StagingToProd(dataType, projectNames, null, null, null, null, null, null, null, null, null, null, null, null, null, dbinstance)
       .then(value => {
         let arr = []; const newArray = [];
-        if (value.data != "0") {
+        if ((value.data.length > 0 && value.data[0]['status'] === 0) || value.data === "0") {
+          this.rowData = [];
+        }
+        else if (value.data != "0") {
           value.data.forEach(element => {
             element['Serial'] = null
           });
@@ -366,6 +402,36 @@ export class ProdCecEdidDataComponent implements OnInit {
           this.setFixedHeight();
         }
         this.gridApi.setQuickFilter(this.searchValue)
+        let crudType = 7;
+        this.mainService.getRoleModule(crudType, null, null, null, null)
+          .then(value => {
+            /** based on role get modules accessible checked or not checked*/
+            let resultFetchArr: any = value.data.filter(u =>
+              u.name == this.role);
+            let permission = resultFetchArr.filter(u => u.mainModule === this.module)
+            if (permission[0]['readPermission'] === null) {
+              permission[0]['readPermission'] = 0
+            }
+            if (permission[0]['downloadPermission'] === null) {
+              permission[0]['downloadPermission'] = 0
+            }
+            if (permission[0]['writePermission'] === null) {
+              permission[0]['writePermission'] = 0
+            }
+            if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0) ||
+              (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0)) {
+              $('#single_download').hide();
+            }
+            if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
+              (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
+              (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1) ||
+              (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
+              (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
+              (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1)) {
+              $('#single_download').show();
+            }
+            console.log(permission)
+          })
       })
 
   }

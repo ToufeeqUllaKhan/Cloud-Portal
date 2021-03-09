@@ -23,14 +23,14 @@ export class ReportConfigurationListComponent implements OnInit {
   constructor(private fb: FormBuilder, private router: Router, private mainService: MainService, private titleService: Title, private toastr: ToastrService) {
     this.titleService.setTitle("SearchReport Configuration");
     localStorage.removeItem('selectedBrand');
-    localStorage.removeItem('updatebrandLibraryAdminProjects');
+    localStorage.removeItem('updatebrandLibraryProjects');
     localStorage.removeItem('dataConfigBinProjects');
-    localStorage.removeItem('configureAdminProjectNames')
+    localStorage.removeItem('configureProjectNames')
   }
 
   ngOnInit(): void {
-    var getBrandProjects = JSON.parse(localStorage.getItem('BrandLibraryAdminProjects'));
-    var getClientProjects = JSON.parse(localStorage.getItem('choosenAdminProjects'));
+    var getBrandProjects = JSON.parse(localStorage.getItem('BrandLibraryProjects'));
+    var getClientProjects = JSON.parse(localStorage.getItem('choosenProjects'));
     let zipUploadsProjects = JSON.parse(localStorage.getItem('dataConfigProjects'));
 
     this.switchRoute = localStorage.getItem('logSelected');
@@ -53,55 +53,29 @@ export class ReportConfigurationListComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        let filterProjectwithstatus2 = value.data.filter(u => u.statusFlag === 2);
-        let filterProjectwithstatus = value.data.filter(u => u.statusFlag != 2);
-        const unique = [...new Set(filterProjectwithstatus.map(item => item.projectname))];
-        const unique1 = [...new Set(filterProjectwithstatus2.map(item => item.projectname))];
-        let arrData = []; let arrData_1 = [];
+        let filterProject = value.data;
+        filterProject.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
+        const unique = [...new Set(filterProject.map(item => item.projectname))];
+        let arrData = [];
         for (var i = 0; i < unique.length; i++) {
           arrData.push({ item_id: i, item_text: unique[i] });
         }
-        for (var i = 0; i < unique1.length; i++) {
-          arrData.push({ item_id: i, item_text: "PROD_" + unique1[i] });
-        }
-        for (var i = 0; i < arrData.length; i++) {
-          arrData_1.push({ item_id: i, item_text: arrData[i]['item_text'] });
-        }
-
-        this.ProjectList = arrData_1;
-        // let FilterProject: any  = value.data.filter(u =>
-        //   (u.statusFlag === 2 || u.statusFlag === '2'));
-        // const unique = [...new Set(FilterProject.map(item => item.projectname))];
-
-        // let arrData = [];
-        // for (var i = 0; i < unique.length; i++) {
-        //   arrData.push({ item_id: i, item_text: "PROD_"+unique[i] });
-        // }
-        // this.ProjectList = arrData;
-
+        this.ProjectList = arrData;
         let RoleLevel = localStorage.getItem('AccessRole');
         if (RoleLevel != 'Admin') {
           let userName = localStorage.getItem('userName');
           this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
-              let filterProjects = []; let ProjectName: any; let clientsArray: any
-              for (var i = 0; i < value.data.length; i++) {
-                if (this.ProjectList[i]['item_text'] != undefined) {
-                  ProjectName = this.ProjectList[i]['item_text'];
-                } else {
-                  ProjectName = this.ProjectList[i]
-                }
-
-                if (ProjectName.startsWith('PROD_')) {
-                  clientsArray = this.ProjectList.filter(u =>
-                    u.item_text == ("PROD_" + value.data[i]['name']) && (u.statusFlag === 2 || u.statusFlag === '2'));
-                }
-                else {
-                  clientsArray = this.ProjectList.filter(u =>
-                    u.item_text == value.data[i]['name'] && (u.statusFlag != 2 || u.statusFlag != '2'));
-                }
-                // let clientsArray: any = this.ProjectList.filter(u =>
-                // u.item_text == ("PROD_"+value.data[i]['name']));
+              let filterProjects = []; let clientArray = [];
+              clientArray = value.data;
+              clientArray.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+              for (var i = 0; i < clientArray.length; i++) {
+                let clientsArray: any = this.ProjectList.filter(u =>
+                  (u.item_text == clientArray[i]['name']));
                 filterProjects.push(...clientsArray);
               }
               let modifyItems = [];
@@ -115,11 +89,10 @@ export class ReportConfigurationListComponent implements OnInit {
                   this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[k] });
                 }
                 this.projectNames = this.selectedItems;
-
               }
             });
         } else {
-          this.projects = arrData_1;
+          this.projects = arrData;
           if (this.projectNames != '' && this.projectNames != undefined) {
             for (var i = 0; i < this.projectNames.length; i++) {
               var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[i]);
@@ -331,27 +304,24 @@ export class ReportConfigurationListComponent implements OnInit {
 
   listofbrands() {
 
-    let datatype = 1; let resultFetchArr: any;
+    let datatype = 1; let resultFetchArr: any; let resultArray: any;
     this.mainService.getProjectNamesWaitReq(null, null, null, null, null, datatype)
       .then(value => {
+        resultArray = value.data;
+        resultArray.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        });
         let ProjectName;
         if (this.projectNames[0]['item_text'] != undefined) {
           ProjectName = this.projectNames[0]['item_text'];
         } else {
           ProjectName = this.projectNames[0]
         }
-
-        if (ProjectName.startsWith('PROD_')) {
-          resultFetchArr = value.data.filter(u =>
-            (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
-        }
-        else {
-          resultFetchArr = value.data.filter(u =>
-            (u.projectname == ProjectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
-        }
-        // let resultFetchArr: any = value.data.filter(u =>
-        //   (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
+        resultFetchArr = resultArray.filter(u => (u.projectname == ProjectName));
         let Dbname = resultFetchArr[0]['dbPath'];
+        if (ProjectName.startsWith(Dbname + '_')) {
+          ProjectName = ProjectName.replace(Dbname + '_', '')
+        }
         let dataType = 0; let arr = [];
         this.mainService.getSearchDetails(Dbname, null, null, null, dataType)
           .then(value => {
@@ -377,8 +347,8 @@ export class ReportConfigurationListComponent implements OnInit {
         arrData2.push(this.projectNames[j]['item_text']);
       }
       this.projectNames = arrData2;
-      localStorage.removeItem('choosenAdminProjects');
-      localStorage.setItem('configureAdminProjectNames', JSON.stringify(this.projectNames));
+      localStorage.removeItem('choosenProjects');
+      localStorage.setItem('configureProjectNames', JSON.stringify(this.projectNames));
 
       if (name != '' && this.projectNames.length != 0) {
         localStorage.setItem('selectedBrand', name);
@@ -400,8 +370,8 @@ export class ReportConfigurationListComponent implements OnInit {
       projSelectedData.push(this.projectNames[i]['item_text']);
     }
     this.projectNames = projSelectedData;
-    localStorage.setItem('fetchedAdminProj', JSON.stringify(this.projectNames));
-    this.router.navigate(['/report-clients'])
+    localStorage.setItem('fetchedProj', JSON.stringify(this.projectNames));
+    this.router.navigate(['/clients'])
       .then(() => {
         location.reload();
       });

@@ -50,8 +50,10 @@ export class CloudApiModulesComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        this.mainArr = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        this.mainArr = value.data;
+        this.mainArr.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const unique = [...new Set(this.mainArr.map(item => item.projectname))];
 
         let arrData = [];
@@ -64,10 +66,14 @@ export class CloudApiModulesComponent implements OnInit {
           let userName = localStorage.getItem('userName');
           this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
-              let filterProjects = [];
-              for (var i = 0; i < value.data.length; i++) {
+              let filterProjects = []; let clientArray = [];
+              clientArray = value.data;
+              clientArray.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+              for (var i = 0; i < clientArray.length; i++) {
                 let clientsArray: any = this.ProjectList.filter(u =>
-                  u.item_text == value.data[i]['name']);
+                  (u.item_text == clientArray[i]['name']));
                 filterProjects.push(...clientsArray);
               }
               let modifyItems = [];
@@ -83,7 +89,6 @@ export class CloudApiModulesComponent implements OnInit {
                 this.projectNames = this.selectedItems;
               }
             });
-
         } else {
           this.projects = arrData;
           if (this.projectNames != '' && this.projectNames != undefined) {
@@ -101,9 +106,9 @@ export class CloudApiModulesComponent implements OnInit {
           ProjectName = this.projectNames[0]
         }
         /** List of Api Modules available for selected Project start default initial selection of project has been considered to view the modules */
-        let resultFetchArr: any = value.data.filter(u =>
+        let resultFetchArr: any = this.mainArr.filter(u =>
           u.projectname == ProjectName);
-        let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = ProjectName;
+        let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = ProjectName.replace(Dbname + '_', '');
         this.mainService.getAPIList(sessionToken, Dbname, Project)
           .subscribe(value => {
             value.data = value.data.filter(function (obj) {
@@ -336,8 +341,8 @@ export class CloudApiModulesComponent implements OnInit {
 
   getTabName(name) {
     let resultFetchArr: any = this.mainArr.filter(u =>
-      (u.projectname == name) && (u.statusFlag != 2 || u.statusFlag != '2'));
-    let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = name;
+      (u.projectname == name));
+    let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath']; let Project = name.replace(Dbname + '_', '');
     this.mainService.getAPIList(sessionToken, Dbname, Project)
       .subscribe(value => {
         value.data = value.data.filter(function (obj) {
@@ -352,7 +357,7 @@ export class CloudApiModulesComponent implements OnInit {
   /** based on project selection to get the list of api modules available for the selected project start */
 
   apiClients() {
-    this.router.navigate(['/api-clients'])
+    this.router.navigate(['/clients'])
       .then(() => {
         window.location.reload();
       });

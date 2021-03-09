@@ -25,10 +25,12 @@ export class ClientsComponent implements OnInit {
   isNextVisible: Boolean = false;
   filterClients = []; clientArrList = [];
   clientsData = []; RolelevelProjects = [];
-  activeRegionsList = []; getMenuItem: any;
+  activeRegionsList = []; getMenuItem: any; apiMenuList: any;
   checkedItems = []; mainProjects = []; checkedProj = [];
   width: number;
   height: number;
+  moduleselected: string; switchRoute: string;
+  cec_edidclients: Boolean; datamangementclients: Boolean; historyclients: Boolean; apiclients: Boolean; reportclients: Boolean;
 
   constructor(private router: Router, private mainService: MainService, private titleService: Title, private spinnerService: NgxSpinnerService, private toastr: ToastrService) {
     this.titleService.setTitle("Clients");
@@ -36,7 +38,45 @@ export class ClientsComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.moduleselected = localStorage.getItem('moduleselected');
+    this.switchRoute = localStorage.getItem('TicketSelected');
     this.getMenuItem = localStorage.getItem('sideMenuItem');
+    this.apiMenuList = localStorage.getItem('ApiMenuItem');
+    if (this.moduleselected === 'Data Management Tool') {
+      this.datamangementclients = true;
+      this.cec_edidclients = false;
+      this.historyclients = false;
+      this.apiclients = false;
+      this.reportclients = false;
+    }
+    if (this.moduleselected === 'Centralized CEC-EDID DB') {
+      this.datamangementclients = false;
+      this.cec_edidclients = true;
+      this.historyclients = false;
+      this.apiclients = false;
+      this.reportclients = false;
+    }
+    if (this.moduleselected === 'admin-dashboard') {
+      this.historyclients = true;
+      this.datamangementclients = false;
+      this.cec_edidclients = false;
+      this.apiclients = false;
+      this.reportclients = false;
+    }
+    if (this.moduleselected === 'Cloud API Search Tester') {
+      this.historyclients = false;
+      this.datamangementclients = false;
+      this.cec_edidclients = false;
+      this.apiclients = true;
+      this.reportclients = false;
+    }
+    if (this.moduleselected === 'Analytics Report') {
+      this.historyclients = false;
+      this.datamangementclients = false;
+      this.cec_edidclients = false;
+      this.apiclients = false;
+      this.reportclients = true;
+    }
     var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
     if (browserZoomLevel != 100) {
       this.zoomFunction();
@@ -143,7 +183,7 @@ export class ClientsComponent implements OnInit {
         let clientArr = [];
         for (var j = 0; j < this.activeRegions.length; j++) {
           let filterClient: any = value.data.filter(u =>
-            (u.clientRegion == this.activeRegions[j]) && (u.statusFlag != 2 || u.statusFlag != '2'));
+            (u.clientRegion == this.activeRegions[j]));
           this.clientsData.push(...filterClient);
           var uniqueArray1 = removeDuplicates(filterClient, "clientName");
           clientArr.push(uniqueArray1);
@@ -166,7 +206,7 @@ export class ClientsComponent implements OnInit {
               let filterProjects = [];
               for (var i = 0; i < value.data.length; i++) {
                 let clientsArray: any = this.filterClients.filter(u =>
-                  u.name == value.data[i]['name']);
+                  (u.name == value.data[i]['name']) && (u.dbPath == value.data[i]['dbPath']) && (u.statusFlag == value.data[i]['statusFlag']));
                 filterProjects.push(...clientsArray);
               }
               let modClients = [];
@@ -385,8 +425,10 @@ export class ClientsComponent implements OnInit {
           if (value) {
             if (this.selectedClients.indexOf(value) === -1) {
               this.selectedClients.push(value);
-              let filterProject: any = value.data.filter(u =>
-                (u.statusFlag != 2 || u.statusFlag != '2'));
+              let filterProject: any = value.data;
+              filterProject.forEach(element => {
+                element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+              })
               for (var i = 0; i < filterProject.length; i++) {
                 projectCheckedData.push(filterProject[i]['projectname']);
               }
@@ -412,8 +454,10 @@ export class ClientsComponent implements OnInit {
         } else {
           event.target.classList.remove('highlighted');
           let removeArr = [];
-          let filterProject: any = value.data.filter(u =>
-            (u.statusFlag != 2 || u.statusFlag != '2'));
+          let filterProject: any = value.data;
+          filterProject.forEach(element => {
+            element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+          })
           for (var i = 0; i < filterProject.length; i++) {
             removeArr.push(filterProject[i]['projectname']);
           }
@@ -473,11 +517,13 @@ export class ClientsComponent implements OnInit {
       .pipe()
       .subscribe(value => {
         this.finalArr = value.data;
+        this.finalArr.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         let RoleLevel = localStorage.getItem('AccessRole');
         if (RoleLevel != 'Admin') {
           let projectArr = [];
-          let filterProject: any = this.finalArr.filter(u =>
-            (u.statusFlag != 2 || u.statusFlag != '2'));
+          let filterProject: any = this.finalArr;
           for (var j = 0; j < filterProject.length; j++) {
             projectArr.push(filterProject[j]['projectname']);
             var uniqueProjects = projectArr.filter((v, i, a) => a.indexOf(v) === i);
@@ -488,8 +534,7 @@ export class ClientsComponent implements OnInit {
           }
         } else {
           let projectArr = [];
-          let filterProject: any = this.finalArr.filter(u =>
-            (u.statusFlag != 2 || u.statusFlag != '2'));
+          let filterProject: any = this.finalArr;
           for (var i = 0; i < filterProject.length; i++) {
             projectArr.push(filterProject[i]['projectname']);
           }
@@ -512,24 +557,175 @@ export class ClientsComponent implements OnInit {
       localStorage.removeItem('choosenProjects');
       localStorage.removeItem('BrandLibraryProjects');
       localStorage.setItem('choosenProjects', JSON.stringify(this.mainProjects));
-      if (this.getMenuItem != null && this.getMenuItem != undefined) {
-        if (this.getMenuItem == 'Brand Model') {
-          this.getMenuItem = 'Component Data';
-        } if (this.getMenuItem == 'BrandInfoCEC') {
-          this.getMenuItem = 'Brand Info CEC';
-        } if (this.getMenuItem == 'BrandInfoEDID') {
-          this.getMenuItem = 'Brand Info EDID';
-        } if (this.getMenuItem == 'CEC-EDID') {
-          this.getMenuItem = 'CEC-EDID Data';
-        } if (this.getMenuItem == 'CrossReferenceBy Brands') {
-          this.getMenuItem = 'Cross Reference By Brands';
-        }
-        localStorage.setItem('selectedBrand', this.getMenuItem);
-        this.router.navigate(['/brand-library']);
 
-      } else {
-        this.router.navigate(['/data-configuration-list']);
+
+      if (this.moduleselected === 'Data Management Tool') {
+        if (this.getMenuItem != null && this.getMenuItem != undefined) {
+          if (this.getMenuItem == 'Brand Model') {
+            this.getMenuItem = 'Component Data';
+          } if (this.getMenuItem == 'BrandInfoCEC') {
+            this.getMenuItem = 'Brand Info CEC';
+          } if (this.getMenuItem == 'BrandInfoEDID') {
+            this.getMenuItem = 'Brand Info EDID';
+          } if (this.getMenuItem == 'CEC-EDID') {
+            this.getMenuItem = 'CEC-EDID Data';
+          } if (this.getMenuItem == 'CrossReferenceBy Brands') {
+            this.getMenuItem = 'Cross Reference By Brands';
+          }
+          localStorage.setItem('selectedBrand', this.getMenuItem);
+          this.router.navigate(['/brand-library']);
+
+        } else {
+          this.router.navigate(['/data-configuration-list']);
+        }
       }
+      if (this.moduleselected === 'Centralized CEC-EDID DB') {
+        if (this.switchRoute == 'CEC-EDID Data') {
+          this.router.navigate(['/prod_CEC-EDID_data']);
+        }
+      }
+      if (this.moduleselected === 'admin-dashboard') {
+        if (this.switchRoute == 'Change History') {
+          this.router.navigate(['/changeHistory']);
+        }
+      }
+      if (this.moduleselected === 'Cloud API Search Tester') {
+        if (this.mainProjects.length == 1) {
+          let dataType = 1;
+          this.mainService.getProjectNames(null, null, null, null, null, dataType)
+            .subscribe(value => {
+              let filterProject: any = value.data;
+              filterProject.forEach(element => {
+                element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+              })
+              let resultFetchArr: any = filterProject.filter(u =>
+                u.projectname == this.mainProjects[0]);
+              let Dbname = resultFetchArr[0]['dbPath'];
+              let arr = []; let Project = this.mainProjects[0].replace(Dbname + '_', ''); let sessionToken = null; let apis = []
+              console.log(sessionToken, Dbname, Project);
+              this.mainService.getAPIListData(sessionToken, Dbname, Project)
+                .then(value => {
+                  if (value.data.length != 0) {
+                    value.data = value.data.filter(function (obj) {
+                      return obj.statusFlag !== 0;
+                    });
+                    apis = value.data;
+                    if (apis.length == 0) {
+                      // this.toastr.warning(value.message);
+                      console.log('No Api is assigned for this ' + Project)
+                    }
+                    for (let i = 0; i < apis.length; i++) {
+                      arr.push(apis[i]['name'])
+                    }
+                  }
+                  if (this.apiMenuList != null && this.apiMenuList != undefined) {
+                    if (this.apiMenuList == 'Auto Search') {
+                      this.apiMenuList = 'AUTOSEARCH';
+                    }
+                    if (this.apiMenuList == 'BIN Download') {
+                      this.apiMenuList = 'DOWNLOAD BIN';
+                    }
+                    if (this.apiMenuList == 'Delta Search') {
+                      this.apiMenuList = 'DELTASEARCH';
+                    }
+                    if (this.apiMenuList == 'Model Search') {
+                      this.apiMenuList = 'MODELSEARCH';
+                    }
+                    if (this.apiMenuList == 'ZIP Download') {
+                      this.apiMenuList = 'DOWNLOAD ZIP';
+                    }
+                    if (this.apiMenuList == 'Download DB Updates') {
+                      this.apiMenuList = 'DOWNLOADDBUPDATES';
+                    }
+                    if (this.apiMenuList == 'FeedBack') {
+                      this.apiMenuList = 'FEEDBACK';
+                    }
+                    if (this.apiMenuList == 'Latest DB Version') {
+                      this.apiMenuList = 'LATESTDBVERSION';
+                    }
+                    if (this.apiMenuList == 'Current DB Version') {
+                      this.apiMenuList = 'CURRENTDBVERSION';
+                    }
+                    if (this.apiMenuList == 'Login') {
+                      this.apiMenuList = 'LOGIN';
+                    }
+                    if (this.apiMenuList == 'Register') {
+                      this.apiMenuList = 'REGISTRATION';
+                    }
+                    if (this.apiMenuList == 'Generic Log') {
+                      this.apiMenuList = 'GENERICLOG';
+                    }
+                    if (arr.includes(this.apiMenuList)) {
+                      localStorage.setItem('CloudApiProjects', JSON.stringify(this.mainProjects));
+                      localStorage.setItem('CloudApi', this.apiMenuList);
+                      this.router.navigate(['/api-db-test']);
+                    }
+                    else {
+                      this.toastr.warning(this.apiMenuList + ' Module is not assigned for Project ' + Project, '');
+                    }
+
+                  }
+                  else {
+                    this.router.navigate(['/cloud-api-modules']);
+                  }
+                });
+            });
+        }
+        if (this.mainProjects.length > 1) {
+          localStorage.removeItem('choosenProjects');
+          localStorage.removeItem('BrandLibraryProjects');
+          localStorage.setItem('choosenProjects', JSON.stringify(this.mainProjects));
+          this.apiMenuList = localStorage.getItem('ApiMenuItem');
+          if (this.apiMenuList != null && this.apiMenuList != undefined) {
+            if (this.apiMenuList == 'Auto Search') {
+              this.apiMenuList = 'AUTOSEARCH';
+            }
+            if (this.apiMenuList == 'BIN Download') {
+              this.apiMenuList = 'DOWNLOAD BIN';
+            }
+            if (this.apiMenuList == 'Delta Search') {
+              this.apiMenuList = 'DELTASEARCH';
+            }
+            if (this.apiMenuList == 'Model Search') {
+              this.apiMenuList = 'MODELSEARCH';
+            }
+            if (this.apiMenuList == 'ZIP Download') {
+              this.apiMenuList = 'DOWNLOAD ZIP';
+            }
+            if (this.apiMenuList == 'Download DB Updates') {
+              this.apiMenuList = 'DOWNLOADDBUPDATES';
+            }
+            if (this.apiMenuList == 'FeedBack') {
+              this.apiMenuList = 'FEEDBACK';
+            }
+            if (this.apiMenuList == 'Latest DB Version') {
+              this.apiMenuList = 'LATESTDBVERSION';
+            }
+            if (this.apiMenuList == 'Current DB Version') {
+              this.apiMenuList = 'CURRENTDBVERSION';
+            }
+            if (this.apiMenuList == 'Login') {
+              this.apiMenuList = 'LOGIN';
+            }
+            if (this.apiMenuList == 'Register') {
+              this.apiMenuList = 'REGISTRATION';
+            }
+            if (this.apiMenuList == 'Generic Log') {
+              this.apiMenuList = 'GENERICLOG';
+            }
+            localStorage.setItem('CloudApi', this.apiMenuList);
+            localStorage.setItem('CloudApiProjects', JSON.stringify(this.selectedClients));
+            this.router.navigate(['/api-db-test']);
+
+          } else {
+            this.router.navigate(['/cloud-api-modules']);
+          }
+        }
+      }
+      if (this.moduleselected === 'Analytics Report') {
+        this.router.navigate(['/Report-configuration-list']);
+      }
+
     } else {
       this.toastr.warning('Please Select the Client to Proceed Further..', '');
     }
@@ -544,27 +740,116 @@ export class ClientsComponent implements OnInit {
     this.mainService.getProjectNames(clientName, regionName, null, null, null, dataType)
       .pipe()
       .subscribe(value => {
-        let filterProject: any = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        let filterProject: any = value.data;
+        filterProject.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         clientArr.push(filterProject[0]['projectname']);
         localStorage.setItem('choosenProjects', JSON.stringify(clientArr));
         if (clientArr.length != 0) {
-          if (this.getMenuItem != null && this.getMenuItem != undefined) {
-            if (this.getMenuItem == 'Brand Model') {
-              this.getMenuItem = 'Component Data';
-            } if (this.getMenuItem == 'BrandInfoCEC') {
-              this.getMenuItem = 'Brand Info CEC';
-            } if (this.getMenuItem == 'BrandInfoEDID') {
-              this.getMenuItem = 'Brand Info EDID';
-            } if (this.getMenuItem == 'CEC-EDID') {
-              this.getMenuItem = 'CEC-EDID Data';
-            } if (this.getMenuItem == 'CrossReferenceBy Brands') {
-              this.getMenuItem = 'Cross Reference By Brands';
+          if (this.moduleselected === 'Data Management Tool') {
+            if (this.getMenuItem != null && this.getMenuItem != undefined) {
+              if (this.getMenuItem == 'Brand Model') {
+                this.getMenuItem = 'Component Data';
+              } if (this.getMenuItem == 'BrandInfoCEC') {
+                this.getMenuItem = 'Brand Info CEC';
+              } if (this.getMenuItem == 'BrandInfoEDID') {
+                this.getMenuItem = 'Brand Info EDID';
+              } if (this.getMenuItem == 'CEC-EDID') {
+                this.getMenuItem = 'CEC-EDID Data';
+              } if (this.getMenuItem == 'CrossReferenceBy Brands') {
+                this.getMenuItem = 'Cross Reference By Brands';
+              }
+              localStorage.setItem('selectedBrand', this.getMenuItem);
+              this.router.navigate(['/brand-library']);
+            } else {
+              this.router.navigate(['/data-configuration-list']);
             }
-            localStorage.setItem('selectedBrand', this.getMenuItem);
-            this.router.navigate(['/brand-library']);
-          } else {
-            this.router.navigate(['/data-configuration-list']);
+          }
+          if (this.moduleselected === 'Centralized CEC-EDID DB') {
+            if (this.switchRoute == 'CEC-EDID Data') {
+              this.router.navigate(['/prod_CEC-EDID_data']);
+            }
+          }
+          if (this.moduleselected === 'admin-dashboard') {
+            if (this.switchRoute == 'Change History') {
+              this.router.navigate(['/changeHistory']);
+            }
+          }
+          if (this.moduleselected === 'Cloud API Search Tester') {
+            let Dbname = filterProject[0]['dbinstance']; let arr = [];
+            let Project = clientArr[0].replace(Dbname + '_', ''); let sessionToken = null; let apis = []
+            this.mainService.getAPIListData(sessionToken, Dbname, Project)
+              .then(value => {
+                if (value.data.length != 0) {
+                  value.data = value.data.filter(function (obj) {
+                    return obj.statusFlag !== 0;
+                  });
+                  apis = value.data;
+                  if (apis.length == 0) {
+                    // this.toastr.warning(value.message);
+                    console.log('No Api is assigned for this ' + Project)
+                  }
+                  for (let i = 0; i < apis.length; i++) {
+                    arr.push(apis[i]['name'])
+                  }
+                }
+                if (clientArr.length != 0) {
+                  if (this.apiMenuList != null && this.apiMenuList != undefined) {
+                    if (this.apiMenuList == 'Auto Search') {
+                      this.apiMenuList = 'AUTOSEARCH';
+                    }
+                    if (this.apiMenuList == 'BIN Download') {
+                      this.apiMenuList = 'DOWNLOAD BIN';
+                    }
+                    if (this.apiMenuList == 'Delta Search') {
+                      this.apiMenuList = 'DELTASEARCH';
+                    }
+                    if (this.apiMenuList == 'Model Search') {
+                      this.apiMenuList = 'MODELSEARCH';
+                    }
+                    if (this.apiMenuList == 'ZIP Download') {
+                      this.apiMenuList = 'DOWNLOAD ZIP';
+                    }
+                    if (this.apiMenuList == 'Download DB Updates') {
+                      this.apiMenuList = 'DOWNLOADDBUPDATES';
+                    }
+                    if (this.apiMenuList == 'FeedBack') {
+                      this.apiMenuList = 'FEEDBACK';
+                    }
+                    if (this.apiMenuList == 'Latest DB Version') {
+                      this.apiMenuList = 'LATESTDBVERSION';
+                    }
+                    if (this.apiMenuList == 'Current DB Version') {
+                      this.apiMenuList = 'CURRENTDBVERSION';
+                    }
+                    if (this.apiMenuList == 'Login') {
+                      this.apiMenuList = 'LOGIN';
+                    }
+                    if (this.apiMenuList == 'Register') {
+                      this.apiMenuList = 'REGISTRATION';
+                    }
+                    if (this.apiMenuList == 'Generic Log') {
+                      this.apiMenuList = 'GENERICLOG';
+                    }
+                    if (arr.includes(this.apiMenuList)) {
+                      localStorage.setItem('CloudApiProjects', JSON.stringify(clientArr));
+                      localStorage.setItem('CloudApi', this.apiMenuList);
+                      this.router.navigate(['/api-db-test']);
+                    }
+                    else {
+                      this.toastr.warning(this.apiMenuList + ' Module is not assigned for ' + Project, '');
+                    }
+
+                  }
+                  else {
+                    this.router.navigate(['/cloud-api-modules']);
+                  }
+                }
+              });
+          }
+          if (this.moduleselected === 'Analytics Report') {
+            this.router.navigate(['/Report-configuration-list']);
           }
         }
       });

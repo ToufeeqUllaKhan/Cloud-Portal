@@ -107,12 +107,14 @@ export class ApiDbTestComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        this.mainArr = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        this.mainArr = value.data;
+        this.mainArr.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         let resultFetchArr: any = this.mainArr.filter(u =>
           u.projectname == this.projectNames[0]);
         let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath'];
-        let Project = this.projectNames[0];
+        let Project = this.projectNames[0].replace(Dbname + '_', '');
         this.sign_key = resultFetchArr[0]['signatureKey'];
         let defaultboxid = resultFetchArr[0]['defaultBoxId'];
         if (defaultboxid != null) {
@@ -141,10 +143,14 @@ export class ApiDbTestComponent implements OnInit {
           let userName = localStorage.getItem('userName');
           this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
-              let filterProjects = [];
-              for (var i = 0; i < value.data.length; i++) {
+              let filterProjects = []; let clientArray = [];
+              clientArray = value.data;
+              clientArray.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+              for (var i = 0; i < clientArray.length; i++) {
                 let clientsArray: any = this.ProjectList.filter(u =>
-                  u.item_text == value.data[i]['name']);
+                  u.item_text == clientArray[i]['name']);
                 filterProjects.push(...clientsArray);
               }
               let modifyItems = [];
@@ -179,7 +185,8 @@ export class ApiDbTestComponent implements OnInit {
                 let Client = filterProject[0]['client'];
                 let Region = filterProject[0]['region'];
                 let dbInstance = filterProject[0]['dbinstance'];
-                this.mainService.getProjectNames(Client, Region, ProjectSel, null, dbInstance, datatype)
+                let Projectname = filterProject[0]['projectname'].replace(dbInstance + '_', '')
+                this.mainService.getProjectNames(Client, Region, Projectname, null, dbInstance, datatype)
                   .subscribe(value => {
                     if (value.data.length != 0) {
                       versionArr.push(value.data[0]['version']);
@@ -217,7 +224,8 @@ export class ApiDbTestComponent implements OnInit {
             let Client = filterProject[0]['client'];
             let Region = filterProject[0]['region'];
             let dbInstance = filterProject[0]['dbinstance'];
-            this.mainService.getProjectNames(Client, Region, Project, null, dbInstance, datatype)
+            let Projectname = filterProject[0]['projectname'].replace(dbInstance + '_', '')
+            this.mainService.getProjectNames(Client, Region, Projectname, null, dbInstance, datatype)
               .subscribe(value => {
                 if (value.data.length != 0) {
                   versionArr.push(value.data[0]['version']);
@@ -320,7 +328,8 @@ export class ApiDbTestComponent implements OnInit {
       version = this.version_list;
       dbInstance = filterProjects[0]['dbinstance'];
     }
-    this.mainService.getDevicesList(dbInstance, this.user, projectname, version)
+    let Projectname = filterProjects[0]['projectname'].replace(dbInstance + '_', '');
+    this.mainService.getDevicesList(dbInstance, this.user, Projectname, version)
       .subscribe(value => {
         this.devices = value.data;
       });
@@ -353,9 +362,10 @@ export class ApiDbTestComponent implements OnInit {
     }
     this.tabName = Project;
     let resultFetchArr: any = this.mainArr.filter(u =>
-      (u.projectname == Project) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == Project));
     let Dbname = resultFetchArr[0]['dbPath']; let arr = [];
-    await this.mainService.getAPIListData(sessionToken, Dbname, Project)
+    let Projectname = resultFetchArr[0]['projectname'].replace(Dbname + '_', '')
+    await this.mainService.getAPIListData(sessionToken, Dbname, Projectname)
       .then(value => {
         if (value.data.length != 0) {
           value.data = value.data.filter(function (obj) {
@@ -402,7 +412,7 @@ export class ApiDbTestComponent implements OnInit {
             this.isDownloadStats = false;
             this.isGenericSearch = false;
             let filterProject: any = this.mainArr.filter(u =>
-              (u.projectname == this.tabName) && (u.statusFlag != 2 || u.statusFlag != '2'));
+              (u.projectname == this.tabName));
             // let crudType = 2; let project = this.tabName; let signaturekey = filterProject[0]['signatureKey'];
             // let BoxId= null; let Dbname = filterProject[0]['dbPath'];let dbversion = this.version[0];
             let defaultboxid = filterProject[0]['defaultBoxId'];
@@ -592,7 +602,7 @@ export class ApiDbTestComponent implements OnInit {
       Project = this.tabName;
     }
     let resultFetchArr: any = this.mainArr.filter(u =>
-      (u.projectname == Project) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == Project));
     // var self=this;let versionselected;
     // $('#version').each(function (i, elem) {
     //   versionselected = ($(elem).val());
@@ -601,24 +611,25 @@ export class ApiDbTestComponent implements OnInit {
     let sessionToken = null; let Dbname = resultFetchArr[0]['dbPath'];
     let SignatureKey = resultFetchArr[0]['signatureKey'];
     let userName = localStorage.getItem('userName'); let recordCount = 1; let ipaddress = this.ipAddress;
-    await this.mainService.getAPIListData(sessionToken, Dbname, Project)
+    let Projectname = resultFetchArr[0]['projectname'].replace(Dbname + '_', '')
+    await this.mainService.getAPIListData(sessionToken, Dbname, Projectname)
       .then(value => {
         if (this.api_list != 'REGISTRATION' && this.api_list != 'LOGIN') {
           this.getDevices();
           let crudType = 2; let BoxId;
           BoxId = null; let dbversion = this.version_list;
-          this.mainService.getBoxId(crudType, Project, SignatureKey, BoxId, Dbname, dbversion)
+          this.mainService.getBoxId(crudType, Projectname, SignatureKey, BoxId, Dbname, dbversion)
             .subscribe(value => {
               if (value.data[0]['result'] == "0" || value.data[0]['result'] === 0) {
                 this.generateUUID();
                 BoxId = 'Portal_' + this.uuidValue;
-                this.mainService.getBoxId(1, Project, SignatureKey, BoxId, Dbname, dbversion)
+                this.mainService.getBoxId(1, Projectname, SignatureKey, BoxId, Dbname, dbversion)
                   .subscribe(value => {
                     if (value.data.length != 0) {
                       if ((value.data[0]['result'] === 1 || value.data[0]['result'] === "1") && value.statusCode === "200") {
                         // this.toastr.success('', value.data[0]['message']);
                         let Updateadddescription = 'Boxid: ' + BoxId + ' Inserted Successfully'; let Updatestatus = 1; let Operation = "Insert"; let Datasection = 'Default Boxid Insertion';
-                        let log = JSON.stringify({ userName, Project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus }) + '(Update DefaultBoxid)';
+                        let log = JSON.stringify({ userName, Projectname, DbName, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus }) + '(Update DefaultBoxid)';
                         let loginid = this.loginid['data'][0]['loginId'];
                         this.mainService.Genericlog(1, loginid, log)
                           .then(value => {
@@ -628,7 +639,7 @@ export class ApiDbTestComponent implements OnInit {
                       // else {
                       //   this.toastr.warning('', value.data[0]['message']);
                       // }
-                      this.mainService.getBoxId(2, Project, SignatureKey, null, Dbname, dbversion)
+                      this.mainService.getBoxId(2, Projectname, SignatureKey, null, Dbname, dbversion)
                         .subscribe(value => {
                           if (value.data.length != 0) {
                             if (value.data[0]['result'] == "1" || value.data[0]['result'] === 1) {
@@ -651,7 +662,8 @@ export class ApiDbTestComponent implements OnInit {
               let resultFetchArr: any = this.mainArr.filter(u =>
                 u.projectname == Project);
               let DbName = resultFetchArr[0]['dbPath'];
-              this.mainService.getAPIList(null, DbName, Project)
+              let ProjectName = resultFetchArr[0]['projectname'].replace(DbName + '_', '')
+              this.mainService.getAPIList(null, DbName, ProjectName)
                 .subscribe(value => {
                   if (value.data.length > 0) {
                     let searchUrl: any = value.data.filter(u => u.name == 'REGISTRATION');
@@ -666,6 +678,11 @@ export class ApiDbTestComponent implements OnInit {
                       dbVersion = resultFetchArr[0]['embeddedDbVersion'];
                     }
                     let signatureKey = resultFetchArr[0]['signatureKey']; let countryCode = null;
+                    if (deviceId.startsWith('Portal_')) {
+                      deviceId = deviceId;
+                    } else {
+                      deviceId = 'Portal_' + deviceId;
+                    }
                     this.mainService.getTestApiRegister(eventUrl, deviceId, dbVersion, signatureKey, countryCode)
                       .subscribe(e => {
                         this.urlData = SearchUrl[0]['address'] + SearchUrl[0]['uri'];
@@ -767,7 +784,8 @@ export class ApiDbTestComponent implements OnInit {
     let Client = filterProject[0]['client'];
     let Region = filterProject[0]['region'];
     let dbInstance = filterProject[0]['dbinstance'];
-    this.mainService.getProjectNames(Client, Region, this.tabName, null, dbInstance, datatype)
+    let Projectname = filterProject[0]['projectname'].replace(dbInstance + '_', '')
+    this.mainService.getProjectNames(Client, Region, Projectname, null, dbInstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -827,7 +845,7 @@ export class ApiDbTestComponent implements OnInit {
   /** If Api Clients was clicked in Braedcrumbs to route to client page */
 
   apiClients() {
-    this.router.navigate(['/api-clients'])
+    this.router.navigate(['/clients'])
       .then(() => {
         window.location.reload();
       });
@@ -852,7 +870,7 @@ export class ApiDbTestComponent implements OnInit {
       });
       this.version_list = this.selectedversion;
       let filterVersion: any = this.mainArr.filter(u =>
-        u.projectname == projectName && u.embeddedDbVersion == this.version_list && (u.statusFlag != 2 || u.statusFlag != '2'));
+        u.projectname == projectName && u.embeddedDbVersion == this.version_list);
       if (filterVersion.length != 0) {
 
         this.ApiForm = this.api_list;
@@ -963,13 +981,14 @@ export class ApiDbTestComponent implements OnInit {
     this.responsetime = ' ';
     if (tabs != undefined && tabs != '') {
       let versionArray: any = this.mainArr.filter(u =>
-        (u.projectname == tabs) && (u.statusFlag != 2 || u.statusFlag != '2'));
+        (u.projectname == tabs));
       let datatype = 21;
       let versionArr = [];
       let Client = versionArray[0]['client'];
       let Region = versionArray[0]['region'];
       let dbInstance = versionArray[0]['dbinstance'];
-      this.mainService.getProjectNames(Client, Region, this.tabName, null, dbInstance, datatype)
+      let Projectname = versionArray[0]['projectname'].replace(dbInstance + '_', '')
+      this.mainService.getProjectNames(Client, Region, Projectname, null, dbInstance, datatype)
         .subscribe(value => {
           if (value.data.length != 0) {
             versionArr.push(value.data[0]['version']);
@@ -993,7 +1012,7 @@ export class ApiDbTestComponent implements OnInit {
       projectName = this.tabName;
     }
     let filterProject: any = this.mainArr.filter(u =>
-      (u.projectname == projectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == projectName));
     this.dbVersion = [];
     if (this.dbVersion.length == 0) {
       this.versionArr = [];

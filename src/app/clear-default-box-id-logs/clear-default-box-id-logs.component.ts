@@ -40,22 +40,24 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
     let dataType = 1; let versionarr = [];
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        this.filterProjects = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        this.filterProjects = value.data;
+        this.filterProjects.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const uniqueProjects = [...new Set(this.filterProjects.map(item => item.projectname))];
         this.projects = uniqueProjects;
         this.projectNames = this.projects[0];
-        let filterProject: any = value.data.filter(u =>
+        let filterProject: any = this.filterProjects.filter(u =>
           u.projectname == this.projects[0]);
         this.defaultboxid = filterProject[0]['defaultBoxId'];
         this.spinnerService.hide();
       });
     var self = this;
     $('#ModuleSubmit').click(function () {
+      let projectname = self.projectNames;
       let filterProject: any = self.filterProjects.filter(u =>
-        (u.projectname == self.projectNames) && (u.statusFlag != 2 || u.statusFlag != '2'));
+        (u.projectname == projectname));
       let dbName = filterProject[0]['dbinstance'];
-      console.log(dbName, self.defaultboxid)
       self.mainService.ClearDefaultBoxIdLogs(dbName, self.defaultboxid)
         .then(value => {
           if ((value.data[0]['status'] === 1 || value.data[0]['status'] === "1") && value.statusCode === "200") {
@@ -90,6 +92,9 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
       this.mainService.getProjectNames(null, null, null, null, null, 1)
         .subscribe(value => {
           this.filterProjects = value.data
+          this.filterProjects.forEach(element => {
+            element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+          })
         })
       let filterProject: any = this.filterProjects.filter(u =>
         u.projectname == this.projectNames);
@@ -115,11 +120,13 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
   updatedeviceid() {
     var deviceId = 'Portal_' + this.updatedevice_id;
     let BoxId = deviceId; let versionarr = [];
+    let Projectname = this.projectNames;
     let filterProject: any = this.filterProjects.filter(u =>
-      (u.projectname == this.projectNames) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == Projectname));
     // var self=this;
-    let Client = filterProject[0]['client']; let Region = filterProject[0]['region']; let ProjectName = filterProject[0]['projectname'];
+    let Client = filterProject[0]['client']; let Region = filterProject[0]['region'];
     let Dbinstance = filterProject[0]['dbinstance'];
+    let ProjectName = filterProject[0]['projectname'].replace(Dbinstance + '_', '');
     this.mainService.getProjectNames(Client, Region, ProjectName, null, Dbinstance, 21)
       .subscribe(value => {
         if (value.data.length != 0) {
@@ -127,8 +134,9 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
           this.versionlist = versionarr[0];
         }
 
-        let crudType = 3; let project = this.projectNames; let dbversion = this.versionlist;
+        let crudType = 3; let dbversion = this.versionlist;
         let signaturekey = filterProject[0]['signatureKey']; let Dbname = filterProject[0]['dbPath'];
+        let project = this.projectNames.replace(Dbname + '_', '');
         let userName = localStorage.getItem('userName'); let recordCount = 1; let ipaddress = this.ipAddress;
 
         if (this.updatedevice_id != undefined) {
@@ -137,7 +145,7 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
               if (boxIdData.status === 'success' && boxIdData.statusCode === '200' && (boxIdData.data[0]["result"] === "1" || boxIdData.data[0]["result"] === 1)) {
                 this.toastr.success('', boxIdData.data[0]["message"], { timeOut: 6000 });
                 let Updateadddescription = 'Boxid: ' + BoxId + ' Updated successfully'; let Updatestatus = 100; let Operation = "Update"; let Datasection = 'Default Boxid Updation';
-                let log = JSON.stringify({ userName, project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus }) + '(Update DefaultBoxid)';
+                let log = JSON.stringify({ userName, Dbname, project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus }) + '(Update DefaultBoxid)';
                 let loginid = this.loginid['data'][0]['loginId'];
                 this.mainService.Genericlog(1, loginid, log)
                   .then(value => {
@@ -155,7 +163,7 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
                     if (value.status === 'success' && value.statusCode === '200' && (value.data[0]["result"] === "1" || value.data[0]["result"] === 1)) {
                       this.toastr.success('', value.data[0]["message"], { timeOut: 6000 });
                       let Updateadddescription = 'Boxid: ' + BoxId + ' Inserted Successfully'; let Updatestatus = 1; let Operation = "Insert"; let Datasection = 'Default Boxid Insertion';
-                      let log = JSON.stringify({ userName, project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus }) + '(Update DefaultBoxid)';
+                      let log = JSON.stringify({ userName, Dbname, project, dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus }) + '(Update DefaultBoxid)';
                       let loginid = this.loginid['data'][0]['loginId'];
                       this.mainService.Genericlog(1, loginid, log)
                         .then(value => {

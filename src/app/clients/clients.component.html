@@ -3,10 +3,42 @@
   <!-- ============================================================== -->
   <div class="row page-titles">
     <div class="col-md-12 col-12 align-self-center">
-      <ol class="breadcrumb">
+      <ol class="breadcrumb" *ngIf="datamangementclients">
         <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
         <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Data Management</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Clients</li>
+      </ol>
+      <ol class="breadcrumb" *ngIf="cec_edidclients">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/Centralized-DB-view']">Centralized DB View</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/Centralized-DB-view']">{{switchRoute}}</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Clients</li>
+      </ol>
+      <ol class="breadcrumb" *ngIf="historyclients">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">{{switchRoute}}</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Clients</li>
+      </ol>
+      <ol class="breadcrumb" *ngIf="apiclients">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/dashboard']">Cloud Api Test</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Clients</li>
+      </ol>
+      <ol class="breadcrumb" *ngIf="reportclients">
+        <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/reports-view']">Customized Reports</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
         <li class="breadcrumb-item active">Clients</li>
       </ol>

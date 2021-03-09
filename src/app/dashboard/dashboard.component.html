@@ -41,6 +41,15 @@
         </div>
       </div>
     </div>
+    <div class="col-md-6 col-xl-4" *ngIf="isCentralized" (click)="centralized()">
+      <div class="mini-stat clearfix card-brown">
+        <span class="mini-stat-icon"><i class="fa fa-database" aria-hidden="true"></i></span>
+        <div class="mini-stat-info text-right text-light">
+          <span class="counter text-white">Centralized CEC-EDID DB</span>
+          View CEC-EDID
+        </div>
+      </div>
+    </div>
     <div class="col-md-6 col-xl-4" *ngIf="isTestModule">
       <div class="mini-stat clearfix card-blue">
         <span class="mini-stat-icon"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>

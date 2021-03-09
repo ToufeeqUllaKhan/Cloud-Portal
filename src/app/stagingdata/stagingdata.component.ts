@@ -45,7 +45,7 @@ export class StagingdataComponent implements OnInit {
   vendorError: Boolean = false; edidError: Boolean = false;
   Detectionid: any; rows: any = []; ModelList: any = []; clicker: any; uidmodels = []; Uid: any = [];
   successunlink: any = 0; successinsert: any = 0; successupdate: any = 0;
-  failedunlink: any = 0; failedinsert: any = 0;
+  failedunlink: any = 0; failedinsert: any = 0; failedupdate: any = 0;
   showeditUIDbutton: boolean = false; showeditbutton: boolean = false;
   showunlinkbutton: boolean = false;
   keys: any = [];
@@ -75,8 +75,7 @@ export class StagingdataComponent implements OnInit {
   xmlDataResult: any[];
   singlecodesetassigned: any = []; multiplecodesetassigned: any = [];
   multiplecodeset: boolean = false;
-  nocodesetassigned: any;
-  nocodeset: boolean;
+  nocodesetassigned: any = [];
   message: string; multipleuidreport: any = [];
 
   public gridApi;
@@ -96,10 +95,14 @@ export class StagingdataComponent implements OnInit {
   rows_selected: any;
   loginid: any;
   show: boolean = false;
+  role: string;
+  module: string;
   constructor(private mainService: MainService, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService, private fb: FormBuilder, private http: HttpClient) {
     localStorage.removeItem('RawStatus')
     this.usersName = localStorage.getItem('userName');
     this.loginid = JSON.parse(localStorage.getItem('currentUser'));
+    this.role = localStorage.getItem('AccessRole');
+    this.module = localStorage.getItem('moduleselected');
     this.status = null; this.device = null; this.subdevice = null;
     this.paginationPageSize = 10;
     this.rowSelection = 'multiple';
@@ -122,41 +125,6 @@ export class StagingdataComponent implements OnInit {
     let statusflag = this.status;
     let device = this.device;
     let subdevice = this.subdevice;
-    this.mainService.getProjectNames(null, null, null, null, null, 1)
-      .subscribe(value => {
-        this.spinnerService.show();
-        this.filterProjects = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
-        const uniqueProjects = [...new Set(this.filterProjects.map(item => item.projectname))];
-        this.projects = uniqueProjects;
-        this.projectNames = this.projects[0];
-        // this.projectNames = filterProject[0]['projectname'];
-        let formData = new FormData();
-        formData.append("filepath", self.fileselected);
-        formData.append("crudtype", "2");
-        formData.append("projectname", self.projectNames);
-        formData.append("statusflag", "1");
-        formData.append("recordid", "");
-        self.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData)
-          .subscribe(val => {
-            if (val.data != '0' && val.data != 0) {
-              let fileselected = val.data[0]['filePath'].toString();
-              this.fileselected = fileselected.replace(';', '');
-              const docFile = new XMLHttpRequest();
-              docFile.open('GET', this.fileselected, true);
-              docFile.send();
-              docFile.onreadystatechange = () => {
-                if (docFile.readyState === 4 && docFile.status === 200) {
-                  this.convertxml(docFile.response);
-                }
-              };
-            }
-            else {
-              this.spinnerService.hide();
-              this.toastr.error('', 'Earlier No Codesetinclude.xml file uploaded to the selected project', { timeOut: 3000 })
-            }
-          })
-      });
     this.stagingdata(dataType, device, subdevice, statusflag);
     $(document).ready(function () {
       $(".pop-menu").click(function () {
@@ -171,105 +139,6 @@ export class StagingdataComponent implements OnInit {
           e.preventDefault();
       });
     });
-
-    // $(document).ready(function () {
-
-    //   $('#addRow').click(function (e) {
-    //     let values = [];
-    //     let val = e.target.value.split(',');
-    //     for (let i = 0; i < val.length; i++) {
-    //       values.push(val[i])
-    //     }
-    //     var select = $('<select class="form-control form-control-line col-sm-7" style="margin-left: 0px;" required>')
-    //     // .prop('id', 'model')
-    //     // .prop('name', 'model');
-
-    //     $(values).each(function () {
-    //       select.append($("<option>")
-    //         .prop('value', this)
-    //         .text(this.charAt(0).toUpperCase() + this.slice(1)));
-    //     });
-
-    //     // var div=$('<div class="col-sm-12"><div class="form-group form-inline"><label class="labelsubSpan col-sm-5 col-form-label">Model<span class="color-red">*</span></label>');
-    //     // var model=div.append(select)[0].innerHTML;
-    //     // console.log(model)
-    //     // var uids=model+'</div></div><div class="col-sm-12"><div class="form-group form-inline"><label class="labelsubSpan col-sm-5 col-form-label">UID<span class="color-red">*</span></label><input type="text" formControlName="Uid" class="form-control form-control-line col-sm-7"  /><button class="remove">-</button></div></div>'
-    //     // console.log(uids)
-    //     // // $('tbody').append(html);
-
-    //     // $('.remove').click(function(e){
-    //     //   e.preventDefault();
-    //     //   $(this).parent('div').remove();
-    //     // })
-
-    //     var table = $('<td>');
-    //     var td = table.append(select)[0].innerHTML;
-    //     var html = "<tr><td>" + td + "</td><td><input  class='form-control' type='text' name='name[]'></td><td><button class='remove'>-</button></td></tr>"
-    //     console.log(html)
-    //     $('tbody').append(html);
-
-    //     $('.remove').click(function (e) {
-    //       e.preventDefault();
-    //       $(this).closest('tr').remove();
-    //     })
-
-    //     $('#getValues').click(function () {
-    //       var values = [];
-
-    //       $('input[name="name[]"]').each(function (i, elem) {
-    //         console.log($(elem))
-    //         values.push($(elem).val());
-    //       });
-    //       alert(values.join(', '));
-    //     });
-    //   })
-    // })
-
-
-    // var self = this;
-    // $('#uploadxml').click(function (e) {
-    //   if ($('#upload').val() === '' || $('#projectname').val() === null) {
-    //     self.toastr.error('Select Projectname and Upload a valid file')
-    //   }
-    //   else {
-    //     self.spinnerService.show();
-    //     let formData = new FormData();
-    //     formData.append("filepath", self.fileselected);
-    //     formData.append("crudtype", "1");
-    //     formData.append("projectname", self.projectNames);
-    //     formData.append("statusflag", "1");
-    //     formData.append("recordid", "");
-    //     self.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData
-    //     ).subscribe((val) => {
-    //       if (val.data[0]['status'] != 0 && val.data[0]['status'] != '0') {
-    //         self.spinnerService.hide();
-    //         self.toastr.success('', val.data[0]['message']);
-    //         (<HTMLInputElement>document.getElementById("upload")).value=null;
-    //       }
-    //       else {
-    //         let formData = new FormData();
-    //         formData.append("filepath", self.fileselected);
-    //         formData.append("crudtype", "3");
-    //         formData.append("projectname", self.projectNames);
-    //         formData.append("statusflag", "1");
-    //         formData.append("recordid", "");
-    //         self.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData
-    //         ).subscribe((val) => {
-    //           self.spinnerService.hide();
-    //           if (val.data[0]['status'] != 0 && val.data[0]['status'] != '0') {
-    //             self.toastr.success('', val.data[0]['message']);
-    //           }
-    //           else {
-    //             self.toastr.info('', val.data[0]['message']);
-    //           }
-    //           (<HTMLInputElement>document.getElementById("upload")).value=null;
-    //         })
-
-    //       }
-    //     })
-    //   }
-
-    // })
 
     this.saveEditStagingData = this.fb.group({
       // Model: ['', Validators.required],
@@ -394,6 +263,12 @@ export class StagingdataComponent implements OnInit {
       self.onBtnExport();
     })
 
+    $('#s_download').click(function () {
+      self.onBtnExport();
+    })
+    $('#t_download').click(function () {
+      self.ontExport();
+    })
   }
 
   unlink(setStagingdata) {
@@ -598,12 +473,14 @@ export class StagingdataComponent implements OnInit {
     this.saveUpdateStagingData.reset();
     this.vendorError = false;
     this.edidError = false;
+    this.projectNames = "null";
+    this.xmlDataResult = [];
   }
 
   onchangestatus() {
     let statusflag = this.status;
     let device = this.device;
-    let subdevice = this.subdevice;;
+    let subdevice = this.subdevice;
     if (statusflag == null || statusflag == 'null') {
       statusflag = null;
     }
@@ -656,7 +533,6 @@ export class StagingdataComponent implements OnInit {
   }
 
   stagingdata(dataType, Device, Subdevice, statusflag) {
-    localStorage.setItem('StagingStatus', this.status)
     this.mainService.RawToStaging(dataType, null, null, statusflag)
       .then(value => {
         let arr = [];
@@ -692,17 +568,17 @@ export class StagingdataComponent implements OnInit {
 
           }
           let uidsize = [];
-          arr.forEach(element => {
-            if (element['UID'].includes(';')) {
-              uidsize = element['UID'].split(';').filter(u => u != '')
-              if (uidsize.length > 1) {
-                element['UID'] = '';
-              }
-              else {
-                element['UID'] = element['UID']
-              }
-            }
-          });
+          // arr.forEach(element => {
+          //   if (element['UID'].includes(';')) {
+          //     uidsize = element['UID'].split(';').filter(u => u != '')
+          //     if (uidsize.length > 1) {
+          //       element['UID'] = '';
+          //     }
+          //     else {
+          //       element['UID'] = element['UID']
+          //     }
+          //   }
+          // });
           let device = []; let subdevice = []; let Status = [];
           for (let i = 0; i < arr.length; i++) {
             device.push(arr[i]['Device']);
@@ -766,77 +642,9 @@ export class StagingdataComponent implements OnInit {
       });
   }
 
-  //  directtostaging(){
-  //   // this.mainService.RawToStaging(3, this.clicker,null)
-  //   // .then(value => {
-  //   //   return value.data;
-  //   // });
-  //   let counts=this.clicker.length/100;
-  //   // let count;
-  //   // console.log(counts)
-  //   // let start=0;
-  //   // let end=100;
-  //   // while(count<100){
-
-  //   //   start=end++;
-  //   //   end=start+99;
-  //   // }
-  //   // let jsondata=this.clicker;
-  //   let temp=[];
-  //   // let tempresult = [];let result;
-  //   let tempslice=0
-  //   for(let i=0;i<counts;i++){
-  //     for(let j=tempslice;j<tempslice+100;j++){
-  //       temp.push(this.clicker[j])
-  //     }
-  //     this.temp1(tempslice)
-  //     for(let i=0;i<=temp.length+1;i++){
-  //       temp.pop();
-  //       console.log(temp)
-  //     }
-  //   //   result =  this.temp(temp);
-
-  //   //   tempresult.concat(result)
-  //     tempslice = tempslice+100
-
-  //   }
-  //   // console.log(tempresult);
-  // }
-
-  // temp1(tempslice){
-  //   let temp=[];
-  //   for(let j=tempslice;j<tempslice+100;j++){
-  //     temp.push(this.clicker[j])
-  //   }
-  //   this.mainService.RawToStaging(3, temp,null)
-  //   .then(value => {
-  //     return value.data;
-  //   });
-  //   tempslice = tempslice+100
-  // }
-
-  // temp(jsondata){
-  //   var time1 = (new Date()).getTime();
-  //   let responsetime;
-  //   setTimeout(() => {
-  //     this.mainService.RawToStaging(3, this.clicker,null)
-  //   .then(value => {
-  //     var time2 = (new Date()).getTime();
-  //     responsetime=time2-time1
-  //     if (value.statusCode == '200' && value.data != '' && value.data != '0') {
-  //       //this.toastr.success('', 'Records uploaded Successfully');
-  //       return value.data
-  //     }
-  //     else{
-  //       return []
-  //     }
-  //   });
-  //  }, responsetime);
-  //   console.log("responsetime:"+responsetime)
-  // }
-
   directtostaging() {
     let data = [];
+    let ce_osd; let osd; let ce_vendorid;
     if (this.clicker != undefined) {
       this.spinnerService.show();
       this.clicker.forEach(element => {
@@ -858,11 +666,37 @@ export class StagingdataComponent implements OnInit {
         if (element['targetmodel'] === undefined) {
           element['targetmodel'] = ''
         }
-        if (element['osdstring'] === undefined) {
+        if (((element['osdstring'] === undefined) || (element['osdstring'] === null)) && ((element['osdhex'] === undefined) || (element['osdhex'] === null))) {
           element['osdstring'] = ''
-        }
-        if (element['osdhex'] === undefined) {
           element['osdhex'] = ''
+        }
+        else if ((element['osdstring'] === '') && (element['osdhex'] != '')) {
+          ce_osd = element['osdhex'];
+          var modOsdString; var str = ''; let type = typeof (ce_osd);
+          if (type == 'number') {
+            ce_osd = ce_osd.toString();
+          }
+          else if (type == 'string') {
+            ce_osd = ce_osd.toString();
+          }
+          if (ce_osd != '') {
+            ce_osd = ce_osd.trim();
+            ce_osd = ce_osd.replace(/[^a-zA-Z0-9]/g, '');
+            modOsdString = ce_osd;
+            for (var i = 0; i < modOsdString.length; i += 2)
+              str += String.fromCharCode(parseInt(modOsdString.substr(i, 2), 16));
+          }
+          element['osdstring'] = str;
+          element['osdhex'] = ce_osd;
+        }
+        else if ((element['osdstring'] != '') && (element['osdhex'] === '')) {
+          ce_osd = element['osdstring'];
+          if (ce_osd != '') {
+            ce_osd = ce_osd.trim();
+            osd = this.convertHexa(ce_osd);
+          }
+          element['osdstring'] = ce_osd;
+          element['osdhex'] = osd;
         }
         if (element['supportedregions'] === undefined) {
           element['supportedregions'] = ''
@@ -881,6 +715,21 @@ export class StagingdataComponent implements OnInit {
         }
         if (element['vendoridhex'] === undefined) {
           element['vendoridhex'] = ''
+        }
+        else if (element['vendoridhex'] != '') {
+          ce_vendorid = element['vendoridhex'];
+          var modOsdString; var str = ''; let type = typeof (ce_vendorid);
+          if (type == 'number') {
+            ce_vendorid = ce_vendorid.toString();
+          }
+          else if (type == 'string') {
+            ce_vendorid = ce_vendorid.toString();
+          }
+          if (ce_vendorid != '') {
+            ce_vendorid = ce_vendorid.trim();
+            ce_vendorid = ce_vendorid.replace(/[^a-zA-Z0-9]/g, '');
+          }
+          element['vendoridhex'] = ce_vendorid;
         }
         if (element['year'] === undefined) {
           element['year'] = ''
@@ -909,6 +758,17 @@ export class StagingdataComponent implements OnInit {
           stagingid: element['stagingid']
         })
       })
+      data.forEach(element => {
+        let addspacetovendor = ''; let addspacetoosd = ''
+        for (let i = 0; i < element['vendoridhex'].length; i = i + 2) {
+          addspacetovendor += element['vendoridhex'].substr(i, 2) + " "
+        }
+        element['vendoridhex'] = addspacetovendor.trim();
+        for (let i = 0; i < element['osdhex'].length; i = i + 2) {
+          addspacetoosd += element['osdhex'].substr(i, 2) + " "
+        }
+        element['osdhex'] = addspacetoosd.trim();
+      });
       this.mainService.RawToStaging(3, data, null, null)
         .then(value => {
           if (value.statusCode == "200" && value.status == "success") {
@@ -1001,11 +861,12 @@ export class StagingdataComponent implements OnInit {
     if (this.saveEditStagingData.invalid) {
       return;
     }
-    let status = parseInt(localStorage.getItem('StagingStatus'));
-    if (status === 1) {
+    let status = this.editedStatus;
+    // localStorage.setItem('StagingStatus', this.status)
+    if (status === "1" || status === 1 || status === 'Imported from Raw') {
       this.cecEdidValidate();
     }
-    else if (status === 2) {
+    else if (status === "2" || status === 2 || status === 'Imported from Excel') {
       if ((this.editedVendor != undefined && this.editedVendor != '') || (this.editedOSD != undefined && this.editedOSD != '') || (this.editedEDID128 != undefined && this.editedEDID128 != '')) {
         var edid128 = this.editedEDID128;
         if (edid128 != null && edid128 != '' && edid128 != undefined) {
@@ -1690,22 +1551,22 @@ export class StagingdataComponent implements OnInit {
       minWidth: 100,
     };
     this.columnDefs = [
-      { field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Subdevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Supportedregions", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "regionsviewCellRenderer" },
-      { field: "UID", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Year", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Cecpresent", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Cecenabled", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Vendoridhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Vendoridstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Osdstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Osdhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-      { field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
+      { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Subdevice", field: "Subdevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Brand", field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Model", field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Supportedregions", field: "Supportedregions", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "regionsviewCellRenderer" },
+      { headerName: "UID", field: "UID", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Year", field: "Year", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Cecpresent", field: "Cecpresent", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Cecenabled", field: "Cecenabled", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Vendoridhex", field: "Vendoridhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Vendoridstring", field: "Vendoridstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Osdstring", field: "Osdstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Osdhex", field: "Osdhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Edid", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
+      { headerName: "Status", field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Select All", field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
       { headerName: "Action", field: "Status", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
     ];
     this.rowData = this.stagingdatacapture;
@@ -1716,6 +1577,88 @@ export class StagingdataComponent implements OnInit {
       this.setFixedHeight();
     }
     this.gridApi.setQuickFilter(this.searchValue)
+    let crudType = 7;
+    this.mainService.getRoleModule(crudType, null, null, null, null)
+      .then(value => {
+        /** based on role get modules accessible checked or not checked*/
+        let resultFetchArr: any = value.data.filter(u =>
+          u.name == this.role);
+        let fetchModule = [];
+        let permission = resultFetchArr.filter(u => u.mainModule === this.module)
+        if (permission[0]['readPermission'] === null) {
+          permission[0]['readPermission'] = 0
+        }
+        if (permission[0]['downloadPermission'] === null) {
+          permission[0]['downloadPermission'] = 0
+        }
+        if (permission[0]['writePermission'] === null) {
+          permission[0]['writePermission'] = 0
+        }
+        if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0) ||
+          (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0)) {
+          this.columnDefs = this.columnDefs.filter(u => u.field != 'Select All' && u.headerName != 'Action');
+          $('.card').hide();
+          $('#download').hide();
+        }
+        if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
+          (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0)) {
+          this.columnDefs = this.columnDefs.filter(u => u.field != 'Select All' && u.headerName != 'Action');
+          $('.card').hide();
+          $('#download').show();
+        }
+        if ((permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1) ||
+          (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
+          (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
+          (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1)) {
+          this.columnDefs = this.columnDefs;
+          this.mainService.getProjectNames(null, null, null, null, null, 1)
+            .subscribe(value => {
+              this.spinnerService.show();
+              this.filterProjects = value.data;
+              this.filterProjects.forEach(element => {
+                element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+              })
+              const uniqueProjects = [...new Set(this.filterProjects.map(item => item.projectname))];
+              this.projects = uniqueProjects;
+              this.projectNames = null;
+              // let ProjectName = this.projectNames.split('_');
+              // this.projectNames = filterProject[0]['projectname'];
+              // let formData = new FormData();
+              // formData.append("filepath", this.fileselected);
+              // formData.append("crudtype", "2");
+              // formData.append("projectname", ProjectName[1]);
+              // formData.append("statusflag", "1");
+              // formData.append("recordid", "");
+              // formData.append("dbinstance", ProjectName[0]);
+              // this.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData)
+              //   .subscribe(val => {
+              //     if (val.data != '0' && val.data != 0) {
+              //       let fileselected = val.data[0]['filePath'].toString();
+              //       this.fileselected = fileselected.replace(';', '');
+              //       const docFile = new XMLHttpRequest();
+              //       docFile.open('GET', this.fileselected, true);
+              //       docFile.send();
+              //       docFile.onreadystatechange = () => {
+              //         if (docFile.readyState === 4 && docFile.status === 200) {
+              //           this.convertxml(docFile.response);
+              //         }
+              //       };
+              //     }
+              //     else {
+              this.spinnerService.hide();
+              //       this.toastr.error('', 'Earlier No Codesetinclude.xml file uploaded to the selected project', { timeOut: 3000 })
+              //     }
+              //   })
+            });
+          $('#Projectname').show();
+          $('#Codesetinclude').show();
+          $('#button').show();
+          $('#single_download').show();
+          $('#direct').show();
+          $('#download').hide();
+        }
+        console.log(permission)
+      })
   }
 
   search() {
@@ -1758,21 +1701,19 @@ export class StagingdataComponent implements OnInit {
       this.toastr.warning('', 'Please Select the Project');
       $('#upload').css('display', 'none');
     } else {
-      this.mainService.getProjectNames(null, null, null, null, null, 1)
-        .subscribe(value => {
-          this.filterProjects = value.data
-        })
       let filterProject: any = this.filterProjects.filter(u =>
         u.projectname == this.projectNames);
       this.projectNames = filterProject[0]['projectname'];
+      let ProjectName = this.projectNames.split('_');
       $('#upload').css('display', 'block');
       this.xmlDataResult = [];
       let formData = new FormData();
       formData.append("filepath", this.fileselected);
       formData.append("crudtype", "2");
-      formData.append("projectname", this.projectNames);
+      formData.append("projectname", ProjectName[1]);
       formData.append("statusflag", "1");
       formData.append("recordid", "");
+      formData.append("dbinstance", ProjectName[0]);
       this.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData
       ).subscribe((val) => {
         if (val.data != '0') {
@@ -1829,11 +1770,13 @@ export class StagingdataComponent implements OnInit {
     else {
       this.spinnerService.show();
       let formData = new FormData();
+      let ProjectName = this.projectNames.split('_');
       formData.append("filepath", this.fileselected);
       formData.append("crudtype", "1");
-      formData.append("projectname", this.projectNames);
+      formData.append("projectname", ProjectName[1]);
       formData.append("statusflag", "1");
       formData.append("recordid", "");
+      formData.append("dbinstance", ProjectName[0]);
       this.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData
       ).subscribe(val => {
         if (val.data[0]['status'] != 0 && val.data[0]['status'] != '0') {
@@ -1852,11 +1795,13 @@ export class StagingdataComponent implements OnInit {
         }
         else {
           let formData = new FormData();
+          let ProjectName = this.projectNames.split('_');
           formData.append("filepath", this.fileselected);
           formData.append("crudtype", "3");
-          formData.append("projectname", this.projectNames);
+          formData.append("projectname", ProjectName[1]);
           formData.append("statusflag", "1");
           formData.append("recordid", "");
+          formData.append("dbinstance", ProjectName[0]);
           this.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData
           ).subscribe(val => {
             if (val.data[0]['status'] != 0 && val.data[0]['status'] != '0') {
@@ -1952,11 +1897,15 @@ export class StagingdataComponent implements OnInit {
       if (this.singlecodesetassigned[i]['iscecenabled'] === 'No') {
         this.singlecodesetassigned[i]['iscecenabled'] = 0
       }
-      this.mainService.StagingToProd(this.singlecodesetassigned[i]['crudtype'], this.singlecodesetassigned[i]['projectname'], this.singlecodesetassigned[i]['device'],
+      let projectname = this.projectNames.split('_');
+      let Projectname = projectname[1].trim();
+      let instance = projectname[0].trim();
+      let crudtype = 1;
+      this.mainService.StagingToProd(crudtype, Projectname, this.singlecodesetassigned[i]['device'],
         this.singlecodesetassigned[i]['subdevice'], this.singlecodesetassigned[i]['brand'], this.singlecodesetassigned[i]['model'],
         this.singlecodesetassigned[i]['region'], this.singlecodesetassigned[i]['country'],
         this.singlecodesetassigned[i]['iscecpresent'], this.singlecodesetassigned[i]['iscecenabled'], this.singlecodesetassigned[i]['vendorid'],
-        this.singlecodesetassigned[i]['osd'], this.singlecodesetassigned[i]['edid'], this.singlecodesetassigned[i]['codeset'], null)
+        this.singlecodesetassigned[i]['osd'], this.singlecodesetassigned[i]['edid'], this.singlecodesetassigned[i]['codeset'], null, instance)
         .then(value => {
           if (value.data != '' && value.data != '0') {
             if (value.message === 'SUCCESS' && (value.data[0]['status'] == '1' || value.data[0]['status'] == 1)) {
@@ -1965,26 +1914,37 @@ export class StagingdataComponent implements OnInit {
             else {
               this.failedinsert++;
             }
-            if (i + 1 == this.singlecodesetassigned.length) {
-              this.spinnerService.hide();
-              if (this.successinsert != 0) {
-                this.toastr.success('', ' ' + 'Records inserted/updated successfully', { timeOut: 4000 });
-                let loginid = this.loginid['data'][0]['loginId'];
-                let log = ' ' + 'Records inserted/updated successfully(Staging to Prod)'
-                this.mainService.Genericlog(1, loginid, log).then(value => {
-                })
-              }
-              if (this.failedinsert != 0) {
-                this.toastr.success('', ' ' + 'Records already exist', { timeOut: 4000 });
-                let loginid = this.loginid['data'][0]['loginId'];
-                let log = ' ' + 'Records already exist(Staging to Prod)'
-                this.mainService.Genericlog(1, loginid, log).then(value => {
-                })
-              }
-              setTimeout(() => {
-                location.reload();
-              }, 2000);
+          }
+          else {
+            this.failedupdate++;
+          }
+
+          if (i + 1 == this.singlecodesetassigned.length) {
+            this.spinnerService.hide();
+            if (this.successinsert != 0) {
+              this.toastr.success('', ' ' + 'Records inserted/updated successfully', { timeOut: 4000 });
+              let loginid = this.loginid['data'][0]['loginId'];
+              let log = ' ' + 'Records inserted/updated successfully(Staging to Prod)'
+              this.mainService.Genericlog(1, loginid, log).then(value => {
+              })
             }
+            if (this.failedinsert != 0) {
+              this.toastr.success('', ' ' + 'Records already exist', { timeOut: 4000 });
+              let loginid = this.loginid['data'][0]['loginId'];
+              let log = ' ' + 'Records already exist(Staging to Prod)'
+              this.mainService.Genericlog(1, loginid, log).then(value => {
+              })
+            }
+            if (this.failedupdate != 0) {
+              this.toastr.info('', ' ' + 'Some Records are not getting Inserted/Updated', { timeOut: 4000 });
+              let loginid = this.loginid['data'][0]['loginId'];
+              let log = ' ' + 'Some Records are not getting Inserted/Updated(Staging to Prod)'
+              this.mainService.Genericlog(1, loginid, log).then(value => {
+              })
+            }
+            setTimeout(() => {
+              location.reload();
+            }, 2000);
           }
           $('#edidproductionModal .close').click();
         })
@@ -2012,15 +1972,49 @@ export class StagingdataComponent implements OnInit {
     this.spinnerService.hide();
   }
 
+  ontExport() {
+    var data1 = [{
+      "Device": "",
+      "Subdevice": "",
+      "Brand": "",
+      "Targetmodel": "",
+      "TargetRegion": "",
+      "TargetCountry": "",
+      "Cecpresent": "",
+      "Cecenabled": "",
+      "Vendoridhex": "",
+      "Vendoridstring": "",
+      "Osdhex": "",
+      "Edid": "",
+      "Year": "",
+      "Supportedregions": "",
+    }];
+    var opts = [{ sheetid: 'Template', header: true }];
+    var filename = 'Import to Staging Data Capture Template';
+    var res = alasql('SELECT INTO XLSX("' + filename + '",?) FROM ?',
+      [opts, [data1]]);
+  }
+
   exporttoProd(datacapture) {
-    if ((datacapture === undefined || datacapture.length === 0) && (this.xmlDataResult === undefined || this.xmlDataResult === null || this.xmlDataResult.length === 0)) {
+    this.singlecodesetassigned = [];
+    this.multiplecodesetassigned = [];
+    this.nocodesetassigned = [];
+    if (this.projectNames == null || this.projectNames == "null" || this.projectNames == undefined) {
+      $('#table').css('display', 'none');
+      this.message = 'Please Select the Project'
+      this.multiplecodeset = false;
+      this.show = false;
+    }
+    else if ((datacapture === undefined || datacapture.length === 0) && (this.xmlDataResult === undefined || this.xmlDataResult === null || this.xmlDataResult.length === 0)) {
       $('#table').css('display', 'none');
       this.message = 'please upload codesetincludes.xml file and then select the records'
+      this.multiplecodeset = false;
       this.show = false;
     }
     else if (this.xmlDataResult === undefined || this.xmlDataResult === null || this.xmlDataResult.length === 0) {
       $('#table').css('display', 'none');
       this.message = 'please upload codesetincludes.xml file'
+      this.multiplecodeset = false;
       this.show = false;
     }
     else if (datacapture === undefined || datacapture.length === 0) {
@@ -2106,7 +2100,7 @@ export class StagingdataComponent implements OnInit {
         if (element['Uid'].includes(';')) {
           uidsize = element['Uid'].split(';').filter(u => u != '')
           if (uidsize.length > 1) {
-            element['Uid'] = '';
+            element['Uid'] = element['Uid'];
           }
           else {
             element['Uid'] = uidsize[0]
@@ -2131,7 +2125,12 @@ export class StagingdataComponent implements OnInit {
                 this.Uid = UpdatedUIDs.slice(0, -1)
               }
               else {
-                this.Uid = UpdatedUID[0]['UID'].toString();
+                if (proddata[i]['Uid'].length > 0) {
+                  this.Uid = proddata[i]['Uid']
+                }
+                else {
+                  this.Uid = UpdatedUID[0]['UID'].toString();
+                }
               }
             }
             let codesets = this.xmlDataResult.filter(u => (u.uid === this.Uid) && (u.device === proddata[i]['Device']))
@@ -2149,7 +2148,7 @@ export class StagingdataComponent implements OnInit {
             }
             if (codesets.length === 1) {
               Singlecodesetassigned.push({
-                crudtype: 1, projectname: this.projectNames.trim(), device: proddata[i]['Device'], subdevice: proddata[i]['Subdevice'], brand: proddata[i]['Brand'],
+                device: proddata[i]['Device'], subdevice: proddata[i]['Subdevice'], brand: proddata[i]['Brand'],
                 model: proddata[i]['Model'], region: proddata[i]['Region'].trim(), country: proddata[i]['Country'].trim(),
                 iscecpresent: proddata[i]['Cecpresent'], iscecenabled: proddata[i]['Cecenabled'], vendorid: proddata[i]['Vendorid'], osd: proddata[i]['Osd'], edid: proddata[i]['Edid'],
                 uid: this.Uid, codeset: codesets[0]['codeset']
@@ -2159,7 +2158,7 @@ export class StagingdataComponent implements OnInit {
               nocodesetassigned.push({
                 Device: proddata[i]['Device'], Subdevice: proddata[i]['Subdevice'], Brand: proddata[i]['Brand'],
                 Model: proddata[i]['Model'], Region: proddata[i]['Region'], Country: proddata[i]['Country'],
-                Cecpresent: proddata[i]['Cecpresent'], Cecenabled: proddata[i]['Cecenabled'], Vendorid: proddata[i]['Vendorid'], Osd: proddata[i]['Osd'], Edid: proddata[i]['Edid'], UID: this.Uid
+                Cecpresent: proddata[i]['Cecpresent'], Cecenabled: proddata[i]['Cecenabled'], Vendorid: proddata[i]['Vendorid'], Osd: proddata[i]['Osd'], Edid: proddata[i]['Edid'], UID: this.Uid, codeset: ''
               })
             }
             this.singlecodesetassigned = Singlecodesetassigned;
@@ -2180,19 +2179,21 @@ export class StagingdataComponent implements OnInit {
               // $('.multiple_unlink').css('display', 'none');
             }
             if (this.nocodesetassigned.length >= 0 && this.multiplecodesetassigned.length < 1 && this.singlecodesetassigned.length < 1) {
-              this.nocodeset = true;
-            }
-            else {
-              this.nocodeset = false;
+              $('#table').css('display', 'none');
+              this.multiplecodeset = true;
+              this.message = 'No codesets assigned to selected records';
+              this.show = false;
             }
 
             console.log(this.singlecodesetassigned);
             console.log(this.multiplecodesetassigned);
             console.log(this.nocodesetassigned);
             if (this.singlecodesetassigned.length > 0) {
+              $('#table').css('display', 'block');
               this.show = true;
             }
             else {
+              $('#table').css('display', 'none');
               this.show = false;
             }
             let count = this.singlecodesetassigned.length + this.multiplecodesetassigned.length + this.nocodesetassigned.length;
@@ -2208,10 +2209,11 @@ export class StagingdataComponent implements OnInit {
 
   onBtnExport() {
     let columndefs = this.gridApi.columnController.columnDefs; let columns = []; let filteredcolumns = [];
+    columndefs = columndefs.filter(u => u.headerName != 'Select All' && u.headerName != 'Action');
     columndefs.forEach(element => {
-      columns.push(element['field'])
+      columns.push(element['headerName'])
     });
-    for (let i = 0; i < columns.length - 2; i++) {
+    for (let i = 0; i < columns.length; i++) {
       filteredcolumns.push(columns[i])
     }
     var excelParams = {

@@ -6,7 +6,7 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
-        <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <li class="breadcrumb-item active"><a [routerLink]="['/Centralized-DB-view']">Centralized DB View</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
         <li class="breadcrumb-item active">View Staging Data</li>
       </ol>
@@ -17,26 +17,35 @@
     <div class="col-md-12">
       <div class="card">
         <div class="card-block">
+          <div class="row" id="direct">
+            <div class="col-sm-4">
+              <label class="colorBlue">Import to Staging<span class="color-red">*</span></label>
+              <input id="file-upload" class="form-control" type="file" accept=".xls,.xlsx,.csv"
+                (change)="onFileChange($event)" style="overflow: hidden;" />
+            </div>
+            <div style="margin-top: auto">
+              <button class="btn btn-primary" id="transfer" (click)=directtostaging()>Import to Staging</button>
+            </div>&nbsp;&nbsp;&nbsp;
+            <div style="margin-top: auto">
+              <button class="btn btn-info float-right" title="Download Template for Import to Staging" id="t_download">
+                <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Template</button>
+            </div>
+            <div style="width:auto;margin-left: auto;margin-top: auto">
+              <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
+                  aria-hidden="true"></i></button>
+            </div>&nbsp;&nbsp;
+            <button class="btn btn-primary float-right newBtn" data-toggle="modal" data-target="#StagingModal_1"
+              data-backdrop="static" data-keyboard="false" style="margin-top: auto">
+              <i class="fa fa-plus" aria-hidden="true"></i>
+              New
+            </button>
+            &nbsp;&nbsp;
+          </div>
           <div class="row">
-            <div class="col-sm-3">
-              <label class="colorBlue">Project Name<span class="color-red">*</span></label>
-              <select id="projectname" [(ngModel)]="projectNames" class="form-control selectDrop"
-                (change)="changeProject()">
-                <option [value]=null>Select</option>
-                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
-              </select>
-              <br />
-            </div>
-            <div class="col-sm-5">
-              <label class="colorBlue">Upload Codesetinclude.xml<span class="color-red">*</span></label>
-              <input id="upload" class="form-control" type="file" accept=".xml" (change)="Upload($event)"
-                style="overflow: hidden;" />
-              <br />
-            </div>
-            <div style="margin-top: 28px;">
+            <div style="margin-top: 28px;margin-left: auto;">
               <!-- <button class="btn btn-primary" id="uploadxml" > Upload </button>&nbsp;&nbsp;&nbsp; -->
-              <button id="button" class="btn btn-primary float-right" data-toggle="modal"
-                data-target="#edidproductionModal">
+              <button class="btn btn-primary float-right" data-toggle="modal" data-target="#codesetincludeModal"
+                data-backdrop="static" data-keyboard="false">
                 <i class="fa fa-file-export"></i>
                 Export to Production
               </button>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -46,46 +55,13 @@
                 <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>&nbsp;&nbsp;
             </div>
           </div>
-          <div class="row">
-            <div class="col-sm-4">
-              <label class="colorBlue">Direct to Staging<span class="color-red">*</span></label>
-              <input id="file-upload" class="form-control" type="file" accept=".xls,.xlsx,.csv"
-                (change)="onFileChange($event)" style="overflow: hidden;" />
-            </div>
-            <div class="col-sm-4" style="margin-top: auto">
-              <button class="btn btn-primary" id="transfer" (click)=directtostaging()>Transfer to Staging</button>
-            </div>
-            <div style="width:auto;margin-left: auto;margin-top: auto">
-              <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
-                  aria-hidden="true"></i></button>
-            </div>&nbsp;&nbsp;
-            <!-- <select [(ngModel)]='device' class="form form-control selectDrop" (change)="onchangedevice()"
-              (ngModelChange)="onModelChange($event)" style="width:auto;">
-              <option [value]=null hidden> Device </option>
-              <option value=null>All</option>
-              <option *ngFor="let list of filter_Device" value={{list}}>{{list}}</option>
-            </select>&nbsp;&nbsp;
-            <select [(ngModel)]='subdevice' class="form form-control selectDrop" (change)="onchangestatus()"
-              (ngModelChange)="onModelChange($event)" style="width:auto;">
-              <option [value]=null hidden> SubDevice </option>
-              <option value=null>All</option>
-              <option *ngFor="let list of filter_Subdevice" value={{list}}>{{list}}</option>
-            </select>&nbsp;&nbsp; -->
-            <!-- <select [(ngModel)]='status' class="form form-control selectDrop" (change)="onchangestatus()"
-              (ngModelChange)="onModelChange($event)" style="width:auto;margin-top: auto">
-              <option [value]=null hidden>Status </option>
-              <option value=null>All</option>
-              <option value=1>Imported from Raw</option>
-              <option value=2>Imported from Excel</option>
-            </select>&nbsp;&nbsp; -->
-            <button class="btn btn-primary float-right newBtn" data-toggle="modal" data-target="#StagingModal_1" style="margin-top: auto">
-              <i class="fa fa-plus" aria-hidden="true"></i>
-              New
-            </button>
-          </div>
         </div>
       </div>
     </div>
+  </div>
+  <div id="download">
+    <button class="btn btn-info float-right" title="Download based on filtered data" id="s_download">
+      <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
   </div>
   <br />
   <div class="row">
@@ -165,7 +141,8 @@
                   <td style="vertical-align: middle;">
                     <button type="button" (click)="decodeedid()"
                       style="vertical-align: middle;cursor: pointer;background:none;border:none;" data-toggle="modal"
-                      data-target="#DecodeedidDataModal" class="btn btn-primary">Decode
+                      data-target="#DecodeedidDataModal" data-backdrop="static" data-keyboard="false"
+                      class="btn btn-primary">Decode
                     </button>
                   </td>
                 </tr>
@@ -374,7 +351,7 @@
                     <label class="labelsubSpan col-sm-5 col-form-label">Vendor ID</label>
                     <input type="text" id="checkInputValid" (change)="vendorMod()" [(ngModel)]="editedVendor"
                       maxlength="6" (keypress)="hexaOnly($event)" formControlName="VendorId"
-                      class="form-control form-control-line col-sm-7 upperCase"
+                      class="form-control form-control-line col-sm-7"
                       [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.VendorId.errors }" />
                     <div *ngIf="stagingdatasubmitted_1 && n.VendorId.errors" class="invalid-feedback">
                       <div *ngIf="n.VendorId.errors.required" class="error-defined text-right">Vendor ID is required
@@ -388,7 +365,7 @@
                   <div class="form-group form-inline">
                     <label class="labelsubSpan col-sm-5 col-form-label">VendorID String</label>
                     <input type="text" [(ngModel)]="editedVendorstr" formControlName="Vendoridstring"
-                      class="form-control form-control-line col-sm-7 upperCase"
+                      class="form-control form-control-line col-sm-7"
                       [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.Vendoridstring.errors }" />
                     <div *ngIf="stagingdatasubmitted_1 && n.Vendoridstring.errors" class="invalid-feedback">
                       <div *ngIf="n.Vendoridstring.errors.required" class="error-defined text-right">VendorID string is
@@ -403,7 +380,7 @@
                   <div class="form-group form-inline">
                     <label class="labelsubSpan col-sm-5 col-form-label">OSD String</label>
                     <input type="text" [(ngModel)]="editedOSD" (change)="vendorMod()" formControlName="OSDString"
-                      class="form-control form-control-line col-sm-7 upperCase"
+                      class="form-control form-control-line col-sm-7"
                       [ngClass]="{ 'is-invalid': stagingdatasubmitted_1 && n.OSDString.errors }" />
                     <div *ngIf="stagingdatasubmitted_1 && n.OSDString.errors" class="invalid-feedback">
                       <div *ngIf="n.OSDString.errors.required" class="error-defined text-right">OSD String is required
@@ -624,7 +601,7 @@
                     <label class="labelsubSpan col-sm-5 col-form-label">Vendor ID</label>
                     <input type="text" id="checkInputValid" (change)="vendorMod()" [(ngModel)]="UpdatedVendor"
                       maxlength="6" (keypress)="hexaOnly($event)" formControlName="UVendorId"
-                      class="form-control form-control-line col-sm-7 upperCase"
+                      class="form-control form-control-line col-sm-7"
                       [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UVendorId.errors }" />
                     <div *ngIf="stagingdatasubmitted_2 && o.UVendorId.errors" class="invalid-feedback">
                       <div *ngIf="o.UVendorId.errors.required" class="error-defined text-right">Vendor ID is required
@@ -638,7 +615,7 @@
                   <div class="form-group form-inline">
                     <label class="labelsubSpan col-sm-5 col-form-label">VendorID String</label>
                     <input type="text" [(ngModel)]="UpdatedVendorstr" formControlName="UVendoridstring"
-                      class="form-control form-control-line col-sm-7 upperCase"
+                      class="form-control form-control-line col-sm-7"
                       [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UVendoridstring.errors }" />
                     <div *ngIf="stagingdatasubmitted_2 && o.UVendoridstring.errors" class="invalid-feedback">
                       <div *ngIf="o.UVendoridstring.errors.required" class="error-defined text-right">VendorID string is
@@ -653,7 +630,7 @@
                   <div class="form-group form-inline">
                     <label class="labelsubSpan col-sm-5 col-form-label">OSD String</label>
                     <input type="text" [(ngModel)]="UpdatedOSD" (change)="vendorMod()" formControlName="UOSDString"
-                      class="form-control form-control-line col-sm-7 upperCase"
+                      class="form-control form-control-line col-sm-7"
                       [ngClass]="{ 'is-invalid': stagingdatasubmitted_2 && o.UOSDString.errors }" />
                     <div *ngIf="stagingdatasubmitted_2 && o.UOSDString.errors" class="invalid-feedback">
                       <div *ngIf="o.UOSDString.errors.required" class="error-defined text-right">OSD String is required
@@ -820,9 +797,50 @@
     </div>
   </div>
 
+  <div class="modal fade" id="codesetincludeModal" tabindex="-1" role="dialog"
+    aria-labelledby="codesetincludeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="codesetincludeLabel">Export records to selected Project</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalClose()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-sm-7" id="Projectname">
+              <label class="colorBlue">Project Name<span class="color-red">*</span></label>
+              <select id="projectname" [(ngModel)]="projectNames" class="form-control selectDrop"
+                (change)="changeProject()">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+              </select>
+              <br />
+            </div>
+            <div class="col-sm-9" id='Codesetinclude'>
+              <label class="colorBlue">Upload Codesetinclude.xml<span class="color-red">*</span></label>
+              <input id="upload" class="form-control" type="file" accept=".xml" (change)="Upload($event)"
+                style="overflow: hidden;" />
+              <br />
+            </div>
+            <div style="margin-top: 28px;">
+              <!-- <button class="btn btn-primary" id="uploadxml" > Upload </button>&nbsp;&nbsp;&nbsp; -->
+              <button id="button" class="btn btn-primary float-right" data-toggle="modal"
+                data-target="#edidproductionModal" data-backdrop="static" data-keyboard="false">
+                <i class="fa fa-file-export"></i>
+                Preview
+              </button>&nbsp;&nbsp;&nbsp;&nbsp;
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="edidproductionModal" tabindex="-1" role="dialog"
     aria-labelledby="edidproductionModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog" role="document" style="margin-top: 85px;">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title h5-color" id="edidproductionModalLabel">Records with single codeset</h5>
@@ -831,7 +849,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <div id="table" class="col-sm-12 form-scroll" *ngIf="!nocodeset">
+          <div id="table" class="col-sm-12 form-scroll">
             <div style="overflow: auto;">
               <table class="display select table table-striped table-bordered" cellspacing="0"
                 style="width:auto;white-space: nowrap;">
@@ -879,26 +897,22 @@
             <div class="col-sm-12">
               <button type="button" class="btn btn-secondary" data-dismiss="modal"
                 (click)="modalClose()">Close</button>&nbsp;
-              <button type="submit" class="btn btn-primary" (click)=assigncodesettouid()>Save</button>
+              <button type="submit" class="btn btn-primary" (click)=assigncodesettouid()>Submit</button>
             </div>
           </div>
-          <div *ngIf="nocodeset">
-            <p>
-              No codesets assigned to selected records
-            </p>
-          </div>
-          <div *ngIf="!nocodeset">
+          <div>
             <p>
               {{message}}
             </p>
           </div>
           <button type="button" style="cursor:pointer;background:none;border:none;" *ngIf="multiplecodeset"
-            class="multiple_codeset float-right"
+            class="multiple_codeset float-right" title="Download Complete report"
             (click)=SingleexcelDownload()>&nbsp;&nbsp;<u><strong>Download</strong></u></button>
         </div>
       </div>
     </div>
   </div>
+
   <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
     [fullScreen]="true">
     <p style="color: white"> Loading... </p>

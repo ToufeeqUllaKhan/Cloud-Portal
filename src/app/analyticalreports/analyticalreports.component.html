@@ -37,7 +37,18 @@
               </div>
             </div>
           </div>
-          <div class="col-xl-3 col-md-3 hideData" *ngIf="showProject">
+          <div class="col-xl-3 col-md-3 hideData" *ngIf="showProjectsfornonAdmin">
+            <label>ProjectName</label>
+            <div class="card">
+              <div class="card-block">
+                <select [(ngModel)]='projectNames' class="form-control selectDrop" (change)="changeProject()"
+                  (ngModelChange)="onModelChange($event)">
+                  <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-3 hideData" *ngIf="showProjectsforAdmin">
             <label>ProjectName</label>
             <div class="card">
               <div class="card-block">

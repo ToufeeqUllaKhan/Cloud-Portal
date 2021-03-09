@@ -91,7 +91,7 @@ export class ZipUploadComponent implements OnInit {
   @ViewChild(FormGroupDirective, { static: false }) formGroupDirective: FormGroupDirective;
 
   private notifier: NotifierService;
-  show: boolean;
+  show: boolean; showDownload: boolean;
   valid: any; valid_1: any; valid_3: any; valid_4: any; valid_5: any; valid_6: any; valid_7: any;
   invalid: any; invalid_1: any; invalid_3: any; invalid_4: any; invalid_5: any; invalid_6: any; invalid_7: any;
   uuidValue: any;
@@ -106,6 +106,7 @@ export class ZipUploadComponent implements OnInit {
   invalid_9: number; public failedCecEdidCount_1: any = 0;
   record: any = [];
   arrayJsonData: any = [];
+  endTime: number;
 
   constructor(private mainService: MainService, private toastr: ToastrService, private titleService: Title, private router: Router, private fb: FormBuilder,
     private spinnerService: NgxSpinnerService, private http: HttpClient, notifier: NotifierService) {
@@ -143,8 +144,10 @@ export class ZipUploadComponent implements OnInit {
     let Projectname = this.projectNames;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        this.finalArray = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        this.finalArray = value.data;
+        this.finalArray.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const unique = [...new Set(this.finalArray.map(item => item.projectname))];
         let arrData = [];
         for (var i = 0; i < unique.length; i++) {
@@ -161,7 +164,7 @@ export class ZipUploadComponent implements OnInit {
         /** Selected project version list  */
         for (var k = 0; k < Projectname.length; k++) {
           let filterProject: any = value.data.filter(u =>
-            (u.projectname == Projectname[k]) && (u.statusFlag != 2 || u.statusFlag != '2'));
+            (u.projectname == Projectname[k]));
           filtProj.push(filterProject);
           if (this.versions.length == 0) {
             for (var m = 0; m < filterProject.length; m++) {
@@ -174,11 +177,19 @@ export class ZipUploadComponent implements OnInit {
         /** Latest Version for the selected project  */
         this.latestVersions();
         /** Div Visibility based on version availablity or not */
-        let filterProjects: any = this.finalArray.filter(u =>
-          (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
 
-        let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region']; let ProjectName = filterProjects[0]['projectname'];
+        let filterProjects: any = this.finalArray.filter(u =>
+          (u.projectname == this.projectNames[0]['item_text']));
+        let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region'];
         let Dbversion = this.versions[0]; let Dbinstance = filterProjects[0]['dbinstance'];
+        let projectname;
+        if (filterProjects[0]['projectname'].startsWith(Dbinstance + '_')) {
+          projectname = filterProjects[0]['projectname'].replace(Dbinstance + '_', '')
+        }
+        else {
+          projectname = filterProjects[0]['projectname']
+        }
+        let ProjectName = projectname;
         this.mainService.filterDataUpload(Client, Region, ProjectName, Dbversion, Dbinstance, 6)
           .subscribe(value => {
             this.countDetails = value.data;
@@ -299,11 +310,18 @@ export class ZipUploadComponent implements OnInit {
     let datatype = 21;
     let projectName = this.projectNames[0]['item_text'];
     let versionArr = [];
+    let projectname;
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == projectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
-
-    let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region']; let ProjectName = filterProjects[0]['projectname'];
+      (u.projectname == projectName));
+    let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region'];
     let Dbinstance = filterProjects[0]['dbinstance'];
+    if (filterProjects[0]['projectname'].startsWith(Dbinstance + '_')) {
+      projectname = filterProjects[0]['projectname'].replace(Dbinstance + '_', '')
+    }
+    else {
+      projectname = filterProjects[0]['projectname']
+    }
+    let ProjectName = projectname;
     this.mainService.getProjectNames(Client, Region, ProjectName, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
@@ -687,11 +705,17 @@ export class ZipUploadComponent implements OnInit {
   fileUpload() {
 
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
-
-    let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region']; let ProjectName = filterProjects[0]['projectname'];
+      (u.projectname == this.projectNames[0]['item_text']));
+    let projectname;
+    let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region'];
     let Dbversion = this.version_list; let Dbinstance = filterProjects[0]['dbinstance'];
-
+    if (filterProjects[0]['projectname'].startsWith(Dbinstance + '_')) {
+      projectname = filterProjects[0]['projectname'].replace(Dbinstance + '_', '')
+    }
+    else {
+      projectname = filterProjects[0]['projectname']
+    }
+    let ProjectName = projectname;
     this.mainService.filterDataUpload(Client, Region, ProjectName, Dbversion, Dbinstance, 6)
       .subscribe(value => {
         if (value.data.length > 0) {
@@ -733,6 +757,7 @@ export class ZipUploadComponent implements OnInit {
 
         this.Starttime = new Date((new Date()).getTime()).toLocaleTimeString();
         console.log("StartTime:" + this.Starttime);
+        this.endTime = (new Date()).getTime();
         this.http.post<any>(`${environment.apiUrl}/api/LoadData/UploadZipFile`, formData
         ).subscribe((val) => {
           if (val.data == true) {
@@ -741,7 +766,7 @@ export class ZipUploadComponent implements OnInit {
             this.getListOfZipFiles(timer1);
 
             let filterProject: any = this.finalArray.filter(u =>
-              (u.projectname == this.projectNames[0]['item_text'] && (u.statusFlag != 2 || u.statusFlag != '2')));
+              (u.projectname == this.projectNames[0]['item_text']));
             for (var m = 0; m < filterProject.length; m++) {
               this.versionArr.push(filterProject[m]['embeddedDbVersion']);
             }
@@ -750,10 +775,17 @@ export class ZipUploadComponent implements OnInit {
             this.latestVersions();
             if (this.versions.length >= 1) {
               let filterProjects: any = this.finalArray.filter(u =>
-                (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+                (u.projectname == this.projectNames[0]['item_text']));
               let Dbname = filterProjects[0]['dbinstance'];
               let Projectname = this.projectNames[0]['item_text'];
-              this.mainService.hdmiData(Dbname, Projectname)
+              let projectname;
+              if (Projectname.startsWith(Dbname + '_')) {
+                projectname = Projectname.replace(Dbname + '_', '')
+              }
+              else {
+                projectname = Projectname;
+              }
+              this.mainService.hdmiData(Dbname, projectname)
                 .subscribe(value => {
 
                 });
@@ -866,6 +898,9 @@ export class ZipUploadComponent implements OnInit {
           this.mainService.getProjectNames(null, null, null, null, null, dataType)
             .subscribe(value => {
               this.finalArray = value.data;
+              this.finalArray.forEach(element => {
+                element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+              })
               let version;
               if (this.embed_version == undefined) {
                 version = this.version_list;
@@ -873,10 +908,17 @@ export class ZipUploadComponent implements OnInit {
                 version = this.embed_version;
               }
               let filterProjects: any = this.finalArray.filter(u =>
-                (u.projectname == this.projectNames[0]['item_text'] && u.embeddedDbVersion == version) && (u.statusFlag != 2 || u.statusFlag != '2'));
+                (u.projectname == this.projectNames[0]['item_text'] && u.embeddedDbVersion == version));
 
               let Dbname = filterProjects[0]['dbinstance'];
               let Projectname = this.projectNames[0]['item_text'];
+              let projectname;
+              if (Projectname.startsWith(Dbname + '_')) {
+                projectname = Projectname.replace(Dbname + '_', '')
+              }
+              else {
+                projectname = Projectname;
+              }
               let Embeddedversion;
               if (this.embed_version == undefined) {
                 Embeddedversion = this.version_list;
@@ -886,7 +928,7 @@ export class ZipUploadComponent implements OnInit {
               let projectversion = filterProjects[0]['projectVersion'];
               let swversion = filterProjects[0]['softwareVersion'];
               let statusFlag = 1;
-              this.mainService.loadBinZip(Dbname, Projectname, Embeddedversion, projectversion, swversion, null, null,
+              this.mainService.loadBinZip(Dbname, projectname, Embeddedversion, projectversion, swversion, null, null,
                 base64Data, checksum, statusFlag)
                 .subscribe(value => {
                   if (value.data.length != 0) {
@@ -967,16 +1009,23 @@ export class ZipUploadComponent implements OnInit {
             versionChoosen = this.version_list;
           }
           let filterProjects: any = this.finalArray.filter(u =>
-            (u.projectname == this.projectNames[0]['item_text'] && u.embeddedDbVersion == versionChoosen) && (u.statusFlag != 2 || u.statusFlag != '2'));
+            (u.projectname == this.projectNames[0]['item_text'] && u.embeddedDbVersion == versionChoosen));
 
           let Dbname = filterProjects[0]['dbinstance'];
           let Projectname = this.projectNames[0]['item_text'];
+          let projectname;
+          if (Projectname.startsWith(Dbname + '_')) {
+            projectname = Projectname.replace(Dbname + '_', '')
+          }
+          else {
+            projectname = Projectname;
+          }
           let Embeddedversion = versionChoosen;
           let projectversion = filterProjects[0]['projectVersion'];
           let swversion = filterProjects[0]['softwareVersion'];
           let statusFlag = 1;
 
-          this.mainService.loadBinZip(Dbname, Projectname, Embeddedversion, projectversion, swversion,
+          this.mainService.loadBinZip(Dbname, projectname, Embeddedversion, projectversion, swversion,
             base64Data, checksum, null, null, statusFlag)
             .subscribe(value => {
               var endtime = (new Date()).getTime();
@@ -1721,21 +1770,21 @@ export class ZipUploadComponent implements OnInit {
         }
       }
       var modVendorId = resultArray[k]['Vendor ID'];
-      if (modVendorId == '') {
+      if (modVendorId == undefined || modVendorId == null || modVendorId == '') {
         modVendorId = '';
       } else {
         modVendorId = modVendorId.replace(/[^a-zA-Z0-9]/g, '');
       }
       dataval['vendorid'] = modVendorId;
       var modOsd = resultArray[k]['OSD Name'];
-      if (modOsd == '') {
+      if (modOsd == undefined || modOsd == null || modOsd == '') {
         modOsd = '';
       } else {
         modOsd = modOsd.replace(/[^a-zA-Z0-9]/g, '');
       }
       dataval['osd'] = modOsd;
       var modOstString;
-      if (modOsd == '') {
+      if (modOsd == undefined || modOsd == null || modOsd == '') {
         modOstString = '';
       } else {
         modOstString = modOsd.replace(/[^a-zA-Z0-9]/g, '');
@@ -1839,11 +1888,17 @@ export class ZipUploadComponent implements OnInit {
   changeVersion() {
 
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text'] && u.embeddedDbVersion == this.version_list) && (u.statusFlag != 2 || u.statusFlag != '2'));
-
-    let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region']; let ProjectName = filterProjects[0]['projectname'];
+      (u.projectname == this.projectNames[0]['item_text'] && u.embeddedDbVersion == this.version_list));
+    let projectname;
+    let Client = filterProjects[0]['client']; let Region = filterProjects[0]['region'];
     let Dbversion = this.version_list; let Dbinstance = filterProjects[0]['dbinstance'];
-
+    if (filterProjects[0]['projectname'].startsWith(Dbinstance + '_')) {
+      projectname = filterProjects[0]['projectname'].replace(Dbinstance + '_', '')
+    }
+    else {
+      projectname = filterProjects[0]['projectname']
+    }
+    let ProjectName = projectname;
     this.mainService.filterDataUpload(Client, Region, ProjectName, Dbversion, Dbinstance, 6)
       .subscribe(value => {
         this.countDetails = [];
@@ -1873,14 +1928,20 @@ export class ZipUploadComponent implements OnInit {
   /** new version creation for the project */
   onUploadNewVersionDataSubmit() {
     let filterProject: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
-
+      (u.projectname == this.projectNames[0]['item_text']));
+    let projectname; let Dbname = filterProject[0]['dbinstance'];
+    if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+      projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+    }
+    else {
+      projectname = this.projectNames[0]['item_text']
+    }
     this.newDataSubmitted = true;
     if (this.uploadNewVersionData.invalid) {
       return;
     }
-    let Dbname = filterProject[0]['dbinstance']; let Client = filterProject[0]['client']; let Region = filterProject[0]['region'];
-    let ProjectName = this.projectNames[0]['item_text']; let SignatureKey = filterProject[0]['signatureKey']; let DbPath = filterProject[0]['dbinstance'];
+    let Client = filterProject[0]['client']; let Region = filterProject[0]['region'];
+    let ProjectName = projectname; let SignatureKey = filterProject[0]['signatureKey']; let DbPath = filterProject[0]['dbinstance'];
     let EmbedVersion = this.embed_version; let DbVersion = this.db_version; let Statusflag = 1;
     let Flagtype = 1; let ProjectVersion = this.project_version; let SwVersion = this.sw_version;
     let allowDownloads = null;
@@ -1941,8 +2002,7 @@ export class ZipUploadComponent implements OnInit {
       this.codeSets(timer1, time1);
     }
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
-
+      (u.projectname == this.projectNames[0]['item_text']));
     this.progressWidth = 0;
     let Dbname = filterProjects[0]['dbinstance'];
     var j = 0;
@@ -1966,7 +2026,7 @@ export class ZipUploadComponent implements OnInit {
             // var timer2 = (new Date()).getTime();
             // this.timer2+=timer2-timer1;
             this.timer2 = endtime - starttime;
-            this.timercount += this.timer2;
+            // this.timercount += this.timer2;
             this.isProgreessVisible = true;
             this.progressWidth = Math.floor((i * 100) / checkLength);
             this.progressName = 'Uploading.. Master Brand';
@@ -1988,6 +2048,9 @@ export class ZipUploadComponent implements OnInit {
                 // console.log(Jsonbrand[l]['brandcode'], Jsonbrand[l]['brandname'], value.data[l]['searchResult'], new Date(starttime).toLocaleTimeString(), new Date(endtime).toLocaleTimeString(), this.timer2)
 
               }
+            }
+            if (i + 1 === checkLength) {
+              this.timercount = this.EndTime - this.endTime
             }
 
           });
@@ -2021,7 +2084,14 @@ export class ZipUploadComponent implements OnInit {
       this.InsertCount = this.addedBrandCount;
       this.ExistsCount = this.existsBrandCount;
       this.FailedCount = this.failedBrandCount;
-      let userName = localStorage.getItem('userName'); let Projectname = this.projectNames[0]['item_text'];
+      let projectname;
+      if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+        projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+      }
+      else {
+        projectname = this.projectNames[0]['item_text']
+      }
+      let userName = localStorage.getItem('userName'); let Projectname = projectname;
       let Dbversion;
       if (this.embed_version == undefined) {
         Dbversion = this.version_list;
@@ -2036,7 +2106,7 @@ export class ZipUploadComponent implements OnInit {
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
       this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
-        Ipaddress, Updatestatus)
+        Ipaddress, Updatestatus, Dbname)
         .subscribe(value => {
           let crud = 1; let dbpath = Dbname; let data = {
             userName, Projectname, Dbversion, dbpath, Datasection, "inserted": Totalinsertedrecords,
@@ -2076,11 +2146,18 @@ export class ZipUploadComponent implements OnInit {
       this.brandModel(timer1, time1);
     }
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == this.projectNames[0]['item_text']));
 
     this.progressWidth = 0;
     let Dbname = filterProjects[0]['dbinstance'];
-    let ProjectName = this.projectNames[0]['item_text'];
+    let projectname;
+    if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+      projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+    }
+    else {
+      projectname = this.projectNames[0]['item_text']
+    }
+    let ProjectName = projectname;
     let embedVersion;
     if (this.embed_version == undefined) {
       embedVersion = this.version_list;
@@ -2106,7 +2183,7 @@ export class ZipUploadComponent implements OnInit {
             // var timer2 = (new Date()).getTime();
             // this.timer2+=timer2-timer1;
             this.timer2 = endtime - starttime;
-            this.timercount += this.timer2;
+            // this.timercount += this.timer2;
             this.isProgreessVisible = true;
             this.progressWidth = Math.floor((i * 100) / checkcodeArrLength);
             this.progressName = 'Uploading.. Codeset Data';
@@ -2126,6 +2203,9 @@ export class ZipUploadComponent implements OnInit {
                 this.timer1 = (((endtime - time1) / 1000) / 60).toFixed(2);
                 // console.log(Codesetvalue[l]['codesetName'],Codesetvalue.data[l]['searchResult'],new Date(starttime).toLocaleTimeString(),new Date(endtime).toLocaleTimeString(),this.timer2)
               }
+            }
+            if (i + 1 === checkcodeArrLength) {
+              this.timercount = this.EndTime - this.endTime
             }
           });
         this.index2 = i;
@@ -2161,7 +2241,7 @@ export class ZipUploadComponent implements OnInit {
       this.ExistsCodeCount = this.existsCodeCount;
       this.FailedCodeCount = this.failedCodeCount;
 
-      let userName = localStorage.getItem('userName'); let Projectname = this.projectNames[0]['item_text'];
+      let userName = localStorage.getItem('userName'); let Projectname = ProjectName;
       let Dbversion;
       if (this.embed_version == undefined) {
         Dbversion = this.version_list;
@@ -2176,7 +2256,7 @@ export class ZipUploadComponent implements OnInit {
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
       this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
-        Ipaddress, Updatestatus)
+        Ipaddress, Updatestatus, Dbname)
         .subscribe(value => {
           let crud = 1; let dbpath = Dbname; let data = {
             userName, Projectname, Dbversion, dbpath, Datasection, "inserted": Totalinsertedrecords,
@@ -2215,7 +2295,7 @@ export class ZipUploadComponent implements OnInit {
       this.crossReferenceBrandsModel(timer1, time1);
     }
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == this.projectNames[0]['item_text']));
 
     this.progressWidth = 0;
     let Dbname = filterProjects[0]['dbinstance'];
@@ -2225,7 +2305,14 @@ export class ZipUploadComponent implements OnInit {
     if (checkBrandModelLength % 1 != 0) {
       checkBrandModelLength = Math.trunc(checkBrandModelLength) + 1;
     }
-    let ProjectName = this.projectNames[0]['item_text'];
+    let projectname;
+    if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+      projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+    }
+    else {
+      projectname = this.projectNames[0]['item_text']
+    }
+    let ProjectName = projectname;
     let embedVersion;
     if (this.embed_version == undefined) {
       embedVersion = this.version_list;
@@ -2245,7 +2332,7 @@ export class ZipUploadComponent implements OnInit {
             // var timer2 = (new Date()).getTime();
             // this.timer2+=timer2-timer1;
             this.timer2 = endtime - starttime;
-            this.timercount += this.timer2;
+            // this.timercount += this.timer2;
             this.isProgreessVisible = true;
             this.progressWidth = Math.floor((i * 100) / checkBrandModelLength);
             this.progressName = 'Uploading.. Brand Model';
@@ -2265,6 +2352,9 @@ export class ZipUploadComponent implements OnInit {
                 this.timer4 = (((endtime - time1) / 1000) / 60).toFixed(2);
                 // console.log(brandvalue[l],brandvalue.data[l]['searchResult'],new Date(starttime).toLocaleTimeString(),new Date(endtime).toLocaleTimeString(),this.timer2)
               }
+            }
+            if (i + 1 === checkBrandModelLength) {
+              this.timercount = this.EndTime - this.endTime
             }
 
           });
@@ -2300,7 +2390,7 @@ export class ZipUploadComponent implements OnInit {
       this.ExistsBrandCount = this.existsModelCount;
       this.FailedBrandCount = this.failedModelCount;
 
-      let userName = localStorage.getItem('userName'); let Projectname = this.projectNames[0]['item_text'];
+      let userName = localStorage.getItem('userName'); let Projectname = ProjectName;
       let Dbversion;
       if (this.embed_version == undefined) {
         Dbversion = this.version_list;
@@ -2315,7 +2405,7 @@ export class ZipUploadComponent implements OnInit {
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
       this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
-        Ipaddress, Updatestatus)
+        Ipaddress, Updatestatus, Dbname)
         .subscribe(value => {
           let crud = 1; let dbpath = Dbname; let data = {
             userName, Projectname, Dbversion, dbpath, Datasection, "inserted": Totalinsertedrecords,
@@ -2356,7 +2446,7 @@ export class ZipUploadComponent implements OnInit {
       this.brandInfoCecModel(timer1, time1);
     }
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == this.projectNames[0]['item_text']));
 
     this.progressWidth = 0;
     let Dbname = filterProjects[0]['dbinstance'];
@@ -2366,7 +2456,14 @@ export class ZipUploadComponent implements OnInit {
     } else {
       embedVersion = this.embed_version;
     }
-    let ProjectName = this.projectNames[0]['item_text'];
+    let projectname;
+    if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+      projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+    }
+    else {
+      projectname = this.projectNames[0]['item_text']
+    }
+    let ProjectName = projectname;
     var j = 0;
     var k = 1;
     var checkxmlDataArrLength = this.xmlDataResult.length / 1;
@@ -2386,7 +2483,7 @@ export class ZipUploadComponent implements OnInit {
             // var timer2 = (new Date()).getTime();
             // this.timer2+=timer2-timer1;
             this.timer2 = endtime - starttime;
-            this.timercount += this.timer2;
+            // this.timercount += this.timer2;
             this.isProgreessVisible = true;
             this.progressWidth = Math.floor((i * 100) / checkxmlDataArrLength);
             this.progressName = 'Uploading.. Cross Reference by Brands';
@@ -2407,7 +2504,9 @@ export class ZipUploadComponent implements OnInit {
                 // console.log(xmlValue[l],xmlValue.data[l]['searchResult'],new Date(starttime).toLocaleTimeString(),new Date(endtime).toLocaleTimeString(),this.timer2)
               }
             }
-
+            if (i + 1 === checkxmlDataArrLength) {
+              this.timercount = this.EndTime - this.endTime
+            }
 
           });
         this.index4 = i;
@@ -2440,7 +2539,7 @@ export class ZipUploadComponent implements OnInit {
       this.ExistsCrossCount = this.existsXmlCount;
       this.FailedCrossCount = this.failedXmlCount;
 
-      let userName = localStorage.getItem('userName'); let Projectname = this.projectNames[0]['item_text'];
+      let userName = localStorage.getItem('userName'); let Projectname = ProjectName;
       let Dbversion;
       if (this.embed_version == undefined) {
         Dbversion = this.version_list;
@@ -2455,7 +2554,7 @@ export class ZipUploadComponent implements OnInit {
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
       this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
-        Ipaddress, Updatestatus)
+        Ipaddress, Updatestatus, Dbname)
         .subscribe(value => {
           let crud = 1; let dbpath = Dbname; let data = {
             userName, Projectname, Dbversion, dbpath, Datasection, "inserted": Totalinsertedrecords,
@@ -2498,7 +2597,7 @@ export class ZipUploadComponent implements OnInit {
       this.brandInfoEdidModel(timer1, time1);
     }
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == this.projectNames[0]['item_text']));
 
     this.progressWidth = 0;
     let Dbname = filterProjects[0]['dbinstance'];
@@ -2521,7 +2620,7 @@ export class ZipUploadComponent implements OnInit {
             // var timer2 = (new Date()).getTime();
             // this.timer2+=timer2-timer1;
             this.timer2 = endtime - starttime;
-            this.timercount += this.timer2;
+            this.timer2 = endtime - timer1;
             this.isProgreessVisible = true;
             this.progressWidth = Math.floor((i * 100) / checkBrandCecLength);
             this.progressName = 'Uploading.. Brand Info CEC Data';
@@ -2541,7 +2640,9 @@ export class ZipUploadComponent implements OnInit {
                 this.timer5 = (((endtime - time1) / 1000) / 60).toFixed(2);
               }
             }
-
+            if (i + 1 === checkBrandCecLength) {
+              this.timercount = this.EndTime - this.endTime
+            }
           });
         this.index5 = i;
         starttime = null
@@ -2572,8 +2673,14 @@ export class ZipUploadComponent implements OnInit {
       this.InsertCecCount = this.addedCecCount;
       this.ExistsCecCount = this.existsCecCount;
       this.FailedCecCount = this.failedCecCount;
-
-      let userName = localStorage.getItem('userName'); let Projectname = this.projectNames[0]['item_text'];
+      let projectname;
+      if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+        projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+      }
+      else {
+        projectname = this.projectNames[0]['item_text']
+      }
+      let userName = localStorage.getItem('userName'); let Projectname = projectname;
       let Dbversion;
       if (this.embed_version == undefined) {
         Dbversion = this.version_list;
@@ -2588,7 +2695,7 @@ export class ZipUploadComponent implements OnInit {
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
       this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
-        Ipaddress, Updatestatus)
+        Ipaddress, Updatestatus, Dbname)
         .subscribe(value => {
           let crud = 1; let dbpath = Dbname; let data = {
             userName, Projectname, Dbversion, dbpath, Datasection, "inserted": Totalinsertedrecords,
@@ -2630,7 +2737,7 @@ export class ZipUploadComponent implements OnInit {
       this.brandInfoCecEdidModel(timer1, time1);
     }
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == this.projectNames[0]['item_text']));
     this.progressWidth = 0;
     let Dbname = filterProjects[0]['dbinstance'];
     var j = 0;
@@ -2653,7 +2760,7 @@ export class ZipUploadComponent implements OnInit {
             // var timer2 = (new Date()).getTime();
             // this.timer2+=timer2-timer1;
             this.timer2 = endtime - starttime;
-            this.timercount += this.timer2;
+            // this.timercount += this.timer2;
             this.isProgreessVisible = true;
             this.progressWidth = Math.floor((i * 100) / checkBrandEdidLength);
             this.progressName = 'Uploading.. Brand Info EDID Data';
@@ -2675,7 +2782,9 @@ export class ZipUploadComponent implements OnInit {
 
               }
             }
-
+            if (i + 1 === checkBrandEdidLength) {
+              this.timercount = this.EndTime - this.endTime
+            }
 
           });
         this.index6 = i;
@@ -2707,8 +2816,14 @@ export class ZipUploadComponent implements OnInit {
       this.InsertEdidCount = this.addedEdidCount;
       this.ExistsEdidCount = this.existsEdidCount;
       this.FailedEdidCount = this.failedEdidCount;
-
-      let userName = localStorage.getItem('userName'); let Projectname = this.projectNames[0]['item_text'];
+      let projectname;
+      if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+        projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+      }
+      else {
+        projectname = this.projectNames[0]['item_text']
+      }
+      let userName = localStorage.getItem('userName'); let Projectname = projectname;
       let Dbversion;
       if (this.embed_version == undefined) {
         Dbversion = this.version_list;
@@ -2723,7 +2838,7 @@ export class ZipUploadComponent implements OnInit {
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
       this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
-        Ipaddress, Updatestatus)
+        Ipaddress, Updatestatus, Dbname)
         .subscribe(value => {
           let crud = 1; let dbpath = Dbname; let data = {
             userName, Projectname, Dbversion, dbpath, Datasection, "inserted": Totalinsertedrecords,
@@ -2761,8 +2876,7 @@ export class ZipUploadComponent implements OnInit {
   async brandInfoCecEdidModel(timer1, time1) {
     time1 = (new Date()).getTime();
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
-    let Projectname = this.projectNames[0]['item_text'];
+      (u.projectname == this.projectNames[0]['item_text']));
     let Dbversion;
     if (this.embed_version == undefined) {
       Dbversion = this.version_list;
@@ -2771,6 +2885,14 @@ export class ZipUploadComponent implements OnInit {
     }
     this.progressWidth = 0;
     let Dbname = filterProjects[0]['dbinstance'];
+    let projectname;
+    if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+      projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+    }
+    else {
+      projectname = this.projectNames[0]['item_text']
+    }
+    let ProjectName = projectname;
     var j = 0;
     var k = 1;
     var checkCecEdidArrLength = this.brandInfoCecEdidList.length / 1;
@@ -2784,13 +2906,13 @@ export class ZipUploadComponent implements OnInit {
       j = j + 1;
       k = k + 1;
       try {
-        await this.mainService.dataUploadloadCecEdidData(Dbname, Projectname, Dbversion, JsonCecEdidArr)
+        await this.mainService.dataUploadloadCecEdidData(Dbname, ProjectName, Dbversion, JsonCecEdidArr)
           .then(cecEdidValue => {
             let endtime = (new Date().getTime());
             // var timer2 = (new Date()).getTime();
             // this.timer2+=timer2-timer1;
             this.timer2 = endtime - starttime;
-            this.timercount += this.timer2;
+            // this.timercount += this.timer2;
             this.isProgreessVisible = true;
             this.progressWidth = Math.floor((i * 100) / checkCecEdidArrLength);
             this.progressName = 'Uploading.. CEC-EDID Data';
@@ -2816,7 +2938,9 @@ export class ZipUploadComponent implements OnInit {
               this.failedCecEdidCount_1++;
               temp.push({ Data: JSON.stringify(JsonCecEdidArr), Result: "0" })
             }
-
+            if (i + 1 === checkCecEdidArrLength) {
+              this.timercount = this.EndTime - this.endTime
+            }
 
           });
         this.index7 = i;
@@ -2837,7 +2961,7 @@ export class ZipUploadComponent implements OnInit {
     // this.Endtime=new Date();
     this.Endtime = new Date((new Date()).getTime()).toLocaleTimeString();
     if (this.index7 + 1 === checkCecEdidArrLength) {
-
+      this.showDownload = true;
       // this.isIconVis7 = true;
       this.isProgreessVisible = false;
       this.progressName = '';
@@ -2865,7 +2989,7 @@ export class ZipUploadComponent implements OnInit {
       this.invalid_9 = this.valid_7 - this.valid_9;
       this.InsertEdidonlyCount = this.valid_9 - this.FailedCecEdidCount;
 
-      let userName = localStorage.getItem('userName'); let Projectname = this.projectNames[0]['item_text'];
+      let userName = localStorage.getItem('userName'); let Projectname = ProjectName;
       let Dbversion;
       if (this.embed_version == undefined) {
         Dbversion = this.version_list;
@@ -2880,7 +3004,7 @@ export class ZipUploadComponent implements OnInit {
       let Operation = 'Insert'; let Systemuser = ''; let Ipaddress = this.ipAddress;
       this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
         Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
-        Ipaddress, Updatestatus)
+        Ipaddress, Updatestatus, Dbname)
         .subscribe(value => {
           let crud = 1; let dbpath = Dbname; let data = {
             userName, Projectname, Dbversion, dbpath, Datasection, "inserted": Totalinsertedrecords,
@@ -2947,6 +3071,7 @@ export class ZipUploadComponent implements OnInit {
       var timer1 = (new Date()).getTime();
       console.log("StartTime:" + new Date(timer1).toLocaleTimeString());
       this.Starttime = new Date((new Date()).getTime()).toLocaleTimeString();
+      this.endTime = (new Date()).getTime();
       if (!(/\.(zip)$/i).test(fileName)) {
         this.notifier.notify('warning', 'Please Select Zip file to Upload');
       } else {
@@ -2969,7 +3094,7 @@ export class ZipUploadComponent implements OnInit {
               this.loaderVisible = false;
               this.getListOfUpdatedZipFiles(timer1);
               let filterProject: any = this.finalArray.filter(u =>
-                (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+                (u.projectname == this.projectNames[0]['item_text']));
               for (var m = 0; m < filterProject.length; m++) {
                 this.versionArr.push(filterProject[m]['embeddedDbVersion']);
               }
@@ -2978,10 +3103,17 @@ export class ZipUploadComponent implements OnInit {
               this.latestVersions();
               if (this.versions.length >= 1) {
                 let filterProjects: any = this.finalArray.filter(u =>
-                  (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+                  (u.projectname == this.projectNames[0]['item_text']));
                 let Dbname = filterProjects[0]['dbinstance'];
-                let Projectname = this.projectNames[0]['item_text'];
-                this.mainService.hdmiData(Dbname, Projectname)
+                let projectname;
+                if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+                  projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+                }
+                else {
+                  projectname = this.projectNames[0]['item_text']
+                }
+                let ProjectName = projectname;
+                this.mainService.hdmiData(Dbname, ProjectName)
                   .subscribe(value => {
 
                   });
@@ -3458,10 +3590,17 @@ export class ZipUploadComponent implements OnInit {
   /** Delete data before submission of selected model checklist */
   async onUpdateFilesSubmit(timer1) {
     let filterProjects: any = this.finalArray.filter(u =>
-      (u.projectname == this.projectNames[0]['item_text']) && (u.statusFlag != 2 || u.statusFlag != '2'));
+      (u.projectname == this.projectNames[0]['item_text']));
 
     let Dbname = filterProjects[0]['dbinstance'];
-    let Projectname = this.projectNames[0]['item_text'];
+    let projectname;
+    if (this.projectNames[0]['item_text'].startsWith(Dbname + '_')) {
+      projectname = this.projectNames[0]['item_text'].replace(Dbname + '_', '')
+    }
+    else {
+      projectname = this.projectNames[0]['item_text']
+    }
+    let Projectname = projectname;
     let Embeddedversion = this.version_list;
     var arr = [];
     let cecEdidValue1; let cecEdidValue2; let componentDataValue;
@@ -3572,7 +3711,7 @@ export class ZipUploadComponent implements OnInit {
               var checkSession = arr.includes(13);
               var checkDevice = arr.includes(14);
 
-              let userName = localStorage.getItem('userName'); let Projectname = this.projectNames[0]['item_text'];
+              let userName = localStorage.getItem('userName');
               let Dbversion;
               if (this.embed_version == undefined) {
                 Dbversion = this.version_list;
@@ -3584,7 +3723,7 @@ export class ZipUploadComponent implements OnInit {
               let Operation = 'Delete'; let Systemuser = ''; let Ipaddress = this.ipAddress; let Updatestatus = 1;
               this.mainService.DataDBUpdates(userName, Projectname, Dbversion, Datasection, Totalinsertedrecords,
                 Totalfailedrecords, Totalupdatedrecords, Recordcount, Updatedescription, Operation, Systemuser,
-                Ipaddress, Updatestatus)
+                Ipaddress, Updatestatus, Dbname)
                 .subscribe(value => {
                 });
               if (checkSearch == true) {

@@ -69,23 +69,54 @@ export class ChangehistoryComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        // this.mainArr = value.data;
-        this.mainArr = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        this.mainArr = value.data;
+        this.mainArr.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const unique = [...new Set(this.mainArr.map(item => item.projectname))];
 
         let arrData = [];
         for (var i = 0; i < unique.length; i++) {
           arrData.push({ item_id: i, item_text: unique[i] });
         }
-        this.projects = arrData;
-        if (this.projectNames != '') {
-          for (var i = 0; i < this.projectNames.length; i++) {
-            var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[i]);
-
-            this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[i] });
+        this.ProjectList = arrData;
+        let RoleLevel = localStorage.getItem('AccessRole');
+        if (RoleLevel != 'Admin') {
+          let userName = localStorage.getItem('userName');
+          this.mainService.getRoleModule(8, null, null, userName, null)
+            .then(value => {
+              let filterProjects = []; let clientArray = [];
+              clientArray = value.data;
+              clientArray.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+              for (var i = 0; i < clientArray.length; i++) {
+                let clientsArray: any = this.ProjectList.filter(u =>
+                  (u.item_text == clientArray[i]['name']));
+                filterProjects.push(...clientsArray);
+              }
+              let modifyItems = [];
+              for (var j = 0; j < filterProjects.length; j++) {
+                modifyItems.push({ item_id: j, item_text: filterProjects[j]['item_text'] });
+              }
+              this.projects = modifyItems;
+              if (this.projectNames != '') {
+                for (var k = 0; k < this.projectNames.length; k++) {
+                  var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[k]);
+                  this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[k] });
+                }
+                this.projectNames = this.selectedItems;
+              }
+            });
+        } else {
+          this.projects = this.ProjectList;
+          if (this.projectNames != '') {
+            for (var i = 0; i < this.projectNames.length; i++) {
+              var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[i]);
+              this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[i] });
+            }
+            this.projectNames = this.selectedItems;
           }
-          this.projectNames = this.selectedItems;
         }
       });
 
@@ -110,8 +141,8 @@ export class ChangehistoryComponent implements OnInit {
     };
     let Projectname = this.projectNames;
     this.tabslist = Projectname;
-    this.tabValue = this.projectNames[0];
-    this.mainService.ChangeHistory(this.tabValue, null)
+    this.tabValue = this.projectNames[0].split('_');
+    this.mainService.ChangeHistory(this.tabValue[1], null, this.tabValue[0])
       .subscribe(value => {
         let parameter = [this.tabValue]
         this.parameters = parameter;
@@ -263,8 +294,8 @@ export class ChangehistoryComponent implements OnInit {
         this.resultProjArr = resultFetchArr;
       }
     }
-    var projectName = this.resultProjArr[0]['projectname'];
-    this.mainService.ChangeHistory(projectName, null)
+    var projectName = this.resultProjArr[0]['projectname'].split('_');
+    this.mainService.ChangeHistory(projectName[1], null, projectName[0])
       .subscribe(value => {
         let parameter = [projectName]
         this.parameters = parameter;
@@ -272,8 +303,8 @@ export class ChangehistoryComponent implements OnInit {
       });
   }
 
-  AdminClients() {
-    this.router.navigate(['/admin-clients'])
+  Clients() {
+    this.router.navigate(['/clients'])
       .then(() => {
         window.location.reload();
       });
@@ -361,7 +392,7 @@ export class ChangehistoryComponent implements OnInit {
 
   View() {
     let projectName = this.parameters[0];
-    this.mainService.ChangeHistory(projectName, null)
+    this.mainService.ChangeHistory(projectName[1], null, projectName[0])
       .subscribe(value => {
         const newArray = []; let datasource1;
         for (let i = 0; i < value.data.length; i++) {

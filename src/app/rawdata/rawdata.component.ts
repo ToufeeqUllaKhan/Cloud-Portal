@@ -71,12 +71,16 @@ export class RawdataComponent implements OnInit {
   rowselected: any;
   failedinsert = 0;
   loginid: any;
+  role: string;
+  module: string;
 
   constructor(private mainService: MainService, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService, private fb: FormBuilder) {
     localStorage.removeItem('StagingStatus')
     this.usersName = localStorage.getItem('userName');
     this.loginid = JSON.parse(localStorage.getItem('currentUser'));
-    this.status = null; this.device = null; this.subdevice = null;
+    this.role = localStorage.getItem('AccessRole');
+    this.module = localStorage.getItem('moduleselected');
+    this.status = 1; this.device = null; this.subdevice = null;
     this.paginationPageSize = 10;
     this.rowSelection = 'multiple';
     this.frameworkComponents = {
@@ -429,7 +433,7 @@ export class RawdataComponent implements OnInit {
   }
 
   refreshScreen() {
-    this.status = null; this.device = null; this.subdevice = null;
+    this.status = 1; this.device = null; this.subdevice = null;
     this.getTabResponseData(this.device, this.subdevice, this.status);
   }
 
@@ -445,7 +449,6 @@ export class RawdataComponent implements OnInit {
   }
 
   rawdata(dataType, Device, Subdevice, statusflag) {
-    localStorage.setItem('RawStatus', this.status)
     this.mainService.RawToStaging(dataType, null, null, statusflag)
       .then(value => {
         let arr = []; let arr1 = []; let arr2 = []; let Remarks = []; let RegioncountryModel;
@@ -862,30 +865,30 @@ export class RawdataComponent implements OnInit {
       minWidth: 100,
     };
     this.columnDefs = [
-      { field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Subdevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Targetmodel", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "TargetRegion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "TargetCountry", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Year", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Remotemodel", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Regionofcapture", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Countryofcapture", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "CECDevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Cecpresent", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Cecenabled", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Vendoridhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Vendoridstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Osdstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Osdhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-      { field: "Sourcename", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Sourcetype", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Supportedregions", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "regionsviewCellRenderer" },
-      { field: "Remarks", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "remarksviewCellRenderer" },
-      { field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
+      { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Subdevice", field: "Subdevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Brand", field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Targetmodel", field: "Targetmodel", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "TargetRegion", field: "TargetRegion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "TargetCountry", field: "TargetCountry", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Year", field: "Year", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Remotemodel", field: "Remotemodel", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Regionofcapture", field: "Regionofcapture", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Countryofcapture", field: "Countryofcapture", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "CECDevice", field: "CECDevice", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Cecpresent", field: "Cecpresent", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Cecenabled", field: "Cecenabled", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Vendoridhex", field: "Vendoridhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Vendoridstring", field: "Vendoridstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Osdstring", field: "Osdstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Osdhex", field: "Osdhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Edid", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
+      { headerName: "Sourcename", field: "Sourcename", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Sourcetype", field: "Sourcetype", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Supportedregions", field: "Supportedregions", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "regionsviewCellRenderer" },
+      { headerName: "Remarks", field: "Remarks", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "remarksviewCellRenderer" },
+      { headerName: "Status", field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Select All", field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
       { headerName: "Action", field: "Status", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
     ];
     this.rowData = this.rawdatacapture;
@@ -897,6 +900,45 @@ export class RawdataComponent implements OnInit {
     }
     this.gridApi.setQuickFilter(this.searchValue)
 
+    let crudType = 7;
+    this.mainService.getRoleModule(crudType, null, null, null, null)
+      .then(value => {
+        /** based on role get modules accessible checked or not checked*/
+        let resultFetchArr: any = value.data.filter(u =>
+          u.name == this.role);
+        let fetchModule = [];
+        let permission = resultFetchArr.filter(u => u.mainModule === this.module)
+        if (permission[0]['readPermission'] === null) {
+          permission[0]['readPermission'] = 0
+        }
+        if (permission[0]['downloadPermission'] === null) {
+          permission[0]['downloadPermission'] = 0
+        }
+        if (permission[0]['writePermission'] === null) {
+          permission[0]['writePermission'] = 0
+        }
+        if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0) ||
+          (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0)) {
+          this.columnDefs = this.columnDefs.filter(u => u.headerName != 'Select All' && u.headerName != 'Action');
+          $('#single_download').hide();
+          $('#button').hide();
+        }
+        if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
+          (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0)) {
+          this.columnDefs = this.columnDefs.filter(u => u.headerName != 'Select All' && u.headerName != 'Action');
+          $('#single_download').show();
+          $('#button').hide();
+        }
+        if ((permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1) ||
+          (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
+          (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
+          (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1)) {
+          this.columnDefs = this.columnDefs;
+          $('#single_download').show();
+          $('#button').show();
+        }
+        console.log(permission)
+      })
 
   }
 
@@ -1060,10 +1102,11 @@ export class RawdataComponent implements OnInit {
 
   onBtnExport() {
     let columndefs = this.gridApi.columnController.columnDefs; let columns = []; let filteredcolumns = [];
+    columndefs = columndefs.filter(u => u.headerName != 'Select All' && u.headerName != 'Action');
     columndefs.forEach(element => {
-      columns.push(element['field'])
+      columns.push(element['headerName'])
     });
-    for (let i = 0; i < columns.length - 2; i++) {
+    for (let i = 0; i < columns.length; i++) {
       filteredcolumns.push(columns[i])
     }
     var excelParams = {

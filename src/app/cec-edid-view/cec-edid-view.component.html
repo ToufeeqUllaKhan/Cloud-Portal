@@ -1,0 +1,39 @@
+<div class="container-fluid">
+  <!-- Bread crumb and right sidebar toggle -->
+  <!-- ============================================================== -->
+  <div class="row page-titles">
+    <div class="col-md-5 col-8 align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Centralized DB View</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter bg-red info hover-cursor" (click)="viewrawcapture()">
+        <i class="fa fa-database" aria-hidden="true"></i>
+        <span class="count-name">Raw capture Data</span>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter bg-yellow info hover-cursor" (click)="stagingdata()">
+        <i class="fa fa-database" aria-hidden="true"></i>
+        <span class="count-name">Staging Data</span>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter info hover-cursor" (click)="cec_ediddata()">
+        <i class="fa fa-database" aria-hidden="true"></i>
+        <span class="count-name">CEC-EDID Data</span>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card-counter bg-brown info hover-cursor" (click)="decodeedid()">
+        <i class="fa fa-code" aria-hidden="true"></i>
+        <span class="count-name">Decode EDID Data</span>
+      </div>
+    </div>
+  </div>
+</div>

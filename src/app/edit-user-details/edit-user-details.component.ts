@@ -45,8 +45,10 @@ export class EditUserDetailsComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        let FilterProject = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        let FilterProject = value.data;
+        FilterProject.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const unique = [...new Set(FilterProject.map(item => item.projectname))];
         let arrData = [];
         for (var i = 0; i < unique.length; i++) {
@@ -86,10 +88,14 @@ export class EditUserDetailsComponent implements OnInit {
             } else {
               this.mainService.getRoleModule(8, null, null, userName, null)
                 .then(value => {
-                  for (var i = 0; i < value.data.length; i++) {
-                    var setIndex = this.projects.findIndex(p => p.item_text == value.data[i]['name']);
+                  let filterProject = value.data;
+                  filterProject.forEach(element => {
+                    element['name'] = element['dbPath'] + '_' + element['name']
+                  })
+                  for (var i = 0; i < filterProject.length; i++) {
+                    var setIndex = this.projects.findIndex(p => p.item_text == filterProject[i]['name']);
 
-                    this.selectedItems.push({ item_id: setIndex, item_text: value.data[i]['name'] });
+                    this.selectedItems.push({ item_id: setIndex, item_text: filterProject[i]['name'] });
                   }
                   this.projectNames = this.selectedItems;
                   this.prevProjects = this.projectNames;
@@ -191,35 +197,62 @@ export class EditUserDetailsComponent implements OnInit {
         if (value.data[0]['result'] == 1) {
           this.toastr.success('', value.data[0]['message']);
           this.submitted = false;
-          for (var i = 0; i < this.prevProjects.length; i++) {
-            let projectRemove = this.prevProjects[i]['item_text'];
-            this.mainService.userProjectLinkingScenario(6, null, null, this.username, projectRemove)
-              .then(val => {
-                this.checkLength++;
-                if (this.prevProjects.length === this.checkLength) {
-                  let crudtype = 5;
-                  for (var j = 0; j < this.projectNames.length; j++) {
-                    let project = this.projectNames[j]['item_text'];
-                    this.mainService.userProjectLinkingScenario(crudtype, null, null, this.username, project)
-                      .then(val => {
-                      });
-                  }
-                  this.spinnerService.hide();
-                  this.router.navigate(['/user-library']);
+          this.mainService.getRegionsperClient()
+            .pipe()
+            .subscribe(value => {
+              let FilterProject = value.data;
+              FilterProject.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+              for (var i = 0; i < this.prevProjects.length; i++) {
+                let projectRemove = FilterProject.filter(u => u.name === this.prevProjects[i]['item_text']);
+                let Dbinstance = projectRemove[0]['dbPath'];
+                let ProjectName = projectRemove[0]['name'];
+                if (ProjectName.startsWith(Dbinstance + '_')) {
+                  ProjectName = ProjectName.replace(Dbinstance + '_', '')
                 }
-              });
-          }
-          if (this.prevProjects.length == 0) {
-            let crudtype = 5;
-            for (var j = 0; j < this.projectNames.length; j++) {
-              let project = this.projectNames[j]['item_text'];
-              this.mainService.userProjectLinkingScenario(crudtype, null, null, this.username, project)
-                .then(val => {
-                });
-            }
-            this.spinnerService.hide();
-            this.router.navigate(['/user-library']);
-          }
+                this.mainService.userProjectLinkingScenario(6, Dbinstance, null, null, this.username, ProjectName)
+                  .then(val => {
+                    this.checkLength++;
+                    if (this.prevProjects.length === this.checkLength) {
+                      let crudtype = 5;
+                      for (var j = 0; j < this.projectNames.length; j++) {
+                        let project = this.projectNames[j]['item_text'];
+                        let projectRemove = FilterProject.filter(u => u.name === project);
+                        let Projectname = projectRemove[0]['name'];
+                        let dbInstance = projectRemove[0]['dbPath'];
+                        if (Projectname.startsWith(dbInstance + '_')) {
+                          Projectname = Projectname.replace(dbInstance + '_', '')
+                        }
+
+                        this.mainService.userProjectLinkingScenario(crudtype, dbInstance, null, null, this.username, Projectname)
+                          .then(val => {
+                          });
+                      }
+                      this.spinnerService.hide();
+                      this.router.navigate(['/user-library']);
+                    }
+                  });
+              }
+              if (this.prevProjects.length == 0) {
+                let crudtype = 5;
+                for (var j = 0; j < this.projectNames.length; j++) {
+                  let project = this.projectNames[j]['item_text'];
+                  let projectRemove = FilterProject.filter(u => u.name === project);
+                  let projectname = projectRemove[0]['name'];
+                  let DbInstance = projectRemove[0]['dbPath'];
+                  if (projectname.startsWith(DbInstance + '_')) {
+                    projectname = projectname.replace(DbInstance + '_', '')
+                  }
+                  this.mainService.userProjectLinkingScenario(crudtype, DbInstance, null, null, this.username, projectname)
+                    .then(val => {
+                    });
+                }
+                this.spinnerService.hide();
+                this.router.navigate(['/user-library']);
+              }
+            })
+
         } else {
           this.toastr.warning('', value.data[0]['message']);
         }

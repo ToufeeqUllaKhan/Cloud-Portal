@@ -1,0 +1,64 @@
+<div class="container-fluid main-scroll">
+
+
+  <div class="row page-titles">
+    <div class="align-self-center">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a [routerLink]="['/dashboard']">Home</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active"><a [routerLink]="['/Centralized-DB-view']">Centralized DB View</a></li>
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <li class="breadcrumb-item active">Decode EDID Data</li>
+      </ol>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="row">
+          <div class="col-sm-8">
+            <div class="col-md-12">&nbsp;</div>
+            <label class="col-form-label">EDID data<span class="color-red">*</span></label>
+            <textarea rows="4" type="text" id="checkEdidValid" [(ngModel)]="EdidData" class="form-control"></textarea>
+            <div class="text-right color-merron" *ngIf="edidError">Enter Valid Edid</div>
+            <br />
+          </div>
+          <div class="col-sm-3 text-right">
+            <button type="submit" class="btn btn-info" (click)="validateEdid()">Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button id="decode" data-toggle="modal" data-target="#DecodeedidDataModal" data-backdrop="static"
+    data-keyboard="false" class="btn btn-primary" hidden>Decode</button>
+  <div class="modal fade" id="DecodeedidDataModal" tabindex="-1" role="dialog"
+    aria-labelledby="DecodeedidDataModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="margin-top: 60px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="DecodeedidDataModalLabel" *ngIf="DecodeedidDataView">Decode Edid View
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+            (click)="modalClose()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12" style="overflow: auto;">
+            <table class="display select nowrap tables table-striped table-bordered" cellspacing="0"
+              style="width:auto;">
+              <tbody *ngIf="DecodeedidDataView">
+                <tr>
+                  <th *ngFor="let header of keys">{{header}}</th>
+                </tr>
+                <tr>
+                  <td *ngFor="let Defn of Values">{{Defn}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

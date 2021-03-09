@@ -19,7 +19,7 @@ export class AnalyticalreportsviewComponent implements OnInit {
   }
 
   CustomizedreportsView() {
-    this.router.navigate(['/report-clients']);
+    this.router.navigate(['/clients']);
   }
 
 }

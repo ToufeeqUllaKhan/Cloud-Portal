@@ -37,8 +37,10 @@ export class CreateUsersComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        let FilterProject = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        let FilterProject = value.data;
+        FilterProject.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const unique = [...new Set(FilterProject.map(item => item.projectname))];
 
         let arrData = [];
@@ -142,14 +144,30 @@ export class CreateUsersComponent implements OnInit {
           this.formGroupDirective.resetForm();
           this.submitted = false;
           let crudtype = 5;
-          for (var i = 0; i < this.projectNames.length; i++) {
-            let project = this.projectNames[i]['item_text'];
-            this.mainService.userProjectLinkingScenario(crudtype, null, null, userName, project)
-              .then(val => {
-              });
-          }
-          this.projectNames = [];
-          this.router.navigate(['/user-library']);
+          this.mainService.getRegionsperClient()
+            .pipe()
+            .subscribe(value => {
+              let FilterProject = value.data;
+              FilterProject.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+
+              for (var i = 0; i < this.projectNames.length; i++) {
+                let project = this.projectNames[i]['item_text'];
+                let projectRemove = FilterProject.filter(u => u.name === project);
+                let dbinstance = projectRemove[0]['dbPath'];
+                let ProjectName = projectRemove[0]['name'];
+                if (ProjectName.startsWith(dbinstance + '_')) {
+                  ProjectName = ProjectName.replace(dbinstance + '_', '')
+                }
+                this.mainService.userProjectLinkingScenario(crudtype, dbinstance, null, null, userName, ProjectName)
+                  .then(val => {
+                  });
+              }
+              this.projectNames = [];
+              this.router.navigate(['/user-library']);
+            })
+
         } else {
           this.toastr.warning('', value.data[0]['message']);
         }

@@ -26,6 +26,7 @@
         <i class="fa fa-cloud-upload" aria-hidden="true" *ngIf="isDataUpload1"></i>
         <i class="fa fa-wrench" aria-hidden="true" *ngIf="isCloudApi1"></i>
         <i class="fa fa-area-chart" aria-hidden="true" *ngIf="isReports1"></i>
+        <i class="fa fa-database" aria-hidden="true" *ngIf="isCentralized1"></i>
         {{mainMenu1}}
         <i class="fa fa-caret-down" style="margin-top: 4px;"></i>
       </a>
@@ -40,6 +41,7 @@
         <i class="fa fa-cloud-upload" aria-hidden="true" *ngIf="isDataUpload2"></i>
         <i class="fa fa-wrench" aria-hidden="true" *ngIf="isCloudApi2"></i>
         <i class="fa fa-area-chart" aria-hidden="true" *ngIf="isReports2"></i>
+        <i class="fa fa-database" aria-hidden="true" *ngIf="isCentralized2"></i>
         {{mainMenu2}}
         <i class="fa fa-caret-down" style="margin-top: 4px;"></i>
       </a>
@@ -49,10 +51,11 @@
           {{list}}
         </a>
       </div>
-      <a href="#" (click)="report()" onclick="return false;" class="list-group-item list-group-item-action dropdown-btn menu3Data">
+      <a href="#" (click)="report()" onclick="return false;" class="list-group-item list-group-item-action menu3Data">
         <i class="fa fa-cloud-upload" aria-hidden="true" *ngIf="isDataUpload3"></i>
         <i class="fa fa-wrench" aria-hidden="true" *ngIf="isCloudApi3"></i>
         <i class="fa fa-area-chart" aria-hidden="true" *ngIf="isReports3"></i>
+        <i class="fa fa-database" aria-hidden="true" *ngIf="isCentralized3"></i>
         {{mainMenu3}}
       </a>
       <!-- <div class="dropdown-container">
@@ -61,6 +64,14 @@
         </a>
         <br />
       </div> -->
+      <a href="#" (click)="Centralized()" onclick="return false;"
+        class="list-group-item list-group-item-action menu4Data">
+        <i class="fa fa-cloud-upload" aria-hidden="true" *ngIf="isDataUpload4"></i>
+        <i class="fa fa-wrench" aria-hidden="true" *ngIf="isCloudApi4"></i>
+        <i class="fa fa-area-chart" aria-hidden="true" *ngIf="isReports4"></i>
+        <i class="fa fa-database" aria-hidden="true" *ngIf="isCentralized4"></i>
+        {{mainMenu4}}
+      </a>
     </div>
     <!--<div class="sidebar-footer">
       <a href="login.html" class="" title="" data-original-title="Logout" style="color: #26c6da;"><i class="fa fa-power-off" aria-hidden="true"></i></a>
@@ -94,7 +105,7 @@
         </div> -->
         <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
           <li class="nav-item dropdown"><a class="nav-link nav-version">App Version: {{version}}</a></li>
-          <li class="nav-item dropdown">
+          <li class="nav-item dropdown" *ngIf="isAdmin">
             <a href="#" onclick="return false;" class="nav-link" href="#" id="notifyDropdown" data-toggle="dropdown"
               aria-haspopup="true" aria-expanded="false">
               <div>

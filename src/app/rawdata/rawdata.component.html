@@ -6,7 +6,7 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a [routerLink]="" (click)="dashboard()">Home</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
-        <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
+        <li class="breadcrumb-item active"><a [routerLink]="['/Centralized-DB-view']">Centralized DB View</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
         <li class="breadcrumb-item active">View Raw Capture Data</li>
       </ol>
@@ -29,7 +29,7 @@
       <option value=null>All</option>
       <option *ngFor="let list of filter_Subdevice" value={{list}}>{{list}}</option>
     </select>&nbsp;&nbsp; -->
-    <!-- <select [(ngModel)]='status' class="form form-control selectDrop" (change)="onchangestatus()"
+    <select [(ngModel)]='status' class="form form-control selectDrop" (change)="onchangestatus()"
       (ngModelChange)="onModelChange($event)" style="width:auto;">
       <option [value]=null hidden>Status </option>
       <option value='null'>All</option>
@@ -37,7 +37,7 @@
       <option value=1>Not Exported to Staging</option>
       <option value=0>Inactive</option>
 
-    </select>&nbsp;&nbsp; -->
+    </select>&nbsp;&nbsp;
     <div>
       <button class="btn btn-info float-right" title="Download based on filtered data" id="single_download">
         <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>

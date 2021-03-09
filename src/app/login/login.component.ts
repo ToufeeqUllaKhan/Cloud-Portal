@@ -7,7 +7,7 @@ import { first } from 'rxjs/operators';
 import { User } from '../model/user';
 import { ToastrService } from 'ngx-toastr';
 import { Title } from "@angular/platform-browser";
-
+import { MainService } from '../services/main-service';
 
 
 @Component({
@@ -25,8 +25,7 @@ export class LoginComponent implements OnInit {
   loading = false;
   user: User = new User();
 
-
-  constructor(private router: Router, private fb: FormBuilder, private authenticationService: AuthenticationService, private toastr: ToastrService, private titleService: Title) {
+  constructor(private router: Router, private fb: FormBuilder, private authenticationService: AuthenticationService, private toastr: ToastrService, private titleService: Title, private mainService: MainService) {
     this.titleService.setTitle("Login - SSC");
   }
 
@@ -101,8 +100,27 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.invalid) {
       return;
     }
+    let userName = this.userName
+    let password = this.pwd
+    this.mainService.createUser(4, userName, null, null, null, null, null, null, null, null)
+      .subscribe(value => {
+        if (value.data.length == 0) {
+          localStorage.setItem('userName', userName);
+          this.login();
+        }
+        else {
+          localStorage.setItem('userName', value.data[0]['username']);
+          if (password != value.data[0]['password']) {
+            this.toastr.error('', 'Invalid Password!');
+          }
+          else {
+            this.login();
+          }
+        }
+      })
+  }
 
-    localStorage.setItem('userName', this.userName);
+  login() {
     localStorage.setItem('passWord', this.pwd);
     this.authenticationService.login(this.f.username.value, this.f.password.value)
       .pipe(first())
@@ -128,8 +146,6 @@ export class LoginComponent implements OnInit {
     //if (getValidation['data'] !== undefined && getValidation['data'].length > 0) {
     //  //this.toastr.error(getValidation['message'], 'SSC Says..');
     //}
-
-
   }
 
 }

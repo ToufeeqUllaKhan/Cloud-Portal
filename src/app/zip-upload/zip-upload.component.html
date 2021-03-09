@@ -157,8 +157,9 @@
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-6 col-form-label">Project Version</label>
-                  <input type="number" [(ngModel)]="project_version" min="0" formControlName="projectVersion"
+                  <input type="text" [(ngModel)]="project_version" formControlName="projectVersion"
                     class="form-control form-control-line col-sm-6"
+                    onkeydown="return ( event.ctrlKey || event.altKey || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false) || (95<event.keyCode && event.keyCode<106) || (event.keyCode==8) || (event.keyCode==9) || (event.keyCode>34 && event.keyCode<40) || (event.keyCode==46))"
                     [ngClass]="{ 'is-invalid': newDataSubmitted && g.projectVersion.errors }" />
 
                   <div *ngIf="newDataSubmitted && g.projectVersion.errors" class="invalid-feedback">
@@ -195,8 +196,9 @@
               <div class="col-sm-12">
                 <div class="form-group form-inline">
                   <label class="labelsubSpan col-sm-6 col-form-label">SW Version</label>
-                  <input type="number" [(ngModel)]="sw_version" min="0" formControlName="swversion"
+                  <input type="text" [(ngModel)]="sw_version" formControlName="swversion"
                     class="form-control form-control-line col-sm-6"
+                    onkeydown="return ( event.ctrlKey || event.altKey || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false) || (95<event.keyCode && event.keyCode<106) || (event.keyCode==8) || (event.keyCode==9) || (event.keyCode>34 && event.keyCode<40) || (event.keyCode==46))"
                     [ngClass]="{ 'is-invalid': newDataSubmitted && g.swversion.errors }" />
 
                   <div *ngIf="newDataSubmitted && g.swversion.errors" class="invalid-feedback">
@@ -216,6 +218,8 @@
       </div>
     </div>
   </div>
+  <button id="uploadedModalButton" [hidden]="true" data-toggle="modal" data-target="#uploadedModal"
+    data-backdrop="static" data-keyboard="false"></button>
   <div class="row" *ngIf="zipUploadDiv">
     <div class="col-xs-12 col-sm-6">
       <div class="card">
@@ -291,7 +295,7 @@
       </div>
     </div>
     <div class="col-xs-12 col-sm-12" *ngIf="isdataUploaded" style="margin-top: 20px;">
-      <div class="card" style="height:372px;">
+      <div class="card">
         <h5 class="h5-color">Overview</h5>&nbsp;
         <span class="bb-grey">&nbsp;</span>
         <span style="margin-left:880px;"><b> StartTime: </b>{{Starttime}} </span>
@@ -405,11 +409,13 @@
                   title="Out of {{valid_7}} Valid records, for {{invalid_9}} records EDID data is absent"
                   style="cursor:pointer"><u>{{invalid_9}}</u></td>
               </tr>
-              <tr *ngIf="show">
+              <tr>
                 <td>
-                  <div style="float: right;">
+                  <div style="text-align: right;" *ngIf="show">
                     <b>Total Time: </b>
                     <b>{{timercount}} min</b>&nbsp;&nbsp;
+                  </div>
+                  <div *ngIf="showDownload">
                     <button class="btn btn-info float-right" title="Download CEC-EDID data"
                       (click)="SingleexcelDownload()">
                       <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
@@ -451,8 +457,8 @@
                     id="zip-update" name='upload_cont_img' type="file" style="display:none;" class="form-control" />
                   <button id="selectModalButton" [hidden]="true" data-toggle="modal" data-target="#UpdateSelectedModal"
                     data-backdrop="static" data-keyboard="false"></button>
-                  <button id="uploadedModalButton" [hidden]="true" data-toggle="modal" data-target="#uploadedModal"
-                    data-backdrop="static" data-keyboard="false"></button>
+                  <!-- <button id="uploadedModalButton" [hidden]="true" data-toggle="modal" data-target="#uploadedModal"
+                    data-backdrop="static" data-keyboard="false"></button> -->
                 </div>
               </div>
               <div class="col-sm-2">
@@ -606,11 +612,13 @@
                   title="Out of {{valid_7}} Valid records, for {{invalid_9}} records EDID data is absent"
                   style="cursor:pointer"><u>{{invalid_9}}</u></td>
               </tr>
-              <tr *ngIf="show">
+              <tr>
                 <td>
-                  <div style="float: right;">
+                  <div style="text-align: right;" *ngIf="show">
                     <b>Total Time: </b>
                     <b>{{timercount}} min</b>&nbsp;&nbsp;
+                  </div>
+                  <div *ngIf="showDownload">
                     <button class="btn btn-info float-right" title="Download CEC-EDID data"
                       (click)="SingleexcelDownload()">
                       <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>

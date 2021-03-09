@@ -109,11 +109,11 @@ export class MainService {
       );
   }
 
-  userProjectLinkingScenario(crudtype: any, role: any, module: any, user: any, project: any): Promise<any> {
+  userProjectLinkingScenario(crudtype: any, dbpath: any, role: any, module: any, user: any, project: any): Promise<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/CRUD_RoleModuleMapping`,
       {
-        "crudtype": crudtype, "role": role, "module": module, "user": user, "project": project
+        "crudtype": crudtype, "dbinstance": dbpath, "role": role, "module": module, "user": user, "project": project
       })
       .pipe(
         retry(1),
@@ -705,12 +705,12 @@ export class MainService {
   }
 
   DBUpdates(Username: String, Projectname: String, Dbversion: any, Datasection: any, Recordcount: any, Updatedescription: any, Operation: any,
-    Ipaddress: any, Updatestatus: any): Observable<any> {
+    Ipaddress: any, Updatestatus: any, dbinstance: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/DataUpdates`,
       {
         "Username": Username, "Projectname": Projectname, "Dbversion": Dbversion, "Datasection": Datasection, "Recordcount": Recordcount, "Updatedescription": Updatedescription,
-        "Operation": Operation, "Ipaddress": Ipaddress, "Updatestatus": Updatestatus
+        "Operation": Operation, "Ipaddress": Ipaddress, "Updatestatus": Updatestatus, "dbinstance": dbinstance
       })
       .pipe(
         retry(1),
@@ -720,14 +720,14 @@ export class MainService {
 
   DataDBUpdates(Username: String, Projectname: String, Dbversion: any, Datasection: any, Totalinsertedrecords: any,
     Totalfailedrecords: any, Totalupdatedrecords: any, Recordcount: any, Updatedescription: any, Operation: any, Systemuser: any,
-    Ipaddress: any, Updatestatus: any): Observable<any> {
+    Ipaddress: any, Updatestatus: any, dbinstance: any): Observable<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/LoadData/DataUpdates`,
       {
         "Username": Username, "Projectname": Projectname, "Dbversion": Dbversion, "Datasection": Datasection,
         "Totalinsertedrecords": Totalinsertedrecords, "Totalfailedrecords": Totalfailedrecords, "Totalupdatedrecords": Totalupdatedrecords,
         "Recordcount": Recordcount, "Updatedescription": Updatedescription, "Operation": Operation, "Systemuser": Systemuser,
-        "Ipaddress": Ipaddress, "Updatestatus": Updatestatus
+        "Ipaddress": Ipaddress, "Updatestatus": Updatestatus, "dbinstance": dbinstance
       })
       .pipe(
         retry(1),
@@ -869,13 +869,13 @@ export class MainService {
 
   CreateNewProjectWithVersion(Dbname: any, Client: any, Region: any, Projectname: any, Signaturekey: any, Dbpath: any, Embeddeddbversion: any,
     Dbversion: any, Statusflag: any, Flagtype: any, Projectversion: any, Swversion: any, Allowdownload: any,
-    Binfile: any, Binfilechecksum: any, Zipfile: any, Zipfilechecksum: any): Promise<any> {
+    Binfile: any, Binfilechecksum: any, Zipfile: any, Zipfilechecksum: any, Boxid: any): Promise<any> {
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/CreateNewProjectWithVersion`,
       {
         "Dbname": Dbname, "Client": Client, "Region": Region, "Projectname": Projectname, "Signaturekey": Signaturekey, "Dbpath": Dbpath,
         "Embeddeddbversion": Embeddeddbversion, "Dbversion": Dbversion, "Statusflag": Statusflag, "Flagtype": Flagtype,
         "Projectversion": Projectversion, "Swversion": Swversion, "Allowdownload": Allowdownload, "Binfile": Binfile,
-        "Binfilechecksum": Binfilechecksum, "Zipfile": Zipfile, "Zipfilechecksum": Zipfilechecksum
+        "Binfilechecksum": Binfilechecksum, "Zipfile": Zipfile, "Zipfilechecksum": Zipfilechecksum, "defaultboxid": Boxid
       })
       .pipe(
         retry(1),
@@ -883,9 +883,9 @@ export class MainService {
       ).toPromise();
   }
 
-  Unlinkanddeletetheproject(Projectname: any): Observable<any> {
+  Unlinkanddeletetheproject(Projectname: any, dbpath: any): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/UnlinkAndDeleteProject`,
-      { "projectname": Projectname })
+      { "projectname": Projectname, "dbinstance": dbpath })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -911,9 +911,9 @@ export class MainService {
       );
   }
 
-  ChangeHistory(Projectname: any, Username: any): Observable<any> {
+  ChangeHistory(Projectname: any, Username: any, dbpath: any): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/GetChangeHistory`,
-      { "Projectname": Projectname, "Username": Username })
+      { "Projectname": Projectname, "Username": Username, "dbinstance": dbpath })
       .pipe(
         retry(1),
         catchError(this.handleError)
@@ -1166,13 +1166,13 @@ export class MainService {
   }
 
   StagingToProd(Crudtype: any, Projectname: any, Device: any, Subdevice: any, Brand: any, Model: any, Region: any, country: any, cecpresent: any,
-    cecenabled: any, vendorid: any, osd: any, ediddata: any, codeset: any, recordid: any): Promise<any> {
+    cecenabled: any, vendorid: any, osd: any, ediddata: any, codeset: any, recordid: any, dbpath: any): Promise<any> {
 
-    return this.http.post<any>(`${environment.apiUrl}/api/Detection//StagingToProd`,
+    return this.http.post<any>(`${environment.apiUrl}/api/Detection/StagingToProd`,
       {
         "crudtype": Crudtype, "Projectname": Projectname, "device": Device, "subdevice": Subdevice, "brand": Brand, "model": Model,
         "region": Region, "country": country, "iscecpresent": cecpresent, "iscecenabled": cecenabled, "vendorid": vendorid,
-        "osd": osd, "edid": ediddata, "codeset": codeset, "recordid": recordid
+        "osd": osd, "edid": ediddata, "codeset": codeset, "recordid": recordid, "dbinstance": dbpath
       })
       .pipe(
         retry(1),
@@ -1180,11 +1180,11 @@ export class MainService {
       ).toPromise();
   }
 
-  CECEDID_NewProject(Crudtype: any, Projectname: any, signaturekey: any, dbpath: any, statusflag: any, recordid: any): Promise<any> {
+  CECEDID_NewProject(Crudtype: any, Projectname: any, signaturekey: any, dbname: any, statusflag: any, recordid: any): Promise<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/CECEDID_NewProject`,
       {
-        "crudtype": Crudtype, "projectname": Projectname, "signaturekey": signaturekey, "dbpath": dbpath, "statusflag": statusflag, "recordid": recordid
+        "crudtype": Crudtype, "projectname": Projectname, "signaturekey": signaturekey, "dbpath": dbname, "statusflag": statusflag, "recordid": recordid
       })
       .pipe(
         retry(1),
@@ -1192,11 +1192,11 @@ export class MainService {
       ).toPromise();
   }
 
-  Notifications(Crudtype: any, Projectname: any, dbversion: any, dbpath: any, data: any, loginid: any, notificationid: any, statusflag: any, recordid: any): Promise<any> {
+  Notifications(Crudtype: any, Projectname: any, dbversion: any, dbname: any, data: any, loginid: any, notificationid: any, statusflag: any, recordid: any): Promise<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Admin/Notifications`,
       {
-        "crudtype": Crudtype, "projectname": Projectname, "dbversion": dbversion, "dbpath": dbpath, "data": data, "loginid": loginid, "recordid": recordid, "notificationid": notificationid, "statusflag": statusflag
+        "crudtype": Crudtype, "projectname": Projectname, "dbversion": dbversion, "dbpath": dbname, "data": data, "loginid": loginid, "recordid": recordid, "notificationid": notificationid, "statusflag": statusflag
       })
       .pipe(
         retry(1),
@@ -1204,11 +1204,11 @@ export class MainService {
       ).toPromise();
   }
 
-  GetReports(dbinstance: any, Crudtype: any,): Promise<any> {
+  GetReports(dbpath: any, Crudtype: any,): Promise<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Report/GetReports`,
       {
-        "dbinstance": dbinstance, "reporttype": Crudtype
+        "dbinstance": dbpath, "reporttype": Crudtype
       })
       .pipe(
         retry(1),

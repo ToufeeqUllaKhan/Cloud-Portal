@@ -47,8 +47,10 @@ export class DataConfigurationListComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        let filterProject: any = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        let filterProject: any = value.data;
+        filterProject.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const unique = [...new Set(filterProject.map(item => item.projectname))];
 
         let arrData = [];
@@ -56,16 +58,19 @@ export class DataConfigurationListComponent implements OnInit {
           arrData.push({ item_id: i, item_text: unique[i] });
         }
         this.ProjectList = arrData;
-
         let RoleLevel = localStorage.getItem('AccessRole');
         if (RoleLevel != 'Admin') {
           let userName = localStorage.getItem('userName');
           this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
-              let filterProjects = [];
-              for (var i = 0; i < value.data.length; i++) {
+              let filterProjects = []; let clientArray = [];
+              clientArray = value.data;
+              clientArray.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+              for (var i = 0; i < clientArray.length; i++) {
                 let clientsArray: any = this.ProjectList.filter(u =>
-                  u.item_text == value.data[i]['name']);
+                  (u.item_text == clientArray[i]['name']));
                 filterProjects.push(...clientsArray);
               }
               let modifyItems = [];
@@ -79,7 +84,6 @@ export class DataConfigurationListComponent implements OnInit {
                   this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[k] });
                 }
                 this.projectNames = this.selectedItems;
-
               }
             });
         } else {
@@ -107,19 +111,19 @@ export class DataConfigurationListComponent implements OnInit {
         // }
         // console.log(value.data);
         // this.dataTickets = value.data;
-        let Tickets=[];
-        for(var i = value.data.length - 1; i >= 0; --i){
+        for (var i = value.data.length - 1; i >= 0; --i) {
           let RoleLevel = localStorage.getItem('AccessRole');
-          if(RoleLevel==='Admin'){
+          if (RoleLevel === 'Admin') {
             if (value.data[i].ticketName == "WDB Bin") {
-              value.data.splice(i, 1)            }
-          }else{
-            if ((value.data[i].ticketName == "WDB Bin") || (value.data[i].ticketName == "Zip") ) {
-              value.data.splice(i, 1)            }
+              value.data.splice(i, 1)
+            }
+          } else {
+            if ((value.data[i].ticketName == "WDB Bin") || (value.data[i].ticketName == "Zip")) {
+              value.data.splice(i, 1)
+            }
           }
         }
-        console.log(value.data)
-        this.dataTickets=value.data;;
+        this.dataTickets = value.data;;
       });
 
     this.dropdownSettings = {

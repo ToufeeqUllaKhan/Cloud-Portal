@@ -51,13 +51,17 @@ export class EditApiComponent implements OnInit {
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
         this.filterProjects = value.data;
+        this.filterProjects.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const uniqueProjects = [...new Set(value.data.map(item => item.projectname))];
         this.projects = uniqueProjects;
         this.projectNames = this.projects[0];
         let filterProject: any = value.data.filter(u =>
           u.projectname == this.projects[0]);
-        let project = this.projects[0]; let signaturekey = filterProject[0]['signatureKey'];
+        let signaturekey = filterProject[0]['signatureKey'];
         let dbName = filterProject[0]['dbinstance']; let fetchModule = [];
+        let project = this.projects[0].replace(dbName + '_', '');
         /** List of Api Modules */
         this.mainService.crudApiList(dbName, 2, project, signaturekey, null, null, null, null, 1, null)
           .then(apiList => {
@@ -194,9 +198,10 @@ export class EditApiComponent implements OnInit {
         let crudType = 1;
         let filterProject: any = this.filterProjects.filter(u =>
           u.projectname == this.projectNames);
-        let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
+        let signaturekey = filterProject[0]['signatureKey'];
         let dbName = filterProject[0]['dbinstance']; let status = 1; let pid = null;
         let apiAddress = this.address; let apiName;
+        let project = this.projectNames.replace(dbName + '_', '');
         let uri; let description;
 
         for (var j = 0; j < this.selectedItems.length; j++) {
@@ -419,8 +424,9 @@ export class EditApiComponent implements OnInit {
                 $("#editDataModal .close").click();
                 let filterProject: any = this.filterProjects.filter(u =>
                   u.projectname == this.projectNames);
-                let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
+                let signaturekey = filterProject[0]['signatureKey'];
                 let dbName = filterProject[0]['dbinstance']; let fetchModule = [];
+                let project = this.projectNames.replace(dbName + '_', '');
                 this.mainService.crudApiList(dbName, 2, project, signaturekey, null, null, null, null, 1, null)
                   .then(apiList => {
                     this.apimodulesList = apiList.data;
@@ -462,8 +468,9 @@ export class EditApiComponent implements OnInit {
     }
     let filterProject: any = this.filterProjects.filter(u =>
       u.projectname == this.projectNames);
-    let crudType = 3; let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
+    let crudType = 3; let signaturekey = filterProject[0]['signatureKey'];
     let dbName = filterProject[0]['dbinstance']; let status = this.editArray[0]['statusFlag'];
+    let project = this.projectNames.replace(dbName + '_', '');
     let apiName = this.editArray[0]['name']; let apiAddress = this.address; let uri = this.updatedUrl; let description = this.editArray[0]['desc']; let pid = this.editArray[0]['id'];
     this.mainService.crudApiList(dbName, crudType, project, signaturekey, apiName, apiAddress, uri, description, status, pid)
       .then(value => {
@@ -498,8 +505,9 @@ export class EditApiComponent implements OnInit {
       this.apimodulesList = [];
       let filterProject: any = this.filterProjects.filter(u =>
         u.projectname == this.projectNames);
-      let crudType = 2; let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
+      let crudType = 2; let signaturekey = filterProject[0]['signatureKey'];
       let dbName = filterProject[0]['dbinstance']; let fetchModule = [];
+      let project = this.projectNames.replace(dbName + '_', '');
       /** List of Api Modules **/
       this.mainService.crudApiList(dbName, crudType, project, signaturekey, null, null, null, null, 1, null)
         .then(apiList => {
@@ -802,8 +810,9 @@ export class EditApiComponent implements OnInit {
     let crudType = 3;
     let filterProject: any = this.filterProjects.filter(u =>
       u.projectname == this.projectNames);
-    let project = this.projectNames; let signaturekey = filterProject[0]['signatureKey'];
+    let signaturekey = filterProject[0]['signatureKey'];
     let dbName = filterProject[0]['dbinstance']; let status; let pid;
+    let project = this.projectNames.replace(dbName + '_', '');
     let apiName; let apiAddress;
     let uri; let description;
     if (this.recheckItems.length > 0) {
@@ -1325,8 +1334,9 @@ export class EditApiComponent implements OnInit {
       if (this.apimodulesList.length > 0) {
         let filterProject: any = this.filterProjects.filter(u =>
           u.projectname == this.projectNames);
-        let dbName = filterProject[0]['dbinstance']; let crudType = 3; let project = this.projectNames;
+        let dbName = filterProject[0]['dbinstance']; let crudType = 3;
         let signaturekey = filterProject[0]['signatureKey']; let apiAddress = this.upd_addr;
+        let project = this.projectNames.replace(dbName + '_', '');
         let apiName; let uri; let description;
         let status; let pid;
         for (var i = 0; i < this.apimodulesList.length; i++) {

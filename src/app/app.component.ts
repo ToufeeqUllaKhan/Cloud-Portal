@@ -20,10 +20,11 @@ export class AppComponent {
   imagePath: any; profilePicture: any;
   public version: string;
   currentApplicationVersion = environment.appVersion;
-  isDataUpload1: Boolean = false; isDataUpload2: Boolean = false; isDataUpload3: Boolean = false;
-  isCloudApi1: Boolean = false; isCloudApi2: Boolean = false; isCloudApi3: Boolean = false;
-  isReports1: Boolean = false; isReports2: Boolean = false; isReports3: Boolean = false;
-  isMenu1: Boolean = false; isMenu2: Boolean = false; isMenu3: Boolean = false
+  isDataUpload1: Boolean = false; isDataUpload2: Boolean = false; isDataUpload3: Boolean = false; isDataUpload4: Boolean = false;
+  isCloudApi1: Boolean = false; isCloudApi2: Boolean = false; isCloudApi3: Boolean = false; isCloudApi4: Boolean = false;
+  isReports1: Boolean = false; isReports2: Boolean = false; isReports3: Boolean = false; isReports4: Boolean = false;
+  isCentralized1: Boolean = false; isCentralized2: Boolean = false; isCentralized3: Boolean = false; isCentralized4: Boolean = false;
+  isMenu1: Boolean = false; isMenu2: Boolean = false; isMenu3: Boolean = false; isMenu4: Boolean = false
   notificationcount: any;
   message: string;
   notificationdetails: any;
@@ -31,6 +32,8 @@ export class AppComponent {
   keys: any[];
   Values: unknown[];
   previewNotification: any;
+  mainMenu4: any;
+  centralized: any;
 
   constructor(public router: Router, private mainService: MainService) {
     this.user = JSON.parse(localStorage.getItem('currentUser'));
@@ -62,16 +65,19 @@ export class AppComponent {
               this.mainService.sidebarLists()
                 .subscribe(value => {
                   if (value.data.length > 0) {
-                    this.mainMenu1 = value.data[1]['mainmenu'];
-                    this.datas = value.data[1]['submenu'];
-                    this.mainMenu2 = value.data[0]['mainmenu'];
-                    this.searchApi = value.data[0]['submenu'];
-                    this.mainMenu3 = value.data[2]['mainmenu'];
-                    this.searchReports = value.data[2]['submenu'];
+                    this.mainMenu1 = value.data[2]['mainmenu'];
+                    this.datas = value.data[2]['submenu'];
+                    this.mainMenu2 = value.data[1]['mainmenu'];
+                    this.searchApi = value.data[1]['submenu'];
+                    this.mainMenu3 = value.data[3]['mainmenu'];
+                    this.searchReports = value.data[3]['submenu'];
+                    this.mainMenu4 = value.data[0]['mainmenu'];
+                    this.centralized = value.data[0]['submenu'];
                     if (mainModules.indexOf('Cloud API Search Tester') > -1) {
                       this.isCloudApi2 = true;
                       this.isDataUpload2 = false;
                       this.isReports2 = false;
+                      this.isCentralized2 = false;
                       $('.menu2Data').css('display', 'block');
                       $('.menu2Data').click(function (e) {
                         localStorage.setItem('moduleselected', 'Cloud API Search Tester')
@@ -85,6 +91,7 @@ export class AppComponent {
                       this.isDataUpload1 = true;
                       this.isCloudApi1 = false;
                       this.isReports1 = false;
+                      this.isCentralized1 = false;
                       $('.menu1Data').css('display', 'block');
                       $('.menu1Data').click(function (e) {
                         localStorage.setItem('moduleselected', 'Data Management Tool')
@@ -96,6 +103,7 @@ export class AppComponent {
                       this.isReports3 = true;
                       this.isDataUpload3 = false;
                       this.isCloudApi3 = false;
+                      this.isCentralized3 = false;
                       $('.menu3Data').css('display', 'block');
                       $('.menu3Data').click(function (e) {
                         localStorage.setItem('moduleselected', 'Analytics Report')
@@ -103,6 +111,19 @@ export class AppComponent {
                     }
                     else {
                       $('.menu3Data').css('display', 'none');
+                    }
+                    if (mainModules.indexOf('Centralized CEC-EDID DB') > -1) {
+                      this.isCentralized4 = true;
+                      this.isDataUpload4 = false;
+                      this.isCloudApi4 = false;
+                      this.isReports4 = false;
+                      $('.menu4Data').css('display', 'block');
+                      $('.menu4Data').click(function (e) {
+                        localStorage.setItem('moduleselected', 'Centralized CEC-EDID DB')
+                      })
+                    }
+                    else {
+                      $('.menu4Data').css('display', 'none');
                     }
                   }
                 });
@@ -351,7 +372,7 @@ export class AppComponent {
     if (list == 'Auto Search' || list == 'BIN Download' || list == 'Current DB Version' || list == 'Delta Search' || list == 'Download DB Updates' ||
       list == 'FeedBack' || list == 'Generic Log' || list == 'Latest DB Version' || list == 'Login' || list == 'Model Search' || list == 'Register' || list == 'ZIP Download') {
       localStorage.setItem('ApiMenuItem', list);
-      this.router.navigate(['api-clients'])
+      this.router.navigate(['clients'])
         .then(() => {
           location.reload();
         });
@@ -490,6 +511,10 @@ export class AppComponent {
 
   report() {
     this.router.navigate(['/reports-view']);
+  }
+
+  Centralized() {
+    this.router.navigate(['/Centralized-DB-view']);
   }
 
   @HostListener("window:onbeforeunload", ["$event"])

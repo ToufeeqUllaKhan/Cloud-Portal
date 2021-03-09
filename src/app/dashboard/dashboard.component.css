@@ -413,3 +413,8 @@ p {
   background: linear-gradient(60deg, #26c6da, #00acc1) !important;
   box-shadow: 0 4px 20px 0 rgba(0, 0, 0, .14), 0 7px 10px -5px rgba(0, 188, 212, .4) !important;
 }
+
+.card-brown {
+  background: linear-gradient(60deg, darkslateblue, darkslateblue) !important;
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(72, 61, 139, .4) !important;
+}

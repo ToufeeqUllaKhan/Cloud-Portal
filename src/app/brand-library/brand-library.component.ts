@@ -181,8 +181,10 @@ export class BrandLibraryComponent implements OnInit {
     let dataType = 1;
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
-        this.finalArray = value.data.filter(u =>
-          (u.statusFlag != 2 || u.statusFlag != '2'));
+        this.finalArray = value.data;
+        this.finalArray.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         const unique = [...new Set(this.finalArray.map(item => item.projectname))];
 
         let arrData = [];
@@ -195,10 +197,14 @@ export class BrandLibraryComponent implements OnInit {
           let userName = localStorage.getItem('userName');
           this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
-              let filterProjects = [];
-              for (var i = 0; i < value.data.length; i++) {
+              let filterProjects = []; let clientArray = [];
+              clientArray = value.data;
+              clientArray.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+              for (var i = 0; i < clientArray.length; i++) {
                 let clientsArray: any = this.ProjectList.filter(u =>
-                  u.item_text == value.data[i]['name']);
+                  (u.item_text == clientArray[i]['name']));
                 filterProjects.push(...clientsArray);
               }
               let modifyItems = [];
@@ -274,9 +280,13 @@ export class BrandLibraryComponent implements OnInit {
     this.mainService.getProjectNames(null, null, null, null, null, data_type)
       .subscribe(value => {
         this.mainArr = value.data;
+        this.mainArr.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
         for (var i = 0; i < Projectname.length; i++) {
-          let filterProject: any = value.data.filter(u =>
-            (u.projectname == Projectname[i]) && (u.statusFlag != 2 || u.statusFlag != '2'));
+          let filterProject: any = this.mainArr.filter(u =>
+            (u.projectname == Projectname[i]));
+
           filtProj.push(filterProject);
           if (this.versions.length == 0) {
             for (var j = 0; j < filterProject.length; j++) {
@@ -300,15 +310,18 @@ export class BrandLibraryComponent implements OnInit {
         if (Projectname != null || Projectname != undefined) {
           $("select").prop("disabled", true);
           $("a").css('pointer-events', 'none');
-          let resultFetchArr: any = value.data.filter(u =>
-            u.projectname == Projectname[0] && u.embeddedDbVersion == this.version_list && (u.statusFlag != 2 || u.statusFlag != '2'));
+          let resultFetchArr: any = this.mainArr.filter(u =>
+            u.projectname == Projectname[0] && u.embeddedDbVersion == this.version_list);
           this.resultProjArr = resultFetchArr;
           if (this.resultProjArr.length != 0) {
             let Client = this.resultProjArr[0]['client']; let Region = this.resultProjArr[0]['region'];
             let Dbversion = this.resultProjArr[0]['embeddedDbVersion'];
             let Dbinstance = this.resultProjArr[0]['dbinstance'];
             let dataTypecount = 6
-
+            let projectName = this.resultProjArr[0]['projectname'];
+            if (projectName.startsWith(Dbinstance + '_')) {
+              projectName = projectName.replace(Dbinstance + '_', '')
+            }
             this.mainService.getProjectNames(null, null, null, null, Dbinstance, 18)
               .subscribe(value => {
                 let temp = []; let a = []; let temp1 = []; let b = []; let c = [];
@@ -323,7 +336,7 @@ export class BrandLibraryComponent implements OnInit {
                 }
                 this.country = c.filter((v, i, a) => a.indexOf(v) === i);
               })
-            this.mainService.getProjectNames(Client, Region, Projectname[0], Dbversion, Dbinstance, dataTypecount)
+            this.mainService.getProjectNames(Client, Region, projectName, Dbversion, Dbinstance, dataTypecount)
               .subscribe(value => {
                 let dataTypeSelection = 0;
                 if (this.Datatype == 8) {
@@ -358,7 +371,6 @@ export class BrandLibraryComponent implements OnInit {
                 }
 
                 var dbName = this.resultProjArr[0]['dbPath'];
-                var projectName = this.resultProjArr[0]['projectname'];
                 let dbVersion = this.resultProjArr[0]['embeddedDbVersion'];
                 var dataType = dataTypeSelection;
                 // var brandName = this.brand_list;
@@ -393,6 +405,9 @@ export class BrandLibraryComponent implements OnInit {
                     projectName = this.tabsProject;
                   } else {
                     projectName = this.projectNames[0]['item_text'];
+                  }
+                  if (projectName.startsWith(dbName + '_')) {
+                    projectName = projectName.replace(dbName + '_', '')
                   }
                   let versionArr = [];
                   this.mainService.getProjectNames(Client, Region, projectName, null, dbName, datatype)
@@ -566,7 +581,12 @@ export class BrandLibraryComponent implements OnInit {
       EdidonlyEdid: ['', Validators.required],
       EdidonlyCodeset: ['', Validators.required],
     });
-    this.tabValue = this.projectNames[0];
+    if (this.projectNames[0].startsWith('Import_')) {
+      this.tabValue = this.projectNames[0].replace('Import_', '')
+    }
+    else {
+      this.tabValue = this.projectNames[0];
+    }
     /** number restrictions validations **/
     $(document).ready(function () {
       $("input").on("keypress", function (e) {
@@ -1094,10 +1114,16 @@ export class BrandLibraryComponent implements OnInit {
       this.mainService.getProjectNames(null, null, null, null, null, data_type)
         .subscribe(value => {
           this.mainArr = value.data;
-          let filterProject: any = value.data.filter(u =>
-            (u.projectname == projectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
+          this.mainArr.forEach(element => {
+            element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+          })
+          let filterProject: any = this.mainArr.filter(u =>
+            (u.projectname == projectName));
           let Client = filterProject[0]['client']; let Region = filterProject[0]['region'];
           let Dbinstance = filterProject[0]['dbinstance'];
+          if (projectName.startsWith(Dbinstance + '_')) {
+            projectName = projectName.replace(Dbinstance + '_', '')
+          }
           this.mainService.getProjectNames(Client, Region, projectName, null, Dbinstance, datatype)
             .subscribe(value => {
               if (value.data.length != 0) {
@@ -1121,8 +1147,11 @@ export class BrandLibraryComponent implements OnInit {
       this.mainService.getProjectNames(null, null, null, null, null, data_type)
         .subscribe(value => {
           this.mainArr = value.data;
-          let filterProject: any = value.data.filter(u =>
-            (u.projectname == projectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
+          this.mainArr.forEach(element => {
+            element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+          })
+          let filterProject: any = this.mainArr.filter(u =>
+            (u.projectname == projectName));
           filtProj.push(filterProject);
           if (this.versions.length == 0) {
             for (var j = 0; j < filterProject.length; j++) {
@@ -1146,6 +1175,8 @@ export class BrandLibraryComponent implements OnInit {
       project = this.projectNames[0]['item_text']
     }
     this.getTabName(project);
+    this.getDropdownValues();
+    this.getCodeSets();
   }
 
   /** datatype selection based on selection of brands list start **/
@@ -1299,14 +1330,17 @@ export class BrandLibraryComponent implements OnInit {
   }
 
   hexaOnlyforosd(event: any) {
-
-    const pattern = /^[0-9A-Fa-f]+$/;
-    if (this.brand_list == 'CEC-EDID Data' || this.brand_list == 'CEC Only') {
-      if ((this.EditosdHeader === 'OSD Hex') || (this.UpdateosdHeader === 'OSD Hex')) {
-        let inputChar = String.fromCharCode(event.charCode);
-        if (event.keyCode != 8 && !pattern.test(inputChar)) {
-          event.preventDefault();
-        }
+    if (this.brand_list == 'CEC-EDID Data') {
+      if (this.EditosdHeader === 'OSD Hex') {
+        this.hexaOnly(event);
+      }
+      if (this.UpdateosdHeader === 'OSD Hex') {
+        this.hexaOnly(event);
+      }
+    }
+    if (this.brand_list == 'CEC Only') {
+      if (this.EditosdHeader === 'OSD Hex') {
+        this.hexaOnly(event);
       }
     }
   }
@@ -1370,6 +1404,8 @@ export class BrandLibraryComponent implements OnInit {
         this.selectModelView();
         this.changeVersionCount++;
         this.getVersionResponseData();
+        this.getCodeSets();
+        this.getDropdownValues();
         this.noData = false;
         $('.newBtn').css('display', 'block');
         $('.tab-content').css('display', 'block');
@@ -1519,27 +1555,65 @@ export class BrandLibraryComponent implements OnInit {
     let pushBrands = [];
     let projectName = this.tabValue;
     let dbInstance = this.resultProjArr[0]['dbinstance'];
-    if (this.version_list != null) {
-      this.mainService.getDevicesList(dbInstance, this.user, projectName, this.version_list)
-        .subscribe(value => {
-          this.edidDevices = value.data;
-        });
+    if (projectName.startsWith(dbInstance + '_')) {
+      projectName = projectName.replace(dbInstance + '_', '')
     }
-    if (this.resultProjArr != null && this.resultProjArr != undefined) {
-      let Client = this.resultProjArr[0]['client']; let Region = this.resultProjArr[0]['region'];
-      let dbInstance = this.resultProjArr[0]['dbinstance']; let dataType = 11;
-      this.mainService.getProjectNames(Client, Region, projectName, this.version_list, dbInstance, dataType)
+    let Client = this.resultProjArr[0]['client']; let Region = this.resultProjArr[0]['region'];
+    if (this.brand_list == 'Component Data' || this.brand_list == 'CEC-EDID Data' || this.brand_list == 'CEC Only' || this.brand_list == 'EDID Only') {
+      let versionArr = [];
+      this.mainService.getProjectNames(Client, Region, projectName, null, dbInstance, 21)
         .subscribe(value => {
-          this.edidBrands = value.data;
-
-          for (var i = 0; i < value.data.length; i++) {
-            pushBrands.push(value.data[i]['brandName'].toUpperCase());
+          if (value.data.length != 0) {
+            versionArr.push(value.data[0]['version']);
+            this.versions = versionArr;
+            this.version_list = versionArr[0];
           }
-          BrandListData = pushBrands.filter((v, i, a) => a.indexOf(v) === i);
+          if (this.version_list != null) {
+            this.mainService.getDevicesList(dbInstance, this.user, projectName, this.version_list)
+              .subscribe(value => {
+                this.edidDevices = value.data;
+              });
+          }
+          if (this.resultProjArr != null && this.resultProjArr != undefined) {
+            let Client = this.resultProjArr[0]['client']; let Region = this.resultProjArr[0]['region'];
+            let dbInstance = this.resultProjArr[0]['dbinstance']; let dataType = 11;
+            this.mainService.getProjectNames(Client, Region, projectName, this.version_list, dbInstance, dataType)
+              .subscribe(value => {
+                this.edidBrands = value.data;
 
+                for (var i = 0; i < value.data.length; i++) {
+                  pushBrands.push(value.data[i]['brandName'].toUpperCase());
+                }
+                BrandListData = pushBrands.filter((v, i, a) => a.indexOf(v) === i);
+                this.spinnerService.hide();
+              });
+          }
         });
+
+    } else {
+      if (this.version_list != null) {
+        this.mainService.getDevicesList(dbInstance, this.user, projectName, this.version_list)
+          .subscribe(value => {
+            this.edidDevices = value.data;
+          });
+      }
+      if (this.resultProjArr != null && this.resultProjArr != undefined) {
+        let Client = this.resultProjArr[0]['client']; let Region = this.resultProjArr[0]['region'];
+        let dbInstance = this.resultProjArr[0]['dbinstance']; let dataType = 11;
+        this.mainService.getProjectNames(Client, Region, projectName, this.version_list, dbInstance, dataType)
+          .subscribe(value => {
+            this.edidBrands = value.data;
+
+            for (var i = 0; i < value.data.length; i++) {
+              pushBrands.push(value.data[i]['brandName'].toUpperCase());
+            }
+            BrandListData = pushBrands.filter((v, i, a) => a.indexOf(v) === i);
+            this.spinnerService.hide();
+          });
+      }
     }
-    this.spinnerService.hide();
+
+
   }
 
   /** get list of all devices registered for the project end **/
@@ -1548,15 +1622,36 @@ export class BrandLibraryComponent implements OnInit {
 
   getCodeSets() {
     let projectName = this.tabValue;
-
     if (this.resultProjArr != null && this.resultProjArr != undefined) {
       let Client = this.resultProjArr[0]['client']; let Region = this.resultProjArr[0]['region'];
       let dbInstance = this.resultProjArr[0]['dbinstance']; let dataType = 10;
-      this.mainService.getProjectNames(Client, Region, projectName, this.version_list, dbInstance, dataType)
-        .subscribe(value => {
-          this.codeSetsData = value.data;
-          this.spinnerService.hide();
-        });
+      if (projectName.startsWith(dbInstance + '_')) {
+        projectName = projectName.replace(dbInstance + '_', '')
+      }
+      if (this.brand_list == 'Component Data' || this.brand_list == 'CEC-EDID Data' || this.brand_list == 'CEC Only' || this.brand_list == 'EDID Only') {
+        let versionArr = [];
+        this.mainService.getProjectNames(Client, Region, projectName, null, dbInstance, 21)
+          .subscribe(value => {
+            if (value.data.length != 0) {
+              versionArr.push(value.data[0]['version']);
+              this.versions = versionArr;
+              this.version_list = versionArr[0];
+            }
+            this.mainService.getProjectNames(Client, Region, projectName, this.version_list, dbInstance, dataType)
+              .subscribe(value => {
+                this.codeSetsData = value.data;
+                this.spinnerService.hide();
+              });
+          });
+
+      } else {
+        this.mainService.getProjectNames(Client, Region, projectName, this.version_list, dbInstance, dataType)
+          .subscribe(value => {
+            this.codeSetsData = value.data;
+            this.spinnerService.hide();
+          });
+      }
+
     }
 
   }
@@ -1777,6 +1872,9 @@ export class BrandLibraryComponent implements OnInit {
 
     var dbName = this.resultProjArr[0]['dbPath'];
     var projectName = this.resultProjArr[0]['projectname'];
+    if (projectName.startsWith(dbName + '_')) {
+      projectName = projectName.replace(dbName + '_', '')
+    }
     if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
       this.version_list = "";
     }
@@ -1801,8 +1899,6 @@ export class BrandLibraryComponent implements OnInit {
         this.parameters = parameter;
         this.viewdata();
       })
-    this.getDropdownValues();
-    this.getCodeSets();
     $("select").prop("disabled", false);
     $("a").css('pointer-events', 'auto');
     //this.spinnerService.hide();      
@@ -1862,6 +1958,9 @@ export class BrandLibraryComponent implements OnInit {
 
     var dbName = this.resultProjArr[0]['dbPath'];
     var projectName = this.resultProjArr[0]['projectname'];
+    if (projectName.startsWith(dbName + '_')) {
+      projectName = projectName.replace(dbName + '_', '')
+    }
     if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
       this.version_list = "";
     }
@@ -1886,8 +1985,6 @@ export class BrandLibraryComponent implements OnInit {
         this.parameters = parameter;
         this.viewdata();
       })
-    this.getDropdownValues();
-    this.getCodeSets();
     $("select").prop("disabled", false);
     $("a").css('pointer-events', 'auto');
     //this.spinnerService.hide();      
@@ -1946,6 +2043,9 @@ export class BrandLibraryComponent implements OnInit {
 
     var dbName = this.resultProjArr[0]['dbPath'];
     var projectName = this.resultProjArr[0]['projectname'];
+    if (projectName.startsWith(dbName + '_')) {
+      projectName = projectName.replace(dbName + '_', '')
+    }
     if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
       this.version_list = "";
     }
@@ -1970,8 +2070,6 @@ export class BrandLibraryComponent implements OnInit {
         this.parameters = parameter;
         this.viewdata();
       })
-    this.getDropdownValues();
-    this.getCodeSets();
     $("select").prop("disabled", false);
     $("a").css('pointer-events', 'auto');
     //this.spinnerService.hide();      
@@ -1983,15 +2081,19 @@ export class BrandLibraryComponent implements OnInit {
     //this.spinnerService.show();
     if (this.tabsProject != undefined) {
       let resultFetchArrTabs: any = this.mainArr.filter(u =>
-        (u.projectname == this.tabsProject && u.embeddedDbVersion == this.version_list) && (u.statusFlag != 2 || u.statusFlag != '2'));
+        (u.projectname == this.tabsProject && u.embeddedDbVersion == this.version_list));
       this.resultProjArr = resultFetchArrTabs;
     }
-    let project = this.resultProjArr[0]['projectname']; let datatype = 21;
+    let projectName = this.resultProjArr[0]['projectname'];
+    let datatype = 21;
     let Client = this.resultProjArr[0]['client'];
     let Region = this.resultProjArr[0]['region'];
     let Dbinstance = this.resultProjArr[0]['dbinstance'];
+    if (projectName.startsWith(Dbinstance + '_')) {
+      projectName = projectName.replace(Dbinstance + '_', '')
+    }
     let versionArr = [];
-    this.mainService.getProjectNames(Client, Region, project, null, Dbinstance, datatype)
+    this.mainService.getProjectNames(Client, Region, projectName, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -2032,7 +2134,6 @@ export class BrandLibraryComponent implements OnInit {
 
         if (this.resultProjArr.length != 0) {
           var dbName = this.resultProjArr[0]['dbPath'];
-          var projectName = this.resultProjArr[0]['projectname'];
           if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
             this.version_list = "";
           }
@@ -2058,8 +2159,6 @@ export class BrandLibraryComponent implements OnInit {
               this.viewdata();
             })
         }
-        this.getDropdownValues();
-        this.getCodeSets();
         $("select").prop("disabled", false);
         $("a").css('pointer-events', 'auto');
         //this.spinnerService.hide();      
@@ -2120,6 +2219,9 @@ export class BrandLibraryComponent implements OnInit {
       if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
         this.version_list = "";
       }
+      if (projectName.startsWith(dbName + '_')) {
+        projectName = projectName.replace(dbName + '_', '')
+      }
       var dbVersion = this.version_list;
       var dataType = dataTypeSelection;
       var brandName = this.brand_list;
@@ -2142,8 +2244,6 @@ export class BrandLibraryComponent implements OnInit {
           this.viewdata();
         })
     }
-    this.getDropdownValues();
-    this.getCodeSets();
     $("select").prop("disabled", false);
     $("a").css('pointer-events', 'auto');
     //this.spinnerService.hide();      
@@ -2205,6 +2305,9 @@ export class BrandLibraryComponent implements OnInit {
       if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
         this.version_list = "";
       }
+      if (projectName.startsWith(dbName + '_')) {
+        projectName = projectName.replace(dbName + '_', '')
+      }
       var dbVersion = this.version_list;
       var dataType = dataTypeSelection;
       let search; let column; let dir; let regex;
@@ -2227,8 +2330,6 @@ export class BrandLibraryComponent implements OnInit {
           this.viewdata();
         })
     }
-    this.getDropdownValues();
-    this.getCodeSets();
     $("select").prop("disabled", false);
     $("a").css('pointer-events', 'auto');
     //this.spinnerService.hide();      
@@ -2252,12 +2353,16 @@ export class BrandLibraryComponent implements OnInit {
         this.resultProjArr = resultFetchArr;
       }
     }
-    let project = this.resultProjArr[0]['projectname']; let datatype = 21;
+    let projectName = this.resultProjArr[0]['projectname'];
+    let datatype = 21;
     let versionArr = [];
     let Client = this.resultProjArr[0]['client'];
     let Region = this.resultProjArr[0]['region'];
     let Dbinstance = this.resultProjArr[0]['dbinstance'];
-    this.mainService.getProjectNames(Client, Region, project, null, Dbinstance, datatype)
+    if (projectName.startsWith(Dbinstance + '_')) {
+      projectName = projectName.replace(Dbinstance + '_', '')
+    }
+    this.mainService.getProjectNames(Client, Region, projectName, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -2298,7 +2403,6 @@ export class BrandLibraryComponent implements OnInit {
 
         if (this.resultProjArr.length != 0) {
           var dbName = this.resultProjArr[0]['dbPath'];
-          var projectName = this.resultProjArr[0]['projectname'];
           if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
             this.version_list = "";
           }
@@ -2324,8 +2428,6 @@ export class BrandLibraryComponent implements OnInit {
               this.viewdata();
             })
         }
-        this.getDropdownValues();
-        this.getCodeSets();
         $('#osd_string').click();
         $('#String').click();
         $("select").prop("disabled", false);
@@ -2352,12 +2454,16 @@ export class BrandLibraryComponent implements OnInit {
         this.resultProjArr = resultFetchArr;
       }
     }
-    let project = this.resultProjArr[0]['projectname']; let datatype = 21;
+    let projectName = this.resultProjArr[0]['projectname'];
+    let datatype = 21;
     let versionArr = [];
     let Client = this.resultProjArr[0]['client'];
     let Region = this.resultProjArr[0]['region'];
     let Dbinstance = this.resultProjArr[0]['dbinstance'];
-    this.mainService.getProjectNames(Client, Region, project, null, Dbinstance, datatype)
+    if (projectName.startsWith(Dbinstance + '_')) {
+      projectName = projectName.replace(Dbinstance + '_', '')
+    }
+    this.mainService.getProjectNames(Client, Region, projectName, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -2398,7 +2504,6 @@ export class BrandLibraryComponent implements OnInit {
 
         if (this.resultProjArr.length != 0) {
           var dbName = this.resultProjArr[0]['dbPath'];
-          var projectName = this.resultProjArr[0]['projectname'];
           if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
             this.version_list = "";
           }
@@ -2424,8 +2529,6 @@ export class BrandLibraryComponent implements OnInit {
               this.viewdata();
             })
         }
-        this.getDropdownValues();
-        this.getCodeSets();
         $('#osd_string').click();
         $('#String').click();
         $("select").prop("disabled", false);
@@ -2451,12 +2554,16 @@ export class BrandLibraryComponent implements OnInit {
         this.resultProjArr = resultFetchArr;
       }
     }
-    let project = this.resultProjArr[0]['projectname']; let datatype = 21;
+    let projectName = this.resultProjArr[0]['projectname'];
+    let datatype = 21;
     let versionArr = [];
     let Client = this.resultProjArr[0]['client'];
     let Region = this.resultProjArr[0]['region'];
     let Dbinstance = this.resultProjArr[0]['dbinstance'];
-    this.mainService.getProjectNames(Client, Region, project, null, Dbinstance, datatype)
+    if (projectName.startsWith(Dbinstance + '_')) {
+      projectName = projectName.replace(Dbinstance + '_', '')
+    }
+    this.mainService.getProjectNames(Client, Region, projectName, null, Dbinstance, datatype)
       .subscribe(value => {
         if (value.data.length != 0) {
           versionArr.push(value.data[0]['version']);
@@ -2497,7 +2604,6 @@ export class BrandLibraryComponent implements OnInit {
 
         if (this.resultProjArr.length != 0) {
           var dbName = this.resultProjArr[0]['dbPath'];
-          var projectName = this.resultProjArr[0]['projectname'];
           if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
             this.version_list = "";
           }
@@ -2523,8 +2629,6 @@ export class BrandLibraryComponent implements OnInit {
               this.viewdata();
             })
         }
-        this.getDropdownValues();
-        this.getCodeSets();
         $('#osd_string').click();
         $('#String').click();
         $("select").prop("disabled", false);
@@ -2549,9 +2653,9 @@ export class BrandLibraryComponent implements OnInit {
         this.resultProjArr = resultFetchArr;
       }
     }
-    let project = this.resultProjArr[0]['projectname']
+    let projectName = this.resultProjArr[0]['projectname'];
     let filterProject: any = this.mainArr.filter(u =>
-      u.projectname == project);
+      u.projectname == projectName);
     this.version_list = filterProject[0]['embeddedDbVersion'];
     let dataTypeSelection = 0;
     if (this.Datatype == 8) {
@@ -2587,7 +2691,9 @@ export class BrandLibraryComponent implements OnInit {
 
     if (this.resultProjArr.length != 0) {
       var dbName = this.resultProjArr[0]['dbPath'];
-      var projectName = this.resultProjArr[0]['projectname'];
+      if (projectName.startsWith(dbName + '_')) {
+        projectName = projectName.replace(dbName + '_', '')
+      }
       if (this.version_list == null || this.version_list == undefined || this.version_list == "null") {
         this.version_list = "";
       }
@@ -2613,8 +2719,6 @@ export class BrandLibraryComponent implements OnInit {
           this.viewdata();
         })
     }
-    this.getDropdownValues();
-    this.getCodeSets();
     $("select").prop("disabled", false);
     $("a").css('pointer-events', 'auto');
     //this.spinnerService.hide();      
@@ -2681,7 +2785,11 @@ export class BrandLibraryComponent implements OnInit {
     let brand = this.brand_name;
     let brandCode = this.brand_code;
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue);
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = searchDbName[0]['embeddedDbVersion'];
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = searchDbName[0]['embeddedDbVersion'];
     this.mainService.getSavebrandDetailsInfo(Dbname, Projectname, Dbversion, null, this.brand_name, this.brand_code, null, null, null,
       null, null, null, null, null, null, null, null, null, null, 1, 1)
       .subscribe(value => {
@@ -2693,7 +2801,7 @@ export class BrandLibraryComponent implements OnInit {
           let userName = localStorage.getItem('userName'); let Datasection = 'Brands';
           let recordCount = 1; let Updateadddescription = '' + brand + ',' + brandCode + '';
           let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -2710,7 +2818,11 @@ export class BrandLibraryComponent implements OnInit {
       return;
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue);
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
     let Brand = this.editedBrandname; let Brandcode = this.editedBrandcode;
     let recordid = this.brandrecordId;
     this.mainService.getSaveEditBrandDetailsInfo(Dbname, Projectname, Dbversion, null, Brand, Brandcode, null, null, null, null,
@@ -2722,7 +2834,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + Brand + ',' + Brandcode + ',' + recordid + '';
           let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress; let Totalinsertedrecords = '', Totalfailedrecords = '', Totalupdatedrecords = '', Systemuser = '';
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -2744,7 +2856,11 @@ export class BrandLibraryComponent implements OnInit {
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue);
 
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = searchDbName[0]['embeddedDbVersion'];
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = searchDbName[0]['embeddedDbVersion'];
 
     if (this.cec_vendorId.length < 6) {
       if (this.cec_vendorId.length === 1) {
@@ -2778,7 +2894,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + Device + ',' + brand + ',' + brandcode + ',' + cecVendor + '';
           let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -2795,7 +2911,11 @@ export class BrandLibraryComponent implements OnInit {
     }
 
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue);
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
     if (this.editedcecVendor.length < 6) {
       if (this.editedcecVendor.length === 1) {
         this.editedcecVendor = '00000' + this.editedcecVendor;
@@ -2825,7 +2945,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + Device + ',' + brand + ',' + cecVendor + ',' + recordid + '';
           let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -2848,7 +2968,11 @@ export class BrandLibraryComponent implements OnInit {
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue);
 
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = searchDbName[0]['embeddedDbVersion'];
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = searchDbName[0]['embeddedDbVersion'];
     let Edid_Brand = this.edid_brand.toUpperCase();
     let Device = this.edid_device; let brand = this.edid_brandName; let brandcode = this.edid_brandcode;
     this.mainService.getSavebrandDetailsInfo(Dbname, Projectname, Dbversion, this.edid_device, this.edid_brandName, this.edid_brandcode, null, null, null,
@@ -2860,7 +2984,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + Device + ',' + brand + ',' + brandcode + ',' + Edid_Brand + '';
           let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -2881,7 +3005,11 @@ export class BrandLibraryComponent implements OnInit {
       return;
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue);
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
     let edidBrand = this.editedEdidBrand.toUpperCase();
     let Device = this.editedEdidDevice; let brand = this.editedEdidBrandname; let brandcode = this.editedEdidBrandcode;
     let recordid = this.EdidrecordId;
@@ -2894,7 +3022,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + Device + ',' + brand + ',' + edidBrand + ',' + recordid + '';
           let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -2917,7 +3045,11 @@ export class BrandLibraryComponent implements OnInit {
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
 
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
     let codesetFileName = this.componentFile; let codesetData = this.base64CompData; let Cschecksum = this.checksumCompData;
     let componentModel = this.component_model.toUpperCase(); let componentcountry = this.component_country;
     this.component_modelx = componentModel;
@@ -2942,7 +3074,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + Device + ',' + brand + ',' + model_x + ',' + codeset + ',' + componentcountry + '';
           let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -2960,7 +3092,11 @@ export class BrandLibraryComponent implements OnInit {
       return;
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
     let componentModel = this.editedComponentModel.toUpperCase();
     this.editedComponentModelx = componentModel;
     if (componentModel != null && componentModel != undefined) {
@@ -2982,7 +3118,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + Device + ',' + brand + ',' + model_x + ',' + codeset + ',' + this.editedComponentCountry + ',' + recordid + '';
           let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -3062,7 +3198,11 @@ export class BrandLibraryComponent implements OnInit {
       this.submittedFile = false;
       let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
 
-      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+      if (Projectname.startsWith(Dbname + '_')) {
+        Projectname = Projectname.replace(Dbname + '_', '')
+      }
+      let Dbversion = this.version_list;
       let codeset = this.codesetFile; let codesetData = this.codesetDataValue; let cschecksum = this.codesetChecksum;
       this.mainService.getSavebrandDetailsInfo(Dbname, Projectname, Dbversion, null, null, null, null, null, codeset, codesetData,
         cschecksum, null, null, null, null, null, null, null, null, 4, 1)
@@ -3075,7 +3215,7 @@ export class BrandLibraryComponent implements OnInit {
             let recordCount = 1;
             let Updateadddescription = '' + codeset + ',' + codesetData + ',' + cschecksum + '';
             let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
               .subscribe(value => {
 
               });
@@ -3097,7 +3237,11 @@ export class BrandLibraryComponent implements OnInit {
       this.submittedFile = false;
       let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
 
-      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+      if (Projectname.startsWith(Dbname + '_')) {
+        Projectname = Projectname.replace(Dbname + '_', '')
+      }
+      let Dbversion = this.version_list;
       let codeset = this.editedCodeset; let codesetData = this.codesetDataValue; let cschecksum = this.codesetChecksum;
       let recordid = this.recordId;
       this.mainService.getSaveEditBrandDetailsInfo(Dbname, Projectname, Dbversion, null, null, null, null, null, codeset, codesetData,
@@ -3111,7 +3255,7 @@ export class BrandLibraryComponent implements OnInit {
             let recordCount = 1;
             let Updateadddescription = '' + codeset + ',' + codesetData + ',' + cschecksum + ',' + recordid + '';
             let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
               .subscribe(value => {
 
               });
@@ -3138,7 +3282,11 @@ export class BrandLibraryComponent implements OnInit {
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
 
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
     let Device = this.cr_device; let brand = this.cr_brandName; let codeset = this.cr_codeset; let rank = this.cs_rank;
     this.mainService.getSavebrandDetailsInfo(Dbname, Projectname, Dbversion, this.cr_device, this.cr_brandName, null, null, null, this.cr_codeset,
       null, null, null, null, null, null, this.cs_rank, null, null, null, 5, 1)
@@ -3150,7 +3298,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + Device + ',' + brand + ',' + codeset + ',' + rank + '';
           let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -3171,7 +3319,11 @@ export class BrandLibraryComponent implements OnInit {
       return;
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
     let Device = this.editedCrossDevice; let brand = this.editedCrossBrandname; let codeset = this.editedCrossCodeset; let rank = this.editedCrossRank;
     let recordid = this.CrossrecordId;
     this.mainService.getSaveEditBrandDetailsInfo(Dbname, Projectname, Dbversion, Device, brand, null, null, null, codeset, null,
@@ -3179,11 +3331,11 @@ export class BrandLibraryComponent implements OnInit {
       .subscribe(value => {
         $("#edidBrandModal .close").click()
         if (value.data === '1') {
-          let userName = localStorage.getItem('userName'); let Datasection = 'Component Data';
+          let userName = localStorage.getItem('userName'); let Datasection = 'Cross Reference by Brands';
           let recordCount = 1;
           let Updateadddescription = '' + Device + ',' + brand + ',' + codeset + ',' + rank + ',' + recordid + '';
           let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -3349,8 +3501,11 @@ export class BrandLibraryComponent implements OnInit {
         }
       }
       let Projectname = this.tabValue; let Dbversion = this.version_list;
-
-      let Dbname = searchDbName[0]['dbinstance']; let JsonCecEdidtype = [{
+      let Dbname = searchDbName[0]['dbinstance'];
+      if (Projectname.startsWith(Dbname + '_')) {
+        Projectname = Projectname.replace(Dbname + '_', '')
+      }
+      let JsonCecEdidtype = [{
         "RowId": RowId, "device": device, "brand": brand, "model": model, "modelx": modelx, "region": region, "country": country,
         "edid": edid, "edidbrand": edidbrand, "edid128": edid128, "vendorid": vendorid, "osd": osd, "osdstr": osdstr,
         "iscecpresent": iscecpresent, "iscecenabled": iscecenabled, "codeset": codeset
@@ -3365,7 +3520,7 @@ export class BrandLibraryComponent implements OnInit {
             let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + region + ',' + country + ',' + edid +
               ',' + edidbrand + ',' + edid128 + ',' + vendorid + ',' + osd + ',' + osdstr + ',' + iscecpresent + ',' + iscecenabled + ',' + codeset + '';
             let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
               .subscribe(value => {
 
               });
@@ -3502,45 +3657,62 @@ export class BrandLibraryComponent implements OnInit {
           osdstr = null;
         }
       }
-      // if(((vendorid != null ||vendorid != '') && (osdstr != '' && osdstr != null))||(edid != '' && edid != null)){}
-      let Projectname = this.tabValue; let Dbversion = this.version_list;
-      let Dbname = searchDbName[0]['dbinstance'];
-      this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
-        null, region, null, country, null, null, null, null, null, edid, edid128, edidbrand, 8, 3, this.EdidonlyrecordId)
-        .subscribe(async value => {
-          $("#edidBrandModal .close").click()
-          if (value.data === '1') {
-            await this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
-              null, region, null, country, null, null, vendorid, osd, osdstr, null, null, null, 7, 3, this.CeconlyrecordId)
-              .subscribe(async value => {
-                if (value.data === '1') {
-                  let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
-                  let recordCount = 1;
-                  let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + vendorid + ',' + osd + ',' + osdstr + ',' + edid + ',' + edidbrand + ',' + edid128 + ',' + this.CeconlyrecordId + ',' + this.EdidonlyrecordId + '';
-                  let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-                  await this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
-                    .subscribe(value => {
+      // if(((vendorid != null && vendorid != '') && (osdstr != '' && osdstr != null))||(edid != '' && edid != null)){}
+      if ((vendorid == null || vendorid == '') && (osdstr == '' || osdstr == null)) {
+        this.toastr.error('', 'Enter Vendorid or OSD', { timeOut: 4000 })
+      }
+      else if (edid == null || edid == '') {
+        this.toastr.error('', 'Enter Edid', { timeOut: 4000 })
+      }
+      else {
+        let Projectname = this.tabValue; let Dbversion = this.version_list; let Dbname = searchDbName[0]['dbinstance'];
+        if (Projectname.startsWith(Dbname + '_')) {
+          Projectname = Projectname.replace(Dbname + '_', '')
+        }
+        this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
+          null, region, null, country, null, null, null, null, null, edid, edid128, edidbrand, 8, 3, this.EdidonlyrecordId)
+          .subscribe(value => {
+            $("#edidBrandModal .close").click()
+            if (value.data === '1') {
+              let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
+              let recordCount = 1;
+              let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + edid + ',' + edidbrand + ',' + edid128 + ',' + this.EdidonlyrecordId + '';
+              let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
+              this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
+                .subscribe(value => {
+                });
+              this.toastr.success('EDID data updated successfully', '');
+            }
+            // else {
+            //   this.toastr.warning('EDID data- ' + value.message, '');
+            // }
+            setTimeout(() => {
+              this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
+                null, region, null, country, null, null, vendorid, osd, osdstr, null, null, null, 7, 3, this.CeconlyrecordId)
+                .subscribe(value => {
+                  if (value.data === '1') {
+                    this.toastr.success('CEC data updated Successfully', '');
+                    let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
+                    let recordCount = 1;
+                    let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + vendorid + ',' + osd + ',' + osdstr + ',' + this.CeconlyrecordId + '';
+                    let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
+                    this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
+                      .subscribe(value => {
 
-                    });
+                      });
+                  }
+                  // else {
+                  //   this.toastr.warning('CEC data- ' + value.message, '');
+                  // }
                   this.getTabResponseData();
-                  this.toastr.success(value.message, '');
-                } else {
-                  let userName = localStorage.getItem('userName'); let Datasection = 'CEC EDID Data';
-                  let recordCount = 1;
-                  let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + codeset + ',' + region + ',' + country + ',' + edid + ',' + edidbrand + ',' + edid128 + ',' + this.EdidonlyrecordId + '';
-                  let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-                  this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
-                    .subscribe(value => {
+                  this.UpdateosdHeader = 'OSD String';
+                  $('#osd_string').click();
+                });
+            }, 2000);
 
-                    });
-                  this.getTabResponseData();
-                  this.toastr.warning(value.message, '');
-                }
-              });
-          } else {
-            this.toastr.warning(value.message, '');
-          }
-        });
+          });
+      }
+
     } else {
       $('#checkInputValid').css('border', '1px solid #bb2a38');
       this.vendorError = true;
@@ -3550,7 +3722,11 @@ export class BrandLibraryComponent implements OnInit {
   EdidValidate() {
     if (this.editedEdidonly_EDID128 != undefined) {
       let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
-      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+      if (Projectname.startsWith(Dbname + '_')) {
+        Projectname = Projectname.replace(Dbname + '_', '')
+      }
+      let Dbversion = this.version_list;
       let recordid = this.EdidonlyrecordId;
       let device = this.editedEdidonlyDevice; let brand = this.editedEdidonlyBrandname;
       let model = this.editedEdidonlyModel; let codeset = this.editedEdidonlyCodeset; let country = this.editedEdidonlyCountry;
@@ -3609,7 +3785,7 @@ export class BrandLibraryComponent implements OnInit {
             let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + modelx + ',' + region + ',' + country + ',' + edid +
               ',' + edidbrand + ',' + edid128 + ',' + codeset + ',' + recordid + '';
             let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
               .subscribe(value => {
 
               });
@@ -3661,7 +3837,11 @@ export class BrandLibraryComponent implements OnInit {
     }
     if (this.editedCeconly_Vendor != undefined || this.editedCeconly_OSD != undefined) {
       let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
-      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+      if (Projectname.startsWith(Dbname + '_')) {
+        Projectname = Projectname.replace(Dbname + '_', '')
+      }
+      let Dbversion = this.version_list;
       let recordid = this.CeconlyrecordId;
       let device = this.editedCeconlyDevice; let brand = this.editedCeconlyBrandname;
       let model = this.editedCeconlyModel; let codeset = this.editedCeconlyCodeset; let country = this.editedCeconlyCountry;
@@ -3674,7 +3854,7 @@ export class BrandLibraryComponent implements OnInit {
       if (this.editedCeconly_Vendor == undefined) {
         vendorid = null;
       } else {
-        vendorid = this.editedCeconly_Vendor.toUpperCase();
+        vendorid = this.editedCeconly_Vendor.toUpperCase().trim();
       }
 
       let osd;
@@ -3693,7 +3873,7 @@ export class BrandLibraryComponent implements OnInit {
               str += String.fromCharCode(parseInt(modOsdString.substr(i, 2), 16));
           }
           osd = ce_osd;
-          osdstr = str;
+          osdstr = str.trim();
         }
         else if (ce_osd == undefined || ce_osd == null) {
           osd = null;
@@ -3711,39 +3891,35 @@ export class BrandLibraryComponent implements OnInit {
           osdstr = null;
         }
       }
-      if (this.editedCeconly_OSD != undefined && this.editedCeconly_OSD != null) {
-        osd = this.convertHexa(this.editedCeconly_OSD);
-      } else {
-        osd = null;
-      }
-      if (this.editedCeconly_OSD == undefined || this.editedCeconly_OSD == null) {
-        osdstr = null;
-      } else {
-        osdstr = this.editedCeconly_OSD.toUpperCase();
-      }
-      if ((this.editedCeconly_OSD == null || this.editedCeconly_OSD == '') && (this.editedCeconly_Vendor == null || this.editedCeconly_Vendor == '')) {
+      if ((vendorid == null || vendorid == '') && (osdstr == '' || osdstr == null)) {
         this.toastr.error('', 'Enter Valid Vendorid or OSD', { timeOut: 4000 })
       }
-      this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
-        null, region, null, country, null, null, vendorid, osd, osdstr, null, null, null, 7, 3, recordid)
-        .subscribe(value => {
-          $("#edidBrandModal .close").click()
-          if (value.data === '1') {
-            let userName = localStorage.getItem('userName'); let Datasection = 'CEC Only';
-            let recordCount = 1;
-            let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + model + ',' + region + ',' + country + ',' + vendorid +
-              ',' + osd + ',' + osdstr + ',' + codeset + ',' + recordid + '';
-            let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
-              .subscribe(value => {
+      // if ((this.editedCeconly_OSD == null && this.editedCeconly_Vendor == null) || (this.editedCeconly_OSD == '' && this.editedCeconly_Vendor == '')) {
+      //   this.toastr.error('', 'Enter Valid Vendorid or OSD', { timeOut: 4000 })
+      // }
+      else {
+        this.mainService.getSaveEditCECEDIDdataInfo(Dbname, Projectname, Dbversion, device, brand, null, model, modelx, codeset, null,
+          null, region, null, country, null, null, vendorid, osd, osdstr, null, null, null, 7, 3, recordid)
+          .subscribe(value => {
+            $("#edidBrandModal .close").click()
+            if (value.data === '1') {
+              let userName = localStorage.getItem('userName'); let Datasection = 'CEC Only';
+              let recordCount = 1;
+              let Updateadddescription = '' + device + ',' + brand + ',' + model + ',' + model + ',' + region + ',' + country + ',' + vendorid +
+                ',' + osd + ',' + osdstr + ',' + codeset + ',' + recordid + '';
+              let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
+              this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
+                .subscribe(value => {
 
-              });
-            this.getTabResponseData();
-            this.toastr.success(value.message, '');
-          } else {
-            this.toastr.warning(value.message, '');
-          }
-        });
+                });
+              this.getTabResponseData();
+              this.toastr.success(value.message, '');
+            } else {
+              this.toastr.warning(value.message, '');
+            }
+          });
+      }
+
     } else {
       $('#checkInputValid').css('border', '1px solid #bb2a38');
       this.vendorError = true;
@@ -3777,7 +3953,11 @@ export class BrandLibraryComponent implements OnInit {
     regioncountrydata.push({ "RowId": 1, "region": this.Region, "regioncode": this.Regioncode, "country": this.Country, "countrycode": this.Countrycode });
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
     let Dbname = searchDbName[0]['dbinstance'];
-    let Dbversion = this.version_list; let Projectname = this.tabValue; let data = regioncountrydata;
+    let Dbversion = this.version_list; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let data = regioncountrydata;
     this.mainService.dataUploadLoadCountryCodeData(1, Dbname, data)
       .then(value => {
         $("#editDataModal .close").click()
@@ -3787,7 +3967,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + region + ',' + regioncode + ',' + country + ',' + countrycode + '';
           let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -3820,7 +4000,11 @@ export class BrandLibraryComponent implements OnInit {
       this.Countrycode = null;
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
     let recordid = this.RegionrecordId;
     let region = this.EditRegion; let regioncode = this.EditRegioncode; let country = this.EditCountry; let countrycode = this.EditCountrycode
     this.mainService.getSaveEditBrandDetailsInfo(Dbname, Projectname, Dbversion, null, null, null, null, null, null, null,
@@ -3832,7 +4016,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + region + ',' + regioncode + ',' + country + ',' + countrycode + ',' + recordid + '';
           let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -4106,7 +4290,11 @@ export class BrandLibraryComponent implements OnInit {
     let brand = this.brand_name;
     let brandCode = this.brand_code;
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue);
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = searchDbName[0]['embeddedDbVersion'];
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = searchDbName[0]['embeddedDbVersion'];
     this.mainService.getSavebrandDetailsInfo(Dbname, Projectname, Dbversion, null, this.brand_name, this.brand_code, null, null, null,
       null, null, null, null, null, null, null, null, null, null, 1, 1)
       .subscribe(value => {
@@ -4118,7 +4306,7 @@ export class BrandLibraryComponent implements OnInit {
           let userName = localStorage.getItem('userName'); let Datasection = 'Brands';
           let recordCount = 1; let Updateadddescription = '' + brand + ',' + brandCode + '';
           let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -4139,7 +4327,11 @@ export class BrandLibraryComponent implements OnInit {
     }
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
 
-    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
     let codesetFileName = this.componentFile; let codesetData = this.base64CompData; let Cschecksum = this.checksumCompData;
     let componentModel = this.component_model.toUpperCase(); let componentcountry = this.component_country;
     this.component_modelx = componentModel;
@@ -4164,7 +4356,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + Device + ',' + brand + ',' + model_x + ',' + codeset + ',' + componentcountry + '';
           let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });
@@ -4184,7 +4376,11 @@ export class BrandLibraryComponent implements OnInit {
       this.submittedFile = false;
       let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
 
-      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue; let Dbversion = this.version_list;
+      let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+      if (Projectname.startsWith(Dbname + '_')) {
+        Projectname = Projectname.replace(Dbname + '_', '')
+      }
+      let Dbversion = this.version_list;
       let codeset = this.codesetFile; let codesetData = this.codesetDataValue; let cschecksum = this.codesetChecksum;
       this.mainService.getSavebrandDetailsInfo(Dbname, Projectname, Dbversion, null, null, null, null, null, codeset, codesetData,
         cschecksum, null, null, null, null, null, null, null, null, 4, 1)
@@ -4197,7 +4393,7 @@ export class BrandLibraryComponent implements OnInit {
             let recordCount = 1;
             let Updateadddescription = '' + codeset + ',' + codesetData + ',' + cschecksum + '';
             let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+            this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
               .subscribe(value => {
 
               });
@@ -4240,7 +4436,11 @@ export class BrandLibraryComponent implements OnInit {
     regioncountrydata.push({ "RowId": 1, "region": this.Region, "regioncode": this.Regioncode, "country": this.Country, "countrycode": this.Countrycode });
     let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
     let Dbname = searchDbName[0]['dbinstance'];
-    let Dbversion = this.version_list; let Projectname = this.tabValue; let data = regioncountrydata;
+    let Dbversion = this.version_list; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let data = regioncountrydata;
     this.mainService.dataUploadLoadCountryCodeData(1, Dbname, data)
       .then(value => {
         $("#DataModal .close").click()
@@ -4250,7 +4450,7 @@ export class BrandLibraryComponent implements OnInit {
           let recordCount = 1;
           let Updateadddescription = '' + region + ',' + regioncode + ',' + country + ',' + countrycode + '';
           let Updatestatus = 1; let Operation = "Create"; let ipaddress = this.ipAddress;
-          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus)
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
             .subscribe(value => {
 
             });

@@ -8,7 +8,7 @@
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
         <li class="breadcrumb-item active"><a [routerLink]="['/admin-dashboard']">Admin</a></li>
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
-        <li class="breadcrumb-item active">Import Project From Production</li>
+        <li class="breadcrumb-item active">Import Project</li>
       </ol>
     </div>
   </div>
@@ -76,12 +76,12 @@
         </div>
       </div>
     </aw-wizard-step>
-    <aw-wizard-step stepTitle="Import Project from Prod">
+    <aw-wizard-step stepTitle="Import Project">
       <div class="row" *ngIf="!isClientDivVisible">
         <div class="col-lg-9 col-xlg-10 col-md-8">
           <div class="card">
             <div class="card-block" style="margin: 10px;">
-              <h5 class="h5-color">Create Client Details</h5>
+              <h5 class="h5-color">Import Project Details</h5>
               <div>&nbsp;</div>
               <div class="row" *ngIf="!isClientDivVisible">
                 <div class="col-md-12">

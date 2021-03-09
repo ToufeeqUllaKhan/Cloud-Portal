@@ -142,7 +142,7 @@ export class ImportprojfromprodComponent implements OnInit {
 
   /** Create Client Submit Operation */
 
-  oncreateClientSubmit() {
+  async oncreateClientSubmit() {
     this.submitted = true;
 
     // stop here if form is invalid
@@ -150,29 +150,39 @@ export class ImportprojfromprodComponent implements OnInit {
       return;
     }
     for (let i = 0; i < this.filterproject.length; i++) {
+      this.spinnerService.show();
       let Dbname = this.db_instance; let Client = this.clientSelected; let Region = this.regionSelected; let Dbpath = this.db_instance;
       let Projectname = this.filterproject[i]['projectName']; let Signaturekey = this.filterproject[i]['signatureKey'];
       let Embeddeddbversion = this.filterproject[i]['embeddedDBVersion']; let Dbversion = this.filterproject[i]['dbVersion'];
       let Statusflag = 2; let Flagtype = 6; let Projectversion = this.filterproject[i]['projectVersion'];
       let Swversion = this.filterproject[i]['swVersion']; let Allowdownload = this.filterproject[i]['allowDownloads'];
       let bin_file = this.filterproject[i]['binFile']; let Binfilechecksum = this.filterproject[i]['binChecksum'];
-      let zip_file = this.filterproject[i]['zipFile']; let Zipfilechecksum = this.filterproject[i]['zipChecksum'];
-      this.mainService.CreateNewProjectWithVersion(Dbname, Client, Region, Projectname, Signaturekey, Dbpath, Embeddeddbversion, Dbversion, Statusflag, Flagtype,
-        Projectversion, Swversion, Allowdownload, bin_file, Binfilechecksum, zip_file, Zipfilechecksum)
+      let zip_file = this.filterproject[i]['zipFile']; let Zipfilechecksum = this.filterproject[i]['zipChecksum']; let boxid = this.filterproject[i]['boxId'];
+      await this.mainService.CreateNewProjectWithVersion(Dbname, Client, Region, Projectname, Signaturekey, Dbpath, Embeddeddbversion, Dbversion, Statusflag, Flagtype,
+        Projectversion, Swversion, Allowdownload, bin_file, Binfilechecksum, zip_file, Zipfilechecksum, boxid)
         .then(value => {
           if (value.statusCode == "200" || value.statusCode == 200) {
             this.toastr.success('Project created or updated Successfully', '');
             this.isNextVisible = true;
-            this.spinnerService.show();
-            this.clientSelected = null;
-            this.regionSelected = null;
-            this.db_instance = null;
-            this.projectnames = null;
-            this.submitted = false;
-            this.spinnerService.hide();
+            if (i + 1 == this.filterproject.length) {
+              // this.mainService.getBoxId(3, Projectname, Signaturekey, boxid, Dbname, Embeddeddbversion)
+              //   .subscribe(boxIdData => {
+
+              //   })
+              this.mainService.CECEDID_NewProject(1, Projectname, Signaturekey, Dbname, 1, null)
+                .then(value => {
+                })
+              this.clientSelected = null;
+              this.regionSelected = null;
+              this.db_instance = null;
+              this.projectnames = null;
+              this.submitted = false;
+              this.spinnerService.hide();
+            }
           } else {
             this.toastr.warning(value.message, '');
             this.submitted = false;
+            this.spinnerService.hide();
           }
         });
     }
@@ -218,9 +228,9 @@ export class ImportprojfromprodComponent implements OnInit {
   onchangedbinstance() {
     // let dbname='"'+this.db_instance+'"';
     this.spinnerService.show();
-    setTimeout(() => {
-      this.spinnerService.hide();
-    }, 3000);
+    // setTimeout(() => {
+    //   this.spinnerService.hide();
+    // }, 3000);
     let dbname = this.db_instance;
     let projectnames = [];
     this.mainService.getAllprojectdetails(dbname)
@@ -229,6 +239,9 @@ export class ImportprojfromprodComponent implements OnInit {
           this.projectdetails = value.data;
           for (let i = 0; i < value.data.length; i++) {
             projectnames.push(value.data[i]['projectName']);
+            if (i + 1 == value.data.length) {
+              this.spinnerService.hide();
+            }
           }
           this.projectnames = projectnames.filter((v, i, a) => a.indexOf(v) === i);
         }

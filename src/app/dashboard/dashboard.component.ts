@@ -15,7 +15,7 @@ export class DashboardComponent implements OnInit {
   user: User = new User();
   role: any; modules = [];
   isDataMgmt: Boolean = false; isCloudApi: Boolean = false;
-  isAnalytics: Boolean = false; isTestModule: Boolean = false;
+  isAnalytics: Boolean = false; isCentralized: Boolean = false; isTestModule: Boolean = false;
   isNone: Boolean = false;
 
   constructor(private router: Router, private titleService: Title, private mainService: MainService, private spinnerService: NgxSpinnerService) {
@@ -62,6 +62,9 @@ export class DashboardComponent implements OnInit {
             if (this.modules.includes('Analytics Report')) {
               this.isAnalytics = true;
             }
+            if (this.modules.includes('Centralized CEC-EDID DB')) {
+              this.isCentralized = true;
+            }
             if (this.modules.includes('TestModule')) {
               this.isTestModule = true;
             }
@@ -96,7 +99,7 @@ export class DashboardComponent implements OnInit {
   /** for routing to api-clients when cloud api module is clicked  **/
   cloudTest() {
     localStorage.setItem('moduleselected', 'Cloud API Search Tester')
-    this.router.navigate(['/api-clients'])
+    this.router.navigate(['/clients'])
       .then(() => {
         location.reload();
       });
@@ -107,4 +110,8 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/reports-view']);
   }
 
+  centralized() {
+    localStorage.setItem('moduleselected', 'Centralized CEC-EDID DB')
+    this.router.navigate(['/Centralized-DB-view']);
+  }
 }

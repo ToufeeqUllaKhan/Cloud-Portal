@@ -40,7 +40,7 @@ import { ChartComponent } from "ng-apexcharts";
 export class AnalyticalreportsComponent implements OnInit {
   @ViewChild("chart") chart: ChartComponent;
 
-  projects: Array<any> = []; projectNames: any = null;
+  projects: Array<any> = []; projectNames: any = null; Project: any = [];
   user: User = new User(); tabslist = [];
   versions = []; db_version: any = null; Datatype: Number;
   brand_list: any = null; brands = []; bname: any = [];
@@ -58,7 +58,7 @@ export class AnalyticalreportsComponent implements OnInit {
   records_TopSearchModel: any = []; records_TopSearchVendorId: any = []; records_TopSearchOSD: any = [];
   records_MonthwiseAutoSearch: any = []; records_MonthwiseModelSearch: any = []; toprecords: any = 10;
   dbinstance: any = []; report_db_instance: any = null; summary_db_instance: any = null; showDevice: Boolean = true;
-  showProject: Boolean = true;
+  showProjectsforAdmin: Boolean; showProjectsfornonAdmin: Boolean;
   public gridApi;
   public gridColumnApi;
   public frameworkComponents;
@@ -167,8 +167,7 @@ export class AnalyticalreportsComponent implements OnInit {
   AvgResponseTimeAutoSearch_title: { text: string; align: string; style: { fontSize: string; fontWeight: string; fontFamily: string; }; };
   AvgResponseTimeAutoSearch_chart: { height: number; type: "pie"; toolbar: { show: boolean; }; };
   AvgResponseTimeAutoSearch_labels: any[];
-  AvgResponseTimeAutoSearch_color: any[]; report_visiblity: any = [];
-  columns: any = []; columns_visible: any = [];
+  AvgResponseTimeAutoSearch_color: any[];
 
   dropdownSettings: any = {}; ShowFilter = false;
   limitSelection = false;
@@ -213,118 +212,110 @@ export class AnalyticalreportsComponent implements OnInit {
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
         this.mainArr = value.data;
-        let filterProjectwithstatus2 = value.data.filter(u => u.statusFlag === 2);
-        let filterProjectwithstatus = value.data.filter(u => u.statusFlag != 2);
-        let filtProj = []; let versionArr = [];
-        const unique = [...new Set(filterProjectwithstatus.map(item => item.projectname))];
-        const unique1 = [...new Set(filterProjectwithstatus2.map(item => item.projectname))];
-        let arrData = []; let arrData_1 = [];
+        this.mainArr.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
+        const unique = [...new Set(this.mainArr.map(item => item.projectname))];
+        let arrData = [];
         for (var i = 0; i < unique.length; i++) {
-          arrData.push({ item_id: i, ProjectName: unique[i] });
+          arrData.push({ item_id: i, item_text: unique[i] });
         }
-        for (var i = 0; i < unique1.length; i++) {
-          arrData.push({ item_id: i, ProjectName: "PROD_" + unique1[i] });
-        }
-        for (var i = 0; i < arrData.length; i++) {
-          arrData_1.push(arrData[i]['ProjectName']);
-        }
-        this.projects = lodash.uniqWith(arrData_1, lodash.isEqual);
-        this.mainService.getAllDbInstance(4, '', '', 1)
-          .subscribe(value => {
-            let instance = [];
-            for (let i = 0; i < value.data.length; i++) {
-              instance.push(value.data[i]['dbInstance'])
-            }
-            this.dbinstance = instance;
-            this.brand_list = this.brands[0];
-            this.SelectedBrandName = this.brands[0];
-            this.summary_db_instance = this.dbinstance[0];
-            this.report_db_instance = this.dbinstance[0];
-            this.selectDatatype();
-            let datatype;
-            let dataTypeSelection = 0;
-            if (this.Datatype == 2) {
-              dataTypeSelection = 2;
-            }
-            if (this.Datatype == 3) {
-              dataTypeSelection = 3;
-            }
-            if (this.Datatype == 4) {
-              dataTypeSelection = 4;
-            }
-            if (this.Datatype == 5) {
-              dataTypeSelection = 5;
-            }
-            if (this.Datatype == 6) {
-              dataTypeSelection = 6;
-            }
-            if (this.Datatype == 7) {
-              dataTypeSelection = 7;
-            }
-            let dbname = this.report_db_instance;
-            datatype = dataTypeSelection;
-            this.mainService.GetReports(dbname, datatype)
-              .then(value => {
-                let parameter = [dbname, datatype]
-                this.parameters = parameter;
-                this.condition();
+        this.ProjectList = arrData;
+        let RoleLevel = localStorage.getItem('AccessRole');
+        if (RoleLevel != 'Admin') {
+          let userName = localStorage.getItem('userName');
+          this.mainService.getRoleModule(8, null, null, userName, null)
+            .then(value => {
+              let filterProjects = []; let clientArray = [];
+              clientArray = value.data;
+              clientArray.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
               })
-          });
+              for (var i = 0; i < clientArray.length; i++) {
+                let clientsArray: any = this.ProjectList.filter(u =>
+                  (u.item_text == clientArray[i]['name']));
+                filterProjects.push(...clientsArray);
+              }
+              let modifyItems = [];
+              for (var j = 0; j < filterProjects.length; j++) {
+                modifyItems.push(filterProjects[j]['item_text']);
+              }
+              let DbInstances = [];
+              for (var j = 0; j < clientArray.length; j++) {
+                DbInstances.push(clientArray[j]['dbPath']);
+              }
+              this.Project = modifyItems;
+              this.dbinstance = lodash.uniqWith(DbInstances, lodash.isEqual);
+              this.summary_db_instance = this.dbinstance[0];
+              let temp = [];
+              this.Project.forEach(element => {
+                if (element.startsWith(this.summary_db_instance + '_')) {
+                  temp.push(element)
+                }
+              })
+
+              console.log(temp);
+              this.projects = temp;
+              this.showProjectsfornonAdmin = true;
+              this.projectNames = this.projects[0];
+              this.condition();
+            });
+        } else {
+          let selectedItems = [];
+          for (var i = 0; i < this.ProjectList.length; i++) {
+            selectedItems.push(this.ProjectList[i]['item_text']);
+          }
+          this.mainService.getAllDbInstance(4, '', '', 1)
+            .subscribe(value => {
+              let instance = [];
+              for (let i = 0; i < value.data.length; i++) {
+                instance.push(value.data[i]['dbInstance'])
+              }
+              this.dbinstance = instance;
+              this.summary_db_instance = this.dbinstance[0];
+              this.Project = selectedItems;
+              let temp = [];
+              this.Project.forEach(element => {
+                if (element.startsWith(this.summary_db_instance + '_')) {
+                  temp.push(element)
+                }
+              })
+              console.log(temp);
+              this.projects = temp;
+              this.showProjectsforAdmin = true;
+              this.condition();
+            });
+        }
       })
     var self = this;
-    $('.carousel-control-prev').click(function () {
-      self.Device = null;
-      self.projectNames = null;
-      self.condition();
-    });
+    if (this.role != 'Admin') {
+      $('.carousel-control-prev').click(function () {
+        self.Device = null;
+        self.projectNames = self.projects[0];
+        self.condition();
+      });
 
-    $('.carousel-control-next').click(function () {
-      self.Device = null;
-      self.projectNames = null;
-      self.condition();
-    });
-
-    // $('#single_download').click(function () {
-    //   self.onBtnExport();
-    // })
-
-    // window.onclick = function (e) {
-    //   if (!($('.dropdown-list').hasClass('hidden'))) {
-    //     $('.dropdown-list').css('width', 'auto')
-    //   }
-    //   self.columnvisiblity();
-    // }
-  }
-
-  onInstanceSelect(item: any) {
-  }
-
-  onSelectAll(items: any) {
-    this.report_visiblity = items;
-    this.columnvisiblity();
-  }
-
-  toogleShowFilter() {
-    this.ShowFilter = !this.ShowFilter;
-    this.dropdownSettings = Object.assign({}, this.dropdownSettings, { allowSearchFilter: this.ShowFilter });
-  }
-
-  handleLimitSelection() {
-    if (this.limitSelection) {
-      this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: 2 });
-    } else {
-      this.dropdownSettings = Object.assign({}, this.dropdownSettings, { limitSelection: null });
+      $('.carousel-control-next').click(function () {
+        self.Device = null;
+        self.projectNames = self.projects[0];
+        self.condition();
+      });
     }
-  }
+    else {
+      $('.carousel-control-prev').click(function () {
+        self.Device = null;
+        self.projectNames = null;
+        self.condition();
+      });
 
-  ViewEdid(setEdid) {
-    this.viewEdidData(setEdid);
-  };
+      $('.carousel-control-next').click(function () {
+        self.Device = null;
+        self.projectNames = null;
+        self.condition();
+      });
+    }
 
-  viewEdidData(value) {
-    this.edidDataView = true;
-    this.edid128DataView = false;
-    this.EdidData = value;
+
   }
 
   dashboard() {
@@ -334,85 +325,7 @@ export class AnalyticalreportsComponent implements OnInit {
       });
   }
 
-  /** Search History Submit operation */
-  SearchHistory() {
-    // this.spinnerService.hide();
-    let dbname = this.report_db_instance;
-    let datatype;
-    let dataTypeSelection = 0;
-    if (this.Datatype == 2) {
-      dataTypeSelection = 2;
-    }
-    if (this.Datatype == 3) {
-      dataTypeSelection = 3;
-    }
-    if (this.Datatype == 4) {
-      dataTypeSelection = 4;
-    }
-    if (this.Datatype == 5) {
-      dataTypeSelection = 5;
-    }
-    if (this.Datatype == 6) {
-      dataTypeSelection = 6;
-    }
-    if (this.Datatype == 7) {
-      dataTypeSelection = 7;
-    }
-    datatype = dataTypeSelection;
-    this.mainService.GetReports(dbname, datatype)
-      .then(value => {
-        if (value.data !== '0' && value.statusCode === "200") {
-          $('#report_details').css('display', 'block');
-          let parameter = [dbname, datatype]
-          this.parameters = parameter;
-          this.viewdata();
-        }
-        else {
-          this.spinnerService.hide();
-          $('#report_details').css('display', 'none');
-          this.report_visiblity = [];
-          this.columns_visible = [];
-          this.columnDefs = [];
-          this.rowData = [];
-        }
-
-      })
-
-  }
-
-  /** datatype selection based on selection of brands list start **/
-
-  selectDatatype() {
-    if (this.brand_list == 'Registered Box Ids') {
-      this.Datatype = 2;
-    }
-    if (this.brand_list == 'Model Search') {
-      this.Datatype = 4;
-    }
-    if (this.brand_list == 'AutoSearch') {
-      this.Datatype = 3;
-    }
-    if (this.brand_list == 'BIN Downloads') {
-      this.Datatype = 6;
-    }
-    if (this.brand_list == 'Zip Downloads') {
-      this.Datatype = 5;
-    }
-    if (this.brand_list == 'Feedback API') {
-      this.Datatype = 7;
-    }
-    return this.Datatype;
-  }
-  /** datatype selection based on selection of brands list start **/
-
   /** If Brand List drodown is changed to show version activation based on selection for needed brands **/
-
-  changeTicket() {
-    this.SelectedBrandName = this.brand_list;
-    this.selectDatatype();
-    this.SearchHistory();
-    this.getTabName();
-  }
 
   changeProject() {
     let versionfilter = []; let Version = [];
@@ -421,38 +334,42 @@ export class AnalyticalreportsComponent implements OnInit {
       Version.push(element['embeddedDbVersion'])
     })
     this.versions = lodash.uniqWith(Version, lodash.isEqual);
-    this.CountrywiseReg();
-    this.MonthwiseReg();
-    this.MonthwiseReReg();
-    this.TotalcountReg();
-    this.MonthwiseModelSearch();
-    this.MonthwiseAutoSearch();
-    this.ModelSearchbasedonResulttype();
-    this.AutoSearchbasedonResulttype();
-    this.AvgResponseTimeModelSearch();
-    this.AvgResponseTimeAutoSearch();
-    this.changeDevice();
-  }
-
-  changeVersion() {
-    this.CountrywiseReg();
-    this.MonthwiseReg();
-    this.MonthwiseReReg();
-    this.TotalcountReg();
-    this.MonthwiseModelSearch();
-    this.MonthwiseAutoSearch();
-    this.ModelSearchbasedonResulttype();
-    this.AutoSearchbasedonResulttype();
-    this.AvgResponseTimeModelSearch();
-    this.AvgResponseTimeAutoSearch();
+    let project = this.projectNames;
+    let dbname = this.summary_db_instance;
+    if (project == null || project == 'null') {
+      project == null;
+    }
+    else if (project.startsWith(dbname + '_')) {
+      project = project.replace(dbname + '_', '')
+    }
+    this.Device = null;
+    this.CountrywiseReg(project);
+    this.MonthwiseReg(project);
+    this.MonthwiseReReg(project);
+    this.TotalcountReg(project);
+    this.MonthwiseModelSearch(project);
+    this.MonthwiseAutoSearch(project);
+    this.ModelSearchbasedonResulttype(project);
+    this.AutoSearchbasedonResulttype(project);
+    this.AvgResponseTimeModelSearch(project);
+    this.AvgResponseTimeAutoSearch(project);
     this.changeDevice();
   }
 
   changeDevice() {
-    this.TopSearchBrand();
-    this.TopSearchModel();
-    this.TopSearchVendorID();
-    this.TopSearchOSD();
+    let project = this.projectNames;
+    let dbname = this.summary_db_instance;
+    if (project == null || project == 'null') {
+      project == null;
+    }
+    else if (project.startsWith(dbname + '_')) {
+      project = project.replace(dbname + '_', '')
+    }
+
+    this.TopSearchBrand(project);
+    this.TopSearchModel(project);
+    this.TopSearchVendorID(project);
+    this.TopSearchOSD(project);
   }
 
   /** getting previous selected dropdown value to handle datatable view start **/
@@ -464,43 +381,46 @@ export class AnalyticalreportsComponent implements OnInit {
   }
   /** getting previous selected dropdown value to handle datatable view end **/
 
-  /** tab switching project data view start **/
-
-  getTabName() {
-    $('#reportcontent').css('display', 'block');
-    $('#summarycontent').css('display', 'none');
-    $('.nav-item').removeClass('active');
-    $('a#nav-home-tab1').addClass('active');
-    this.SearchHistory();
-  }
-
-  /** tab switching project data view end **/
-
   summary() {
     $('#reportcontent').css('display', 'none');
     $('#summarycontent').css('display', 'block');
     this.spinnerService.hide();
     let datatype = 1;
     let dbname = this.summary_db_instance;
+    let temp = [];
+    this.Project.forEach(element => {
+      if (element.startsWith(dbname + '_')) {
+        temp.push(element)
+      }
+    })
+    this.projects = temp;
+    this.projectNames = this.projects[0];
     this.mainService.GetReports(dbname, datatype)
       .then(value => {
         this.graphreports = value.data;
         if (this.graphreports !== '0' && value.statusCode === "200") {
           $('#chart-carousel').css('display', 'block');
-          this.CountrywiseReg();
-          this.MonthwiseReg();
-          this.MonthwiseReReg();
-          this.TotalcountReg();
-          this.MonthwiseModelSearch();
-          this.MonthwiseAutoSearch();
-          this.ModelSearchbasedonResulttype();
-          this.AutoSearchbasedonResulttype();
-          this.AvgResponseTimeModelSearch();
-          this.AvgResponseTimeAutoSearch();
-          this.TopSearchBrand();
-          this.TopSearchModel();
-          this.TopSearchVendorID();
-          this.TopSearchOSD();
+          let project = this.projectNames;
+          if (project == null || project == 'null') {
+            project == null;
+          }
+          else if (project.startsWith(dbname + '_')) {
+            project = project.replace(dbname + '_', '')
+          }
+          this.CountrywiseReg(project);
+          this.MonthwiseReg(project);
+          this.MonthwiseReReg(project);
+          this.TotalcountReg(project);
+          this.MonthwiseModelSearch(project);
+          this.MonthwiseAutoSearch(project);
+          this.ModelSearchbasedonResulttype(project);
+          this.AutoSearchbasedonResulttype(project);
+          this.AvgResponseTimeModelSearch(project);
+          this.AvgResponseTimeAutoSearch(project);
+          this.TopSearchBrand(project);
+          this.TopSearchModel(project);
+          this.TopSearchVendorID(project);
+          this.TopSearchOSD(project);
         }
         else {
           this.spinnerService.hide();
@@ -509,7 +429,7 @@ export class AnalyticalreportsComponent implements OnInit {
       })
   }
 
-  CountrywiseReg() {
+  CountrywiseReg(projectName) {
 
     let countrywise = []; let Countries = []; let individualcountrywise = [];
     this.graphreports.table.forEach(element => {
@@ -528,7 +448,6 @@ export class AnalyticalreportsComponent implements OnInit {
     let groupbycountry = lodash.groupBy(countrywise, 'Country');
     let groupbyproject = lodash.groupBy(countrywise, 'ProjectName')
 
-    let projectName = this.projectNames;
     let Version = this.db_version;
     if ((projectName === null || projectName === 'null') && (Version === null || Version === 'null')) {
       this.records_CountrywiseReg = [];
@@ -627,7 +546,7 @@ export class AnalyticalreportsComponent implements OnInit {
     };
   }
 
-  MonthwiseReg() {
+  MonthwiseReg(projectName) {
     let MonthwiseReg = []; let Monthwise = []; let month_year = []; let individualmonth_year = [];
     Monthwise = this.graphreports.table1;
 
@@ -679,7 +598,6 @@ export class AnalyticalreportsComponent implements OnInit {
     let groupbymonth_year = lodash.groupBy(MonthwiseReg, 'Month-Year');
     let groupbyproject = lodash.groupBy(MonthwiseReg, 'ProjectName')
 
-    let projectName = this.projectNames;
     let Version = this.db_version;
     if ((projectName === null || projectName === 'null') && (Version === null || Version === 'null')) {
       this.records_MonthwiseReg = [];
@@ -740,7 +658,7 @@ export class AnalyticalreportsComponent implements OnInit {
     });
   }
 
-  MonthwiseReReg() {
+  MonthwiseReReg(projectName) {
     let MonthwiseReReg = []; let Monthwise = []; let month_year = []; let individualmonth_year = [];
     Monthwise = this.graphreports.table2;
 
@@ -792,7 +710,6 @@ export class AnalyticalreportsComponent implements OnInit {
     let groupbymonth_year = lodash.groupBy(MonthwiseReReg, 'Month-Year');
     let groupbyproject = lodash.groupBy(MonthwiseReReg, 'ProjectName')
 
-    let projectName = this.projectNames;
     let Version = this.db_version;
     if ((projectName === null || projectName === 'null') && (Version === null || Version === 'null')) {
       this.records_MonthwiseReReg = [];
@@ -905,14 +822,13 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  TotalcountReg() {
+  TotalcountReg(projectName) {
     let UnSuccessfulreg; let Successfulreg; let Successfulrereg;
     Successfulreg = this.graphreports.table3;
     Successfulrereg = this.graphreports.table4;
     UnSuccessfulreg = this.graphreports.table5;
     let groupbyproject_Successfulreg = lodash.groupBy(Successfulreg, 'projectName');
     let groupbyproject_Successfulrereg = lodash.groupBy(Successfulrereg, 'projectName');
-    let projectName = this.projectNames;
     let Version = this.db_version;
     if ((projectName === null || projectName === 'null') && (Version === null || Version === 'null')) {
       this.successfulreg = 0; this.successfulrereg = 0; this.unSuccessfulreg = 0;
@@ -1004,7 +920,7 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  MonthwiseModelSearch() {
+  MonthwiseModelSearch(projectName) {
     let MonthwiseModelSearch = []; let Monthwise = []; let month_year = []; let individualmonth_year = [];
     Monthwise = this.graphreports.table6;
 
@@ -1055,7 +971,6 @@ export class AnalyticalreportsComponent implements OnInit {
     month_year = lodash.uniqWith(month_year, lodash.isEqual)
     let groupbymonth_year = lodash.groupBy(MonthwiseModelSearch, 'Month-Year');
     let groupbyproject = lodash.groupBy(MonthwiseModelSearch, 'ProjectName');
-    let projectName = this.projectNames;
     let Version = this.db_version;
     if ((projectName === null || projectName === 'null') && (Version === null || Version === 'null')) {
       this.records_MonthwiseModelSearch = [];
@@ -1111,7 +1026,7 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  MonthwiseAutoSearch() {
+  MonthwiseAutoSearch(projectName) {
     let MonthwiseAutoSearch = []; let Monthwise = []; let month_year = []; let individualmonth_year = [];
     Monthwise = this.graphreports.table11;
 
@@ -1162,7 +1077,6 @@ export class AnalyticalreportsComponent implements OnInit {
     month_year = lodash.uniqWith(month_year, lodash.isEqual)
     let groupbymonth_year = lodash.groupBy(MonthwiseAutoSearch, 'Month-Year');
     let groupbyproject = lodash.groupBy(MonthwiseAutoSearch, 'ProjectName');
-    let projectName = this.projectNames;
     let Version = this.db_version;
     if ((projectName === null || projectName === 'null') && (Version === null || Version === 'null')) {
       this.records_MonthwiseAutoSearch = [];
@@ -1272,7 +1186,7 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  ModelSearchbasedonResulttype() {
+  ModelSearchbasedonResulttype(projectName) {
     let ModelSearchbasedonResulttype = []; let Resultwise = []; let result_type = []; let individualresult_type = [];
     Resultwise = this.graphreports.table7;
 
@@ -1285,7 +1199,6 @@ export class AnalyticalreportsComponent implements OnInit {
     result_type = lodash.uniqWith(result_type, lodash.isEqual);
     let groupbyresult_type = lodash.groupBy(ModelSearchbasedonResulttype, 'Result');
     let groupbyproject = lodash.groupBy(ModelSearchbasedonResulttype, 'ProjectName');
-    let projectName = this.projectNames;
     let Version = this.db_version;
     if ((projectName === null || projectName === 'null') && (Version === null || Version === 'null')) {
       this.recordsModelSearchbasedonResulttype_result_type = [];
@@ -1392,7 +1305,7 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  AutoSearchbasedonResulttype() {
+  AutoSearchbasedonResulttype(projectName) {
     let AutoSearchbasedonResulttype = []; let Resultwise = []; let result_type = []; let individualresult_type = [];
     Resultwise = this.graphreports.table12;
 
@@ -1405,7 +1318,6 @@ export class AnalyticalreportsComponent implements OnInit {
     result_type = lodash.uniqWith(result_type, lodash.isEqual)
     let groupbyresult_type = lodash.groupBy(AutoSearchbasedonResulttype, 'Result');
     let groupbyproject = lodash.groupBy(AutoSearchbasedonResulttype, 'ProjectName');
-    let projectName = this.projectNames;
     let Version = this.db_version;
     if ((projectName === null || projectName === 'null') && (Version === null || Version === 'null')) {
       this.recordsAutoSearchbasedonResulttype_result_type = [];
@@ -1516,7 +1428,7 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  TopSearchBrand() {
+  TopSearchBrand(projectname) {
     let TopSearchBrand = []; let Devicelist = []; let individualDevice = []; let brand = [];
     this.graphreports.table10.forEach(element => {
       if (element['brand'] === null || element['brand'] === '') {
@@ -1534,7 +1446,6 @@ export class AnalyticalreportsComponent implements OnInit {
     brand = lodash.uniqWith(brand, lodash.isEqual);
     this.DeviceList = Devicelist
     let device = this.Device;
-    let projectname = this.projectNames;
     let Version = this.db_version;
     let groupbybrand = lodash.groupBy(TopSearchBrand, 'Brand');
     if ((projectname != null && projectname != 'null')) {
@@ -1683,7 +1594,7 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  TopSearchModel() {
+  TopSearchModel(projectname) {
     let TopSearchModel = []; let individualDevice = []; let model = [];
     this.graphreports.table9.forEach(element => {
       if (element['model'] === null || element['model'] === '') {
@@ -1699,7 +1610,6 @@ export class AnalyticalreportsComponent implements OnInit {
 
     model = lodash.uniqWith(model, lodash.isEqual);
     let device = this.Device;
-    let projectname = this.projectNames;
     let Version = this.db_version;
     let groupbymodel = lodash.groupBy(TopSearchModel, 'Model');
     if ((projectname != null && projectname != 'null')) {
@@ -1850,7 +1760,7 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  TopSearchVendorID() {
+  TopSearchVendorID(projectname) {
     let TopSearchVendorId = []; let individualDevice = []; let vendorId = [];
     this.graphreports.table15.forEach(element => {
       if (element['vendorId'] === null || element['vendorId'] === '') {
@@ -1865,7 +1775,6 @@ export class AnalyticalreportsComponent implements OnInit {
     })
     vendorId = lodash.uniqWith(vendorId, lodash.isEqual);
     let device = this.Device;
-    let projectname = this.projectNames;
     let Version = this.db_version;
     let groupbyvendorId = lodash.groupBy(TopSearchVendorId, 'VendorId');
     if ((projectname != null && projectname != 'null')) {
@@ -2016,7 +1925,7 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  TopSearchOSD() {
+  TopSearchOSD(projectname) {
     let TopSearchOSD = []; let individualDevice = []; let osd = [];
     this.graphreports.table16.forEach(element => {
       if (element['osd'] === null || element['osd'] === '') {
@@ -2032,7 +1941,6 @@ export class AnalyticalreportsComponent implements OnInit {
 
     osd = lodash.uniqWith(osd, lodash.isEqual);
     let device = this.Device;
-    let projectname = this.projectNames;
     let Version = this.db_version;
     let groupbyosd = lodash.groupBy(TopSearchOSD, 'OSD');
     if ((projectname != null && projectname != 'null')) {
@@ -2184,13 +2092,12 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  AvgResponseTimeModelSearch() {
+  AvgResponseTimeModelSearch(projectname) {
     let AvgResponseTimeModelSearch = []; let Devicelist = []; let individualDevice = [];
     this.graphreports.table8.forEach(element => {
       AvgResponseTimeModelSearch.push({ Sum: element['sumOfTimeConsumed'], Count: element['countOfTimeConsumed'], Min: element['mintime'], Max: element['maxtime'], Avg: element['averageResponseTime'], ProjectName: element['projectName'], Version: element['embeddedDBVersion'] })
     });
     let mintime = []; let maxtime = []; let Avg = [];
-    let projectname = this.projectNames;
     let Version = this.db_version;
     if ((projectname != null && projectname != 'null')) {
       if ((Version === null || Version === 'null')) {
@@ -2284,13 +2191,12 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  AvgResponseTimeAutoSearch() {
+  AvgResponseTimeAutoSearch(projectname) {
     let AvgResponseTimeAutoSearch = []; let individualDevice = [];
     this.graphreports.table13.forEach(element => {
       AvgResponseTimeAutoSearch.push({ Sum: element['sumOfTimeConsumed'], Count: element['countOfTimeConsumed'], Min: element['mintime'], Max: element['maxtime'], Avg: element['averageResponseTime'], ProjectName: element['projectName'], Version: element['embeddedDBVersion'] })
     });
     let mintime = []; let maxtime = []; let Avg = [];
-    let projectname = this.projectNames;
     let Version = this.db_version;
     if ((projectname != null && projectname != 'null')) {
       if ((Version === null || Version === 'null')) {
@@ -2385,249 +2291,6 @@ export class AnalyticalreportsComponent implements OnInit {
     this.spinnerService.hide();
   }
 
-  onPageSizeChanged() {
-    var value = (<HTMLInputElement>document.getElementById('page-size')).value;
-    this.gridApi.paginationSetPageSize(Number(value));
-  }
-
-  onGridReady(params) {
-    this.gridApi = params.api;
-    this.gridColumnApi = params.columnApi;
-  }
-
-  methodFromParent_viewEdid(cell) {
-    let values = Object.values(cell);
-    if (this.brand_list === 'AutoSearch') {
-      this.ViewEdid(values[6]);
-    }
-  }
-
-  onBtnExport() {
-    let columndefs = this.gridApi.columnController.columnDefs; let columns = []; let filteredcolumns = [];
-    columndefs.forEach(element => {
-      columns.push(element['field'])
-    });
-    for (let i = 0; i < columns.length; i++) {
-      filteredcolumns.push(columns[i])
-    }
-    var excelParams = {
-      columnKeys: filteredcolumns,
-      allColumns: false,
-      fileName: '' + this.SelectedBrandName,
-      skipHeader: false
-    }
-    this.gridApi.exportDataAsCsv(excelParams);
-  }
-
-  viewdata() {
-    this.searchValue = null
-    this.spinnerService.show();
-    this.defaultColDef = {
-      minWidth: 100,
-    };
-    if (this.SelectedBrandName == 'Registered Box Ids') {
-      this.columnDef = [
-        { headerName: "Apiname", field: "Apiname", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "EmbeddedDBVersion", field: "EmbeddedDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SsuGuid", field: "BoxIdRef", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Input", field: "Input", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Output", field: "Output", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Result", field: "Result", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "CreatedDate", field: "CreatedDate", resizable: true, sortable: false, filter: 'agDateColumnFilter', floatingFilter: true, filterParams: this.filterParams }
-      ];
-      this.portal = true;
-      this.gridColumnApi.moveColumns(['Apiname', 'ProjectName', 'EmbeddedDBVersion', 'BoxIdRef', 'Input', 'Output', 'Result', 'CreatedDate'], 0);
-    }
-    if (this.SelectedBrandName == 'AutoSearch') {
-      this.columnDef = [
-        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "EmbeddedDBVersion", field: "EmbeddedDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Brand", field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Model", field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "VendorId", field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Osd", field: "Osd", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Edid", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-        { headerName: "TimeConsumed", field: "TimeConsumed", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "ModelMatched", field: "ModelMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "CodesetMatches", field: "CodesetMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SearchResult", field: "ResultType", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "TimeStamp", field: "CreatedDate", resizable: true, sortable: false, filter: 'agDateColumnFilter', floatingFilter: true, filterParams: this.filterParams }
-      ];
-      this.portal = true;
-      this.gridColumnApi.moveColumns(['ProjectName', 'EmbeddedDBVersion', 'BoxId', 'Device', 'Brand', 'Model', 'VendorId', 'Osd', 'Edid', 'TimeConsumed', 'ModelMatches', 'CodesetMatches', 'ResultType', 'CreatedDate'], 0)
-    }
-
-    if (this.SelectedBrandName == 'Model Search') {
-      this.columnDef = [
-        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "EmbeddedDBVersion", field: "EmbeddedDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Brand", field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Model", field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "ModelMatched", field: "ModelMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "CodesetMatches", field: "CodesetMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "TimeConsumed", field: "TimeConsumed", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SearchResult", field: "ResultType", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "TimeStamp", field: "CreatedDate", resizable: true, sortable: false, filter: 'agDateColumnFilter', floatingFilter: true, filterParams: this.filterParams }
-      ];
-      this.portal = true;
-      this.gridColumnApi.moveColumns(['ProjectName', 'EmbeddedDBVersion', 'BoxId', 'Device', 'Brand', 'Model', 'ModelMatches', 'CodesetMatches', 'TimeConsumed', 'ResultType', 'CreatedDate'], 0)
-    }
-    if ((this.SelectedBrandName == 'ZIP Downloads') || (this.SelectedBrandName == 'Zip Downloads')) {
-      this.columnDef = [
-        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "EmbeddedDBVersion", field: "EmbeddedDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "ZipId", field: "FK_ZipId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "CreatedDate", field: "CreatedDate", resizable: true, sortable: false, filter: 'agDateColumnFilter', floatingFilter: true, filterParams: this.filterParams },
-        { headerName: "ModifiedDate", field: "ModifiedDate", resizable: true, sortable: false, filter: 'agDateColumnFilter', floatingFilter: true, filterParams: this.filterParams }
-      ];
-      this.gridColumnApi.moveColumns(['ProjectName', 'EmbeddedDBVersion', 'BoxId', 'FK_ZipId', 'CreatedDate', 'ModifiedDate'], 0)
-    }
-
-    if ((this.SelectedBrandName == 'BIN Downloads') || (this.SelectedBrandName == 'Bin Downloads')) {
-      this.columnDef = [
-        { headerName: "ProjectName", field: "ProjectName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "EmbeddedDBVersion", field: "EmbeddedDBVersion", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "BinId", field: "FK_BinId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "CreatedDate", field: "CreatedDate", resizable: true, sortable: false, filter: 'agDateColumnFilter', floatingFilter: true, filterParams: this.filterParams },
-        { headerName: "ModifiedDate", field: "ModifiedDate", resizable: true, sortable: false, filter: 'agDateColumnFilter', floatingFilter: true, filterParams: this.filterParams }
-      ];
-      this.gridColumnApi.moveColumns(['ProjectName', 'EmbeddedDBVersion', 'BoxId', 'FK_BinId', 'CreatedDate', 'ModifiedDate'], 0)
-    }
-    if (this.SelectedBrandName == 'Feedback API') {
-      this.columnDef = [
-        { headerName: "BoxSerialNo", field: "BoxSerialNo", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "BrandName", field: "BrandName", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Model", field: "Model", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "VendorId", field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Osd", field: "Osd", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Edid", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-        { headerName: "Codeset", field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "SearchType", field: "SearchType", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Message", field: "Message", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "StatusFlag", field: "StatusFlag", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
-      ];
-      this.gridColumnApi.moveColumns(['BoxSerialNo', 'BoxId', 'Device', 'BrandName', 'Model', 'VendorId', 'Osd', 'Edid', 'Codeset', 'SearchType', 'Message', 'StatusFlag', 'TimeStamp'], 0)
-    }
-    let arrData = [];
-    for (var i = 0; i < this.columnDef.length; i++) {
-      arrData.push({ item_id: i, item_text: this.columnDef[i]['headerName'] });
-    }
-    this.report_visiblity = arrData;
-    this.columns_visible = arrData;
-    this.columns = this.columnDef;
-    this.columnvisiblity();
-  }
-
-  columnvisiblity() {
-    let column = this.columns;
-    this.report_visiblity = lodash.sortBy(this.report_visiblity, 'item_id');
-    this.report_visiblity = lodash.uniqWith(this.report_visiblity, lodash.isEqual);
-    let visible = []; let columnvisible = []; let moveColumn = [];
-    for (let i = 0; i < this.report_visiblity.length; i++) {
-      visible.push(column.filter(u => u.headerName === this.report_visiblity[i]['item_text']));
-    }
-    visible = visible.filter(u => u.length > 0);
-    visible.forEach(element => {
-      columnvisible.push(element[0]);
-    })
-    this.columnDefs = columnvisible;
-    this.columnDefs.forEach(element => {
-      moveColumn.push(element['field']);
-    })
-    this.gridColumnApi.moveColumns(moveColumn, 0);
-    this.View();
-  }
-
-  changecolumns() {
-    this.columnvisiblity();
-  }
-
-  onColumnSelect(e) {
-    this.report_visiblity.push(e);
-  }
-
-  View() {
-    let dbname = this.parameters[0], datatype = this.parameters[1];
-    this.mainService.GetReports(dbname, datatype)
-      .then(value => {
-        if (value.data !== '0') {
-          this.spinnerService.hide();
-          const newArray = []; let datasource1;
-          for (let i = 0; i < value.data.table.length; i++) {
-            const keys = Object.keys(value.data.table[i])
-            const newObject = {};
-            keys.forEach(key => {
-              const newKey = key.charAt(0).toUpperCase() + key.slice(1);
-              newObject[newKey] = value.data.table[i][key];
-            })
-            newArray.push(newObject);
-            if (value.data.table[i]['createdDate'] != undefined) {
-              var d = new Date(value.data.table[i]['createdDate']);
-              var getT = (d.getUTCMonth() + 1) + '/' + d.getDate() + '/' + d.getUTCFullYear() + ' ' +
-                d.getUTCHours() + ':' + d.getUTCMinutes();
-              value.data.table[i]['createdDate'] = getT;
-            }
-          }
-          datasource1 = newArray;
-          this.rowData = datasource1
-          this.datasource = datasource1
-          this.gridApi.setQuickFilter(this.searchValue)
-        }
-        else {
-          this.rowData = [];
-          $('#single_download').hide();
-          this.gridApi.setQuickFilter(this.searchValue);
-          this.spinnerService.hide();
-        }
-
-        // let crudType = 7;
-        // this.mainService.getRoleModule(crudType, null, null, null, null)
-        //   .then(value => {
-        //     /** based on role get modules accessible checked or not checked*/
-        //     let resultFetchArr: any = value.data.filter(u =>
-        //       u.name == this.role);
-        //     let permission = resultFetchArr.filter(u => u.mainModule === this.module)
-        //     if (permission[0]['readPermission'] === null) {
-        //       permission[0]['readPermission'] = 0
-        //     }
-        //     if (permission[0]['downloadPermission'] === null) {
-        //       permission[0]['downloadPermission'] = 0
-        //     }
-        //     if (permission[0]['writePermission'] === null) {
-        //       permission[0]['writePermission'] = 0
-        //     }
-        //     if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0) ||
-        //       (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0)) {
-        //       this.columnDefs = this.columnDefs;
-        //     }
-        //     if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
-        //       (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0)) {
-        //       this.columnDefs = this.columnDefs;
-        //     }
-        //     if ((permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1) ||
-        //       (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
-        //       (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
-        //       (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1)) {
-        //       this.columnDefs = this.columnDefs;
-        //     }
-        //   })
-      });
-  }
-
-  search() {
-    this.gridApi.setQuickFilter(this.searchValue);
-  }
-
   condition() {
     this.summary();
     let item = []; let id;
@@ -2639,69 +2302,26 @@ export class AnalyticalreportsComponent implements OnInit {
         }
       }
       switch (id) {
-        case "TotalRegcount":
-          this.showDevice = false;
-          this.showProject = true;
-          break;
-        case "Countrywise":
-          this.showDevice = false;
-          this.showProject = true;
-          break;
-        case "Monthwise_Reg":
-          this.showDevice = false;
-          this.showProject = true;
-          break;
-        case "Monthwise_Search":
-          this.showDevice = false;
-          this.showProject = true;
-          break;
-        case "ModelSearchbasedonResulttype":
-          this.showDevice = false;
-          this.showProject = true;
-          break;
-        case "AutoSearchbasedonResulttype":
-          this.showDevice = false;
-          this.showProject = true;
-          break;
-        case "AvgResponseTimeModelSearch":
-          this.showDevice = false;
-          this.showProject = true;
-          break;
-        case "AvgResponseTimeAutoSearch":
-          this.showDevice = false;
-          this.showProject = true;
-          break;
         case "TopSearchBrand":
           this.showDevice = true;
-          this.showProject = true;
           break;
         case "TopSearchModel":
           this.showDevice = true;
-          this.showProject = true;
           break;
         case "TopSearchVendorID":
           this.showDevice = true;
-          this.showProject = true;
           break;
         case "TopSearchOSD":
           this.showDevice = true;
-          this.showProject = true;
           break;
 
         default:
+          this.showDevice = false;
+          break;
         //the id is none of the above
       }
     }, 1000);
 
   }
 
-  check(e) {
-    let check = e.target.checked;
-    if (check == true) {
-      this.rowData = this.datasource.filter(u => !u.BoxId.startsWith('Portal_'))
-    }
-    else {
-      this.rowData = this.datasource
-    }
-  }
 }

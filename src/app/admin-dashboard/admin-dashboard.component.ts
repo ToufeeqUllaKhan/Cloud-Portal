@@ -23,15 +23,17 @@ export class AdminDashboardComponent implements OnInit {
     localStorage.removeItem('CloudApiProjects');
     localStorage.removeItem('CloudApi');
     localStorage.removeItem('previousUrl');
+    localStorage.removeItem('moduleselected');
   }
 
   ngOnInit() {
     localStorage.removeItem('TicketSelected');
+    localStorage.setItem('moduleselected', 'admin-dashboard')
   }
 
 
   clientsView() {
-    this.router.navigate(['/client-library']);
+    this.router.navigate(['/project-library']);
   }
 
   userView() {
@@ -42,21 +44,9 @@ export class AdminDashboardComponent implements OnInit {
     this.router.navigate(['/edit-api']);
   }
 
-  viewrawcapture() {
-    this.router.navigate(['/view_raw_capture']);
-  }
-
-  stagingdata() {
-    this.router.navigate(['/view_staging_data']);
-  }
-
   changeHistory() {
     localStorage.setItem('TicketSelected', 'Change History');
-    this.router.navigate(['/admin-clients']);
-  }
-
-  searchHistory() {
-    this.router.navigate(['/log-view']);
+    this.router.navigate(['/clients']);
   }
 
   ClearDefaultBoxIdLogs() {
@@ -67,12 +57,8 @@ export class AdminDashboardComponent implements OnInit {
     this.router.navigate(['/importfromprod']);
   }
 
-  cec_ediddata() {
-    localStorage.setItem('TicketSelected', 'CEC-EDID Data');
-    this.router.navigate(['/admin-clients']);
-  }
-
   cec_edidHistory() {
     this.router.navigate(['/Data Update History']);
   }
+
 }

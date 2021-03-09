@@ -141,9 +141,9 @@ export class ReportComponent implements OnInit {
     this.switchRoute = localStorage.getItem('logSelected');
     /** list of selected projects in previous page **/
     var updateBrandsProjects = JSON.parse(localStorage.getItem('updatedBrandProjects'));
-    var getClientProjects = JSON.parse(localStorage.getItem('configureAdminProjectNames'));
+    var getClientProjects = JSON.parse(localStorage.getItem('configureProjectNames'));
     var getReloadedProject = JSON.parse(localStorage.getItem('reloadedProjects'));
-    // var getClientProjects = JSON.parse(localStorage.getItem('choosenAdminProjects'));
+    // var getClientProjects = JSON.parse(localStorage.getItem('choosenProjects'));
     let projectNames: any;
     if (getClientProjects != null) {
       projectNames = getClientProjects;
@@ -159,38 +159,52 @@ export class ReportComponent implements OnInit {
     this.mainService.getProjectNames(null, null, null, null, null, dataType)
       .subscribe(value => {
         this.mainArr = value.data;
-        let filterProjectwithstatus2 = value.data.filter(u => u.statusFlag === 2);
-        let filterProjectwithstatus = value.data.filter(u => u.statusFlag != 2);
-        const unique = [...new Set(filterProjectwithstatus.map(item => item.projectname))];
-        const unique1 = [...new Set(filterProjectwithstatus2.map(item => item.projectname))];
+        this.mainArr.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
+        const unique = [...new Set(this.mainArr.map(item => item.projectname))];
         let arrData = []; let arrData_1 = [];
         for (var i = 0; i < unique.length; i++) {
           arrData.push({ item_id: i, item_text: unique[i] });
         }
-        for (var i = 0; i < unique1.length; i++) {
-          arrData.push({ item_id: i, item_text: "PROD_" + unique1[i] });
-        }
-        for (var i = 0; i < arrData.length; i++) {
-          arrData_1.push({ item_id: i, item_text: arrData[i]['item_text'] });
-        }
-
-        this.projects = arrData_1;
-        // this.mainArr = value.data.filter(u =>
-        //   (u.statusFlag === 2 || u.statusFlag === '2'));
-        // const unique = [...new Set(this.mainArr.map(item => item.projectname))];
-
-        // let arrData = [];
-        // for (var i = 0; i < unique.length; i++) {
-        //   arrData.push({ item_id: i, item_text: "PROD_"+unique[i] });
-        // }
-        // this.projects = arrData;
-        if (this.projectNames != '') {
-          for (var i = 0; i < this.projectNames.length; i++) {
-            var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[i]);
-
-            this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[i] });
+        this.ProjectList = arrData;
+        let RoleLevel = localStorage.getItem('AccessRole');
+        if (RoleLevel != 'Admin') {
+          let userName = localStorage.getItem('userName');
+          this.mainService.getRoleModule(8, null, null, userName, null)
+            .then(value => {
+              let filterProjects = []; let clientArray = [];
+              clientArray = value.data;
+              clientArray.forEach(element => {
+                element['name'] = element['dbPath'] + '_' + element['name']
+              })
+              for (var i = 0; i < clientArray.length; i++) {
+                let clientsArray: any = this.ProjectList.filter(u =>
+                  (u.item_text == clientArray[i]['name']));
+                filterProjects.push(...clientsArray);
+              }
+              let modifyItems = [];
+              for (var j = 0; j < filterProjects.length; j++) {
+                modifyItems.push({ item_id: j, item_text: filterProjects[j]['item_text'] });
+              }
+              this.projects = modifyItems;
+              if (this.projectNames != '') {
+                for (var k = 0; k < this.projectNames.length; k++) {
+                  var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[k]);
+                  this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[k] });
+                }
+                this.projectNames = this.selectedItems;
+              }
+            });
+        } else {
+          this.projects = this.ProjectList;
+          if (this.projectNames != '') {
+            for (var i = 0; i < this.projectNames.length; i++) {
+              var setIndex = this.projects.findIndex(p => p.item_text == this.projectNames[i]);
+              this.selectedItems.push({ item_id: setIndex, item_text: this.projectNames[i] });
+            }
+            this.projectNames = this.selectedItems;
           }
-          this.projectNames = this.selectedItems;
         }
       });
     this.spinnerService.hide();
@@ -215,33 +229,23 @@ export class ReportComponent implements OnInit {
 
     this.mainService.getProjectNames(null, null, null, null, null, 1)
       .subscribe(value => {
-        let ProjectName; let resultFetchArr: any;
+        let ProjectName; let resultFetchArr: any; let resultArray: any;
+        resultArray = value.data;
+        resultArray.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        });
         if (this.projectNames[0]['item_text'] != undefined) {
           ProjectName = this.projectNames[0]['item_text'];
         } else {
           ProjectName = this.projectNames[0]
         }
-
-
-        if (ProjectName.startsWith('PROD_')) {
-          resultFetchArr = value.data.filter(u =>
-            (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
-        }
-        else {
-          resultFetchArr = value.data.filter(u =>
-            (u.projectname == ProjectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
-        }
-        // let ProjectName;
-        // if (this.projectNames[0]['item_text'] != undefined) {
-        //   ProjectName = this.projectNames[0]['item_text'];
-        // } else {
-        //   ProjectName = this.projectNames[0]
-        // }
-        // let resultFetchArr: any = value.data.filter(u =>
-        //   (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
+        resultFetchArr = resultArray.filter(u => (u.projectname == ProjectName));
         let Dbname = resultFetchArr[0]['dbPath'];
-        let arr = [];
-        this.mainService.getSearchDetails(Dbname, null, null, null, 0)
+        if (ProjectName.startsWith(Dbname + '_')) {
+          ProjectName = ProjectName.replace(Dbname + '_', '')
+        }
+        let dataType = 0; let arr = [];
+        this.mainService.getSearchDetails(Dbname, null, null, null, dataType)
           .then(value => {
             if (value.data.length != 0) {
               value.data = value.data.filter(function (obj) {
@@ -264,28 +268,6 @@ export class ReportComponent implements OnInit {
     this.tabslist = Projectname;
     this.mainService.getProjectNames(null, null, null, null, null, 1)
       .subscribe(value => {
-        // this.mainArr = value.data;
-        // let ProjectName;
-        // if (this.projectNames[0]['item_text'] != undefined) {
-        //   ProjectName = this.projectNames[0]['item_text'];
-        // } else {
-        //   ProjectName = this.projectNames[0]
-        // }
-        let ProjectName; let resultFetchArr: any;
-        if (this.projectNames[0]['item_text'] != undefined) {
-          ProjectName = this.projectNames[0]['item_text'];
-        } else {
-          ProjectName = this.projectNames[0]
-        }
-
-        if (ProjectName.startsWith('PROD_')) {
-          resultFetchArr = value.data.filter(u =>
-            (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
-        }
-        else {
-          resultFetchArr = value.data.filter(u =>
-            (u.projectname == ProjectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
-        }
         let StartDate;
         let EndDate;
         if (this.from_date != null && this.to_date != null) {
@@ -304,8 +286,17 @@ export class ReportComponent implements OnInit {
             EndDate = ModifiedEndDate;
           }
 
-          // let resultFetchArr: any = this.mainArr.filter(u =>
-          //   (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
+          let ProjectName; let resultFetchArr: any; let resultArray: any;
+          resultArray = value.data;
+          resultArray.forEach(element => {
+            element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+          });
+          if (this.projectNames[0]['item_text'] != undefined) {
+            ProjectName = this.projectNames[0]['item_text'];
+          } else {
+            ProjectName = this.projectNames[0]
+          }
+          resultFetchArr = resultArray.filter(u => (u.projectname == ProjectName));
           this.resultProjArr = resultFetchArr;
 
           let datatype;
@@ -343,6 +334,9 @@ export class ReportComponent implements OnInit {
           // let projectname = this.projectNames[0]['item_text'];
           let dbname = this.resultProjArr[0]['dbPath'];
           let projectname = this.resultProjArr[0]['projectname'];
+          if (projectname.startsWith(dbname + '_')) {
+            projectname = projectname.replace(dbname + '_', '')
+          }
           datatype = dataTypeSelection;
           this.excelFromDate = StartDate;
           this.excelToDate = EndDate;
@@ -454,6 +448,11 @@ export class ReportComponent implements OnInit {
       let datatype = 1;
       await this.mainService.getProjectNamesWaitReq(null, null, null, null, null, datatype)
         .then(value => {
+          let resultArray: any;
+          resultArray = value.data;
+          resultArray.forEach(element => {
+            element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+          });
           for (var i = 0; i < this.projectNames.length; i++) {
             let ProjectName; let filterClient: any;
             if (this.projectNames[i]['item_text'] != undefined) {
@@ -461,18 +460,7 @@ export class ReportComponent implements OnInit {
             } else {
               ProjectName = this.projectNames[i]
             }
-
-
-            if (ProjectName.startsWith('PROD_')) {
-              filterClient = value.data.filter(u =>
-                (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
-            }
-            else {
-              filterClient = value.data.filter(u =>
-                (u.projectname == ProjectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
-            }
-            // let filterClient: any = value.data.filter(u =>
-            //   u.projectname == this.projectNames[i]['item_text']);
+            filterClient = resultArray.filter(u => (u.projectname == ProjectName));
             this.projArr.push(filterClient);
             projectSelectedList.push(this.projectNames[i]['item_text']);
           }
@@ -558,28 +546,13 @@ export class ReportComponent implements OnInit {
         EndDate = ModifiedEndDate;
       }
       let ProjectName; let searchDbname: any;
-
-      // if (this.projectNames[0]['item_text'] != undefined) {
-      //   ProjectName = this.projectNames[0]['item_text'];
-      // } else {
-      //   ProjectName = this.projectNames[0]
-      // }
       ProjectName = this.tabsProject;
-
-
-      if (ProjectName.startsWith('PROD_')) {
-        searchDbname = this.mainArr.filter(u =>
-          (u.projectname == ProjectName.replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
-      }
-      else {
-        searchDbname = this.mainArr.filter(u =>
-          (u.projectname == ProjectName) && (u.statusFlag != 2 || u.statusFlag != '2'));
-      }
-      // let searchDbname: any = this.mainArr.filter(u => 
-      //   (u.projectname == this.projectNames[0]['item_text'].replace("PROD_", "")) && (u.statusFlag === 2 || u.statusFlag === '2'));
+      searchDbname = this.mainArr.filter(u => (u.projectname == ProjectName));
       let dbname = searchDbname[0]['dbPath'];
       let projectname = searchDbname[0]['projectname'];
-
+      if (projectname.startsWith(dbname + '_')) {
+        projectname = projectname.replace(dbname + '_', '')
+      }
       let datatype;
       let dataTypeSelection = 0;
       if (this.Datatype == 1) {
@@ -656,9 +629,13 @@ export class ReportComponent implements OnInit {
         var ModifiedEndDate = modEndDate.year + '-' + modEndDate.month + '-' + modEndDate.day;
         EndDate = ModifiedEndDate;
       }
-      let searchDbname: any = this.mainArr.filter(u => u.projectname == this.projectNames[0]['item_text'].replace("PROD_", ''));
+      let ProjectName = this.projectNames[0]['item_text'];
+      let searchDbname: any = this.mainArr.filter(u => (u.projectname == ProjectName));
       let dbname = searchDbname[0]['dbPath'];
-      let projectname = this.projectNames[0]['item_text'];
+      let projectname = searchDbname[0]['projectname'];
+      if (projectname.startsWith(dbname + '_')) {
+        projectname = projectname.replace(dbname + '_', '')
+      }
       let datatype;
       let arr = [1, 2, 3, 4, 6, 7, 8, 10, 11];
       let pushData = [];
@@ -744,7 +721,7 @@ export class ReportComponent implements OnInit {
       arrPush.push(this.projectNames[i]['item_text']);
     }
     localStorage.setItem('serachHistoryProj', JSON.stringify(arrPush));
-    this.router.navigate(['/admin-clients'])
+    this.router.navigate(['/clients'])
       .then(() => {
         window.location.reload();
       });
@@ -905,21 +882,21 @@ export class ReportComponent implements OnInit {
       projSelectedData.push(this.projectNames[i]['item_text'].replace("PROD_", ""));
     }
     this.projectNames = projSelectedData;
-    localStorage.setItem('BrandLibraryAdminProjects', JSON.stringify(this.projectNames));
+    localStorage.setItem('BrandLibraryProjects', JSON.stringify(this.projectNames));
     this.router.navigate(['/Report-configuration-list']);
   }
 
   /** Sending selected projects in Brand Library to Data Configuration page if its selected in breadcrumbs end  **/
 
   clients() {
-    localStorage.removeItem('fetchedAdminProj');
+    localStorage.removeItem('fetchedProj');
     let projSelectedData = [];
     for (var i = 0; i < this.projectNames.length; i++) {
-      projSelectedData.push(this.projectNames[i]['item_text'].replace("PROD_", ""));
+      projSelectedData.push(this.projectNames[i]['item_text']);
     }
     this.projectNames = projSelectedData;
-    localStorage.setItem('BrandLibraryAdminProjects', JSON.stringify(this.projectNames));
-    this.router.navigate(['/report-clients'])
+    localStorage.setItem('BrandLibraryProjects', JSON.stringify(this.projectNames));
+    this.router.navigate(['/clients'])
       .then(() => {
         location.reload();
       });
@@ -954,7 +931,7 @@ export class ReportComponent implements OnInit {
 
   methodFromParent_viewEdid(cell) {
     let values = Object.values(cell);
-    if (this.brand_list === 'AutoSearch-Device Grouping') {
+    if (this.brand_list === 'AutoSearch') {
       this.ViewEdid(values[10]);
     }
     if (this.brand_list === 'Feedback API') {
@@ -1046,19 +1023,16 @@ export class ReportComponent implements OnInit {
         { headerName: "BoxId", field: "BoxId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "Ssu GUID", field: "Ssu GUID", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Brand", field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "ModelInput", field: "ModelInput", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "VendorId", field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "Osd", field: "Osd", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "Edid", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
         { headerName: "TimeConsumed", field: "TimeConsumed", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-        { headerName: "Model Matched", field: "Model Matched", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "CodesetMatches", field: "CodesetMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "SearchResult", field: "SearchResult", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
       ];
       this.portal = true;
-      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssu GUID', 'Device', 'Brand', 'ModelInput', 'VendorId', 'Osd', 'Edid', 'TimeConsumed', 'Model Matched', 'CodesetMatches', 'SearchResult'], 0)
+      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssu GUID', 'Device', 'VendorId', 'Osd', 'Edid', 'TimeConsumed', 'CodesetMatches', 'SearchResult'], 0)
     }
     if (this.SelectedBrandName == 'Model Search') {
       this.columnDef = [
@@ -1272,7 +1246,7 @@ export class ReportComponent implements OnInit {
 
   check(e) {
     let check = e.target.checked;
-    this.checked=check;
+    this.checked = check;
     if (check == true) {
       this.rowData = this.datasource.filter(u => !u.BoxId.startsWith('Portal_'))
     }

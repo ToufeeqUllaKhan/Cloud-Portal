@@ -16,7 +16,6 @@ import { MatButtonModule, MatNativeDateModule, MatIconModule, MatSidenavModule, 
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ClientsComponent } from './clients/clients.component';
 import { DataManagementComponent } from './data-management/data-management.component';
-import { CreateNewClientComponent } from './create-new-client/create-new-client.component';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { LoginComponent } from './login/login.component';
 import { AuthenticationService } from './services/authentication.service';
@@ -35,17 +34,14 @@ import { DataTablesModule } from 'angular-datatables';
 import { Data } from './model/data';
 // import { Ng2TableModule } from 'ng2-table/ng2-table';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
-import { ClientLibraryComponent } from './client-library/client-library.component';
 import { UserLibraryComponent } from './user-library/user-library.component';
 import { CreateUsersComponent } from './create-users/create-users.component';
-import { AdminClientsComponent } from './admin-clients/admin-clients.component';
 import { NgbModule, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { NgbDateCustomParserFormatter } from '../app/model/DateCustomParser';
 import { ZipUploadComponent } from './zip-upload/zip-upload.component';
 import { NotifierModule, NotifierOptions } from 'angular-notifier';
 import { ApiDbTestComponent } from './api-db-test/api-db-test.component';
 import { CloudApiModulesComponent } from './cloud-api-modules/cloud-api-modules.component';
-import { ApiClientsComponent } from './api-clients/api-clients.component';
 import { AccessibleModulesComponent } from './accessible-modules/accessible-modules.component';
 import { AddRolesComponent } from './add-roles/add-roles.component';
 import { RoleModuleViewComponent } from './role-module-view/role-module-view.component';
@@ -60,7 +56,6 @@ import { AngularResizedEventModule } from 'angular-resize-event';
 import { ReportConfigurationListComponent } from './report-configuration-list/report-configuration-list.component';
 import { ReportComponent } from './report/report.component';
 import { ChangehistoryComponent } from './changehistory/changehistory.component';
-import { ReportsClientComponent } from './reports-client/reports-client.component';
 import { RawdataComponent } from './rawdata/rawdata.component';
 import { StagingdataComponent } from './stagingdata/stagingdata.component';
 import { ClearDefaultBoxIdLogsComponent } from './clear-default-box-id-logs/clear-default-box-id-logs.component';
@@ -70,6 +65,10 @@ import { ProdCecEdidHistoryComponent } from './prod-cec-edid-history/prod-cec-ed
 import { EditRoleModulePermissionComponent } from './edit-role-module-permission/edit-role-module-permission.component';
 import { AnalyticalreportsComponent } from './analyticalreports/analyticalreports.component';
 import { AnalyticalreportsviewComponent } from './analyticalreportsview/analyticalreportsview.component';
+import { CecEdidViewComponent } from './cec-edid-view/cec-edid-view.component';
+import { DecodeEdidComponent } from './decode-edid/decode-edid.component';
+import { ProjectLibraryComponent } from './project-library/project-library.component';
+import { CreateNewProjectComponent } from './create-new-project/create-new-project.component';
 // import { BtnCellRenderer } from './brand-library/btn-cell-renderer.component';
 // import { CodesetDownloadCellRenderer } from "./brand-library/codesetdownload-cell-renderer.component";
 // import { EdidviewCellRenderer } from './brand-library/edidview-cell-renderer.component';
@@ -124,21 +123,17 @@ const customNotifierOptions: NotifierOptions = {
     DashboardComponent,
     ClientsComponent,
     DataManagementComponent,
-    CreateNewClientComponent,
     LoginComponent,
     ProfileComponent,
     ChangePasswordComponent,
     DataConfigurationListComponent,
     BrandLibraryComponent,
     AdminDashboardComponent,
-    ClientLibraryComponent,
     UserLibraryComponent,
     CreateUsersComponent,
-    AdminClientsComponent,
     ZipUploadComponent,
     ApiDbTestComponent,
     CloudApiModulesComponent,
-    ApiClientsComponent,
     AccessibleModulesComponent,
     AddRolesComponent,
     RoleModuleViewComponent,
@@ -150,7 +145,6 @@ const customNotifierOptions: NotifierOptions = {
     ReportConfigurationListComponent,
     ReportComponent,
     ChangehistoryComponent,
-    ReportsClientComponent,
     RawdataComponent,
     StagingdataComponent,
     ClearDefaultBoxIdLogsComponent,
@@ -160,6 +154,10 @@ const customNotifierOptions: NotifierOptions = {
     EditRoleModulePermissionComponent,
     AnalyticalreportsComponent,
     AnalyticalreportsviewComponent,
+    CecEdidViewComponent,
+    DecodeEdidComponent,
+    ProjectLibraryComponent,
+    CreateNewProjectComponent,
     // BtnCellRenderer,
     // CodesetDownloadCellRenderer,
     // EdidviewCellRenderer
