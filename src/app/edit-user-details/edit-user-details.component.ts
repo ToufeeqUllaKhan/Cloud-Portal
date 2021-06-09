@@ -4,6 +4,7 @@ import { FormGroup, FormBuilder, Validators, FormGroupDirective } from '@angular
 import { ToastrService } from 'ngx-toastr';
 import { Router, NavigationStart } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
+import mainscroll from '../model/Scroll';
 declare var $: any;
 
 @Component({
@@ -126,6 +127,7 @@ export class EditUserDetailsComponent implements OnInit {
       itemsShowLimit: 3,
       allowSearchFilter: this.ShowFilter
     };
+    mainscroll();
   }
 
   onInstanceSelect(item: any) {

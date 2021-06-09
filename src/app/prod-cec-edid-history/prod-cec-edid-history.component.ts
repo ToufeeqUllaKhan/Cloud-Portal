@@ -4,6 +4,7 @@ import { MainService } from '../services/main-service';
 import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { HttpClient } from '@angular/common/http';
+import mainscroll from '../model/Scroll';
 declare var $: any;
 var lodash = require('lodash');
 @Component({
@@ -53,6 +54,7 @@ export class ProdCecEdidHistoryComponent implements OnInit {
     $('#single_download').click(function () {
       self.onBtnExport();
     })
+    mainscroll();
   }
   onPageSizeChanged() {
     var value = (<HTMLInputElement>document.getElementById('page-size')).value;

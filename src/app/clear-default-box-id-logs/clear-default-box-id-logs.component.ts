@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { FormBuilder, Validators } from '@angular/forms';
+import mainscroll from '../model/Scroll';
 declare var $: any;
 
 
@@ -72,6 +73,7 @@ export class ClearDefaultBoxIdLogsComponent implements OnInit {
     this.updatedeviceidForm = this.fb.group({
       updatedeviceId: ['', Validators.required]
     });
+    mainscroll();
   }
 
   /** Space Validation for Inputs */

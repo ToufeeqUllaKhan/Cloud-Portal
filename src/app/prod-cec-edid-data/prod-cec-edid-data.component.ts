@@ -8,6 +8,8 @@ import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { HttpClient } from '@angular/common/http';
 import { EdidviewCellRenderer } from '../brand-library/edidview-cell-renderer.component';
+import { BtnCellRenderer } from '../brand-library/btn-cell-renderer.component';
+import mainscroll from '../model/Scroll';
 @Component({
   selector: 'app-prod-cec-edid-data',
   templateUrl: './prod-cec-edid-data.component.html',
@@ -19,6 +21,7 @@ export class ProdCecEdidDataComponent implements OnInit {
   dropdownSettings: any = {}; ShowFilter = false; tabslist = []; count: any = 0; switchRoute: any;
   limitSelection = false; mainArr = [];
   noData: boolean = false; projArr = []; tabsProject: any; tabValue: any; resultProjArr: any = [];
+  status: any; changeStatus: any = []; recordId: any; editedCodeset: any;
   public gridApi;
   public gridColumnApi;
   public frameworkComponents;
@@ -39,14 +42,20 @@ export class ProdCecEdidDataComponent implements OnInit {
   Values: any;
   role: string;
   module: string;
+  loginid: any;
+  ProdDatasubmitted: boolean = false;
+  saveEditProdData: FormGroup;
   constructor(private mainService: MainService, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService, private fb: FormBuilder, private http: HttpClient) {
     this.paginationPageSize = 10;
     this.rowSelection = 'multiple';
+    this.status = '1';
+    this.loginid = JSON.parse(localStorage.getItem('currentUser'));
     this.frameworkComponents = {
+      btnCellRenderer: BtnCellRenderer,
       edidviewCellRenderer: EdidviewCellRenderer
     };
     this.defaultColDef = {
-      minWidth: 100,
+      width:115
     };
     this.paginationNumberFormatter = function (params) {
       return '[' + params.value.toLocaleString() + ']';
@@ -124,7 +133,7 @@ export class ProdCecEdidDataComponent implements OnInit {
       textField: 'item_text',
       selectAllText: 'Select All',
       unSelectAllText: 'UnSelect All',
-      itemsShowLimit: 10,
+      itemsShowLimit: 3,
       allowSearchFilter: this.ShowFilter
     };
     let Projectname = this.projectNames;
@@ -149,6 +158,11 @@ export class ProdCecEdidDataComponent implements OnInit {
     $('#single_download').click(function () {
       self.onBtnExport();
     })
+
+    this.saveEditProdData = this.fb.group({
+      Codeset: ['', Validators.required]
+    });
+    mainscroll();
   }
 
   /** Multiselect project selection functions start **/
@@ -180,6 +194,7 @@ export class ProdCecEdidDataComponent implements OnInit {
       project = this.projectNames[0]['item_text']
     }
     this.getTabName(project);
+    this.status = '1';
   }
 
   async onProjectSelect(e) {
@@ -300,8 +315,14 @@ export class ProdCecEdidDataComponent implements OnInit {
   };
 
   viewEdidData(value) {
-    this.edidDataView = true;
-    this.EdidData = value;
+    if ((value === null) || (value === '')) {
+      this.edidDataView = false;
+      this.EdidData = value;
+    }
+    else {
+      this.edidDataView = true;
+      this.EdidData = value;
+    }
   }
 
   viewDecodeEdidData(value, value1) {
@@ -350,12 +371,13 @@ export class ProdCecEdidDataComponent implements OnInit {
       { headerName: "Vendor ID", field: "VendorId", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
       { headerName: "OSD Name", field: "Osd", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
       { headerName: "EDID", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-      { headerName: "Id", field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
+      { headerName: "Id", field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+      { headerName: "Action", field: "CecEdidId", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
     ];
     let split = val.split('_');
     let projectNames = split[1];
     let dbinstance = split[0];
-    this.mainService.StagingToProd(dataType, projectNames, null, null, null, null, null, null, null, null, null, null, null, null, null, dbinstance)
+    this.mainService.StagingToProd(dataType, projectNames, null, null, null, null, null, null, null, null, null, null, null, null, null, dbinstance,null, null)
       .then(value => {
         let arr = []; const newArray = [];
         if ((value.data.length > 0 && value.data[0]['status'] === 0) || value.data === "0") {
@@ -390,7 +412,34 @@ export class ProdCecEdidDataComponent implements OnInit {
             })
             newArray.push(newObject);
           }
-          this.rowData = newArray;
+          newArray.forEach(element => {
+            let removespacetovendor = element['VendorId'].split(" ");
+            let removespacetoosd = element['Osd'].split(" ");
+            let vendor = ''; let osd = '';
+
+            for (let i = 0; i < removespacetovendor.length; i++) {
+              vendor += removespacetovendor[i]
+            }
+            for (let i = 0; i < removespacetoosd.length; i++) {
+              osd += removespacetoosd[i]
+            }
+            element['VendorId'] = vendor;
+            element['Osd'] = osd;
+          })
+          newArray.forEach(element => {
+            let addspacetovendor = ''; let addspacetoosd = ''
+            for (let i = 0; i < element['VendorId'].length; i = i + 2) {
+              addspacetovendor += element['VendorId'].substr(i, 2) + " "
+            }
+            element['VendorId'] = addspacetovendor.trim();
+            for (let i = 0; i < element['Osd'].length; i = i + 2) {
+              addspacetoosd += element['Osd'].substr(i, 2) + " "
+            }
+            element['Osd'] = addspacetoosd.trim();
+          });
+          this.changeStatus = newArray;
+          // this.rowData = newArray;
+          this.onChangeStatus();
         }
         else {
           this.rowData = [];
@@ -441,8 +490,80 @@ export class ProdCecEdidDataComponent implements OnInit {
   }
 
   methodFromParent_viewEdid(cell) {
-    let values = Object.values(cell);
-    this.edid(values[11]);
+    this.edid(cell['Edid']);
+  }
+
+  methodFromParent(cell) {
+    this.ProddataView(cell);
+    $('#showeditbutton').click();
+  }
+
+  ProddataView(ret) {
+    this.recordId = ret['CecEdidId'];
+    this.editedCodeset = ret['Codeset'].trim();
+  }
+
+  keyPressHandler(e) {
+    if (e.keyCode === 32) {
+      return false;
+    }
+  }
+
+  get m() { return this.saveEditProdData.controls; }
+  async onsaveEditProdDataSubmit() {
+
+    let recordid = this.recordId;
+    let dataType = 3;
+    let split = this.tabValue.split('_');
+    let projectNames = split[1];
+    let dbinstance = split[0];
+    this.ProdDatasubmitted = true;
+    if (this.saveEditProdData.invalid) {
+      return;
+    }
+    this.spinnerService.show();
+    await this.mainService.StagingToProd(dataType, projectNames, null, null, null, null, null, null, null, null, null, null, null, this.editedCodeset, recordid, dbinstance,null, null)
+      .then(async value => {
+        this.spinnerService.hide();
+        if (value.data[0]['status'] === 1 && value.statusCode == "200" && value.status == "success") {
+          this.toastr.success('', value.data[0]['message'], { timeOut: 3000 });
+          let loginid = this.loginid['data'][0]['loginId'];
+          let log = 'Record updated Successfully(prod_CEC-EDID_data)'
+          await this.mainService.Genericlog(1, loginid, log).then(value => {
+            $('#edidprod_cec_edid_dataModal .close').click();
+            this.refreshScreen();
+          })
+        }
+        else {
+          this.toastr.warning('', value.data[0]['message'], { timeOut: 3000 });
+        }
+      })
+
+  }
+
+  StagingToProdValidate() {
+    let codeset = this.editedCodeset + ';';
+    codeset = codeset.replace(/[^0-9;]/g, '')
+    let codeset_split = [];
+    if (codeset === null || codeset === '') {
+      this.editedCodeset = '';
+      this.onsaveEditProdDataSubmit();
+    }
+    if (codeset.includes(';')) {
+      codeset_split = codeset.split(';')
+      codeset_split = codeset_split.filter(u => u != "")
+    }
+    if (codeset_split.length > 1) {
+      this.toastr.error('Multiple Codeset are not Allowed');
+    }
+    if (codeset_split.length <= 1) {
+      this.editedCodeset = codeset_split[0];
+      this.onsaveEditProdDataSubmit()
+    }
+  }
+  modalClose() {
+    this.ProdDatasubmitted = false;
+    this.saveEditProdData.reset();
   }
 
   setAutoHeight() {
@@ -454,4 +575,17 @@ export class ProdCecEdidDataComponent implements OnInit {
     this.gridApi.setDomLayout('normal');
     (<HTMLInputElement>document.querySelector('#myGrid')).style.height = '500px';
   }
+
+  onChangeStatus() {
+    if (this.status === '1') {
+      this.rowData = this.changeStatus.filter(u => ((u.Codeset != '') && (!u.Codeset.includes(';'))))
+    }
+    if (this.status === '0') {
+      this.rowData = this.changeStatus.filter(u => ((u.Codeset === '') || (u.Codeset.includes(';'))));
+    }
+    if (this.status === 'null' || this.status === null) {
+      this.rowData = this.changeStatus;
+    }
+  }
+
 }

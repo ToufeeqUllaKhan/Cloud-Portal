@@ -12,6 +12,7 @@ import { Title } from '@angular/platform-browser';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham.css";
 import { EdidviewCellRenderer } from "../brand-library/edidview-cell-renderer.component";
+import mainscroll from '../model/Scroll';
 declare let alasql;
 var lodash = require('lodash');
 
@@ -382,6 +383,7 @@ export class ReportComponent implements OnInit {
       }
       self.columnvisiblity();
     })
+    mainscroll();
   }
 
   ViewEdid(setEdid) {
@@ -879,7 +881,7 @@ export class ReportComponent implements OnInit {
   dataConfig() {
     let projSelectedData = [];
     for (var i = 0; i < this.projectNames.length; i++) {
-      projSelectedData.push(this.projectNames[i]['item_text'].replace("PROD_", ""));
+      projSelectedData.push(this.projectNames[i]['item_text']);
     }
     this.projectNames = projSelectedData;
     localStorage.setItem('BrandLibraryProjects', JSON.stringify(this.projectNames));
@@ -1027,12 +1029,13 @@ export class ReportComponent implements OnInit {
         { headerName: "Osd", field: "Osd", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "Edid", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
         { headerName: "TimeConsumed", field: "TimeConsumed", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: "BrandMatched", field: "Brand", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "CodesetMatches", field: "CodesetMatches", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "SearchResult", field: "SearchResult", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
         { headerName: "TimeStamp", field: "TimeStamp", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true }
       ];
       this.portal = true;
-      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssu GUID', 'Device', 'VendorId', 'Osd', 'Edid', 'TimeConsumed', 'CodesetMatches', 'SearchResult'], 0)
+      this.gridColumnApi.moveColumns(['ProjectName', 'BoxDBVersion', 'BoxSerialNo', 'BoxId', 'Ssu GUID', 'Device', 'Brand', 'VendorId', 'Osd', 'Edid', 'TimeConsumed', 'CodesetMatches', 'SearchResult'], 0)
     }
     if (this.SelectedBrandName == 'Model Search') {
       this.columnDef = [

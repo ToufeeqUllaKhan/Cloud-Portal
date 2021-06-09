@@ -13,6 +13,7 @@ import { Brand } from '../model/Brand';
 import { NotifierService } from 'angular-notifier';
 import { environment } from '../../environments/environment.prod';
 import { UUID } from 'angular2-uuid';
+import mainscroll from '../model/Scroll';
 var lodash = require('lodash');
 declare let alasql;
 
@@ -276,7 +277,7 @@ export class ZipUploadComponent implements OnInit {
 
     this.selecttoUpdateForm = this.fb.group({
     });
-
+    mainscroll();
   }
 
   /** Multiselect dropdown settings  */

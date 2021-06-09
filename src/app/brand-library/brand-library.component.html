@@ -70,12 +70,38 @@
     </div>
   </div>
   <br />
+  <div class="show">
+    <div class="row">
+      <div class="col-md-7"></div>
+      <!-- <div>
+        <button class="btn btn-primary float-right" (click)="selectAllCodeset()"
+          title="Update Download Status of all Codeset"> Update All Codeset</button>
+      </div>&nbsp;&nbsp;
+      <div>
+        <button class="btn btn-primary float-right" (click)="codesetStatusUpdate()"
+          title="Update Download Status of Selected Codeset">Update Selected Codeset</button>
+      </div>&nbsp;&nbsp; -->
+
+      <div style="margin-left: auto;">
+        <button class="btn btn-primary float-right newcode" (click)="selectAllCodeset()"
+          title="Update Download Status to ON">
+          Download Flag ON</button>
+      </div>&nbsp;&nbsp;
+      <div>
+        <button class="btn btn-primary float-right newcode" (click)="codesetStatusUpdate()"
+          title="Update Download Status to OFF">Download Flag OFF</button>
+      </div>&nbsp;&nbsp;
+      <div>
+        <button class="btn btn-primary float-right newBtn" data-toggle="modal" data-target="#editDataModal">
+          <i class="fa fa-plus" aria-hidden="true"></i>
+          New
+        </button>
+      </div>
+    </div>
+  </div>
+  <br />
   <div class="row">
     <div class="col-xl-12 col-md-12">
-      <button class="btn btn-primary float-right newBtn" data-toggle="modal" data-target="#editDataModal">
-        <i class="fa fa-plus" aria-hidden="true"></i>
-        New
-      </button>
       <button id="editCodeset" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
         data-toggle="modal" data-target="#edidCodesetModal" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u></button>
       <button id="editBrand" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal1"
@@ -94,12 +120,14 @@
         data-toggle="modal" data-target="#edidBrandModal" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u></button>
       <button id="editcecedidData" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal6"
         data-toggle="modal" data-target="#edidBrandModal" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u></button>
-
+      <button id="editCodesetStatus" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
+        data-toggle="modal" data-target="#edidCodesetStatusModal"
+        hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u></button>
       <div class="tab tabView" role="tabpanel">
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
           <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}"
-            class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab"
-            aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
+            class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" title={{tabs}}
+            role="tab" aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
         </div>
         <div class="tab-content">
           <div class="col-md-12">&nbsp;</div>
@@ -129,7 +157,8 @@
             <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
               style="width: 100%; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
               [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
-              [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents">
+              [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents"
+              [rowSelection]="rowSelection" [rowMultiSelectWithClick]="true" (click)="onRowClicked()">
             </ag-grid-angular>
             <div class="col-md-12">
             </div>
@@ -137,6 +166,8 @@
             <br />
 
           </div>
+          <br />
+          <br />
         </div>
       </div>
       <table *ngIf="noData">
@@ -148,7 +179,6 @@
       </table>
     </div>
     <br />
-
   </div>
   <!--modal start-->
   <div class="modal fade" id="editDataModal" tabindex="-1" role="dialog" aria-labelledby="editDataModalLabel"
@@ -903,6 +933,35 @@
     </div>
   </div>
 
+  <div class="modal fade" id="edidCodesetStatusModal" tabindex="-1" role="dialog"
+    aria-labelledby="edidCodesetStatusModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidCodesetStatusModalLabel">Alert !!!</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="closePopup()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+            <p class="dark-blue">Unchecking this would revert the codeset update status. On performing this operation
+              would not be able to download the binary of this updated codeset as the status flag would be reset.The
+              only way to download binary would be to upload the codeset once again which would set the status flag once
+              again. Would you like to continue?
+            </p>
+          </div>
+          <div class="col-sm-12">
+            <div class="form-group float-right">
+              <button type="button" class="btn btn-secondary" (click)="closePopup()"
+                data-dismiss="modal">No</button>&nbsp;
+              <button type="submit" (click)="onsaveEditCodesetStatusSubmit()" class="btn btn-primary">Yes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="modal fade" id="edidBrandModal" tabindex="-1" role="dialog" aria-labelledby="edidBrandModalLabel"
     aria-hidden="true">
     <div class="modal-dialog" role="document">

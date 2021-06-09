@@ -30,7 +30,7 @@
   <div class="tab tabView" role="tabpanel">
     <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
       <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}"
-        class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab"
+        class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab" title="{{tabs}}"
         aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
     </div>
     <div class="tab-content">
@@ -48,6 +48,8 @@
       </div>
     </div>
   </div>
+  <br />
+  <br />
   <br />
   <!-- <div class="row" id="Tickets">
     <div class="col-xs-12 col-sm-3" *ngFor="let list of dataTickets; let i = index">

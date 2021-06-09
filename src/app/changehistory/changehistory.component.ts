@@ -10,6 +10,7 @@ import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-balham.css";
+import mainscroll from '../model/Scroll';
 var lodash = require('lodash');
 
 @Component({
@@ -168,7 +169,7 @@ export class ChangehistoryComponent implements OnInit {
       }
       self.columnvisiblity();
     })
-
+    mainscroll();
 
   }
   /** Multiselect project selection functions start **/

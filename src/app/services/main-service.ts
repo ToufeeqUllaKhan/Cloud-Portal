@@ -845,6 +845,36 @@ export class MainService {
       );
   }
 
+  getSaveEditCodeset(Dbname: any, Projectname: any, Dbversion: any, Device: any, Brand: any, Brandcode: any, Model: any, Modelx: any, Codeset: any,
+    Codesetdata: any, Cschecksum: any, Region: any, Regioncode: any, Country: any, Countrycode: any, Csrank: any, Vendorid: any, Osd: any, Edidbrand: any,
+    Datatype: any, Optype: any, recordid: any, status: any): Observable<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/LoadData/InsertDelete`,
+      {
+        "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "Device": Device, "Brand": Brand, "Brandcode": Brandcode,
+        "Model": Model, "Modelx": Modelx, "Codeset": Codeset, "Codesetdata": Codesetdata, "Cschecksum": Cschecksum, "Region": Region,
+        "Regioncode": Regioncode, "Country": Country, "Countrycode": Countrycode, "Csrank": Csrank, "Vendorid": Vendorid, "Osd": Osd,
+        "Edidbrand": Edidbrand, "Datatype": Datatype, "Optype": Optype, "recordid": recordid, statusFlag: status
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+
+  getSaveEditCodesetStatus(Dbname: any, Projectname: any, Dbversion: any, codesetlist: any, Datatype: any, Optype: any, statusid: any): Observable<any> {
+
+    return this.http.post<any>(`${environment.apiUrl}/api/LoadData/InsertDelete`,
+      {
+        "Dbname": Dbname, "Projectname": Projectname, "Dbversion": Dbversion, "codesetlist": codesetlist, "Datatype": Datatype,
+        "Optype": Optype, "statusflag": statusid
+      })
+      .pipe(
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+
   getClientViewProjects(): Observable<any> {
 
     return this.http.get<any>(`${environment.apiUrl}/api/Admin/GetProjectList`)
@@ -942,6 +972,10 @@ export class MainService {
     else if (zipurl === 'https://zipprocessing.azurewebsites.net') {
       this.listZip = '/api/GetListOfZipFiles?code=Fk5s14t8lPNmniS4NRQi/T2EDKai6tI8s0pPtZC6buOa9rR5RmWWow==';
     }
+    else if (zipurl === 'https://sscfunctionsdevpro.azurewebsites.net') {
+      this.listZip = '/api/GetListOfZipFiles?code=foAG1MJxlaT5fzBuaih9yUY1ftD9Yaqb06XyfM77Y1sSD72gpipzfw==';
+    }
+
     return this.http.post<any>(`${environment.zipUrl}${this.listZip}`, {})
       .pipe(
         retry(1),
@@ -960,6 +994,9 @@ export class MainService {
     }
     if (zipurl === 'https://zipprocessing.azurewebsites.net') {
       this.unzipFile = '/api/UnzipFile?code=9pCaBiclLRo89t807YAKVMW6yDrizwC3ggJC2YeaEq6HKs/gDkywnQ==';
+    }
+    if (zipurl === 'https://sscfunctionsdevpro.azurewebsites.net') {
+      this.unzipFile = '/api/UnzipFile?code=w8LfaO6sQoiGCx1JIbWPfxDheqNWyjB9cqYp9H/vd1R7Q0jdB/rPPQ==';
     }
     return this.http.post<any>(`${environment.zipUrl}${this.unzipFile}`,
       { "zipfile": url })
@@ -981,6 +1018,9 @@ export class MainService {
     if (zipurl === 'https://zipprocessing.azurewebsites.net') {
       this.memStream = '/api/GetMemoryStream?code=8ua2iLhT0vQ1qf1dffuQ51Ll9d33QflFhQ/UaOUl7YqAPs3KBaK8EA==';
     }
+    if (zipurl === 'https://sscfunctionsdevpro.azurewebsites.net') {
+      this.memStream = '/api/GetMemoryStream?code=/BamHiYnOfARzLFZtS9adWCDjC90Pwmf5JXYtabZnXtIG5EFETJGwA==';
+    }
     return this.http.post<any>(`${environment.zipUrl}${this.memStream}`,
       { "fileurl": url })
       .pipe(
@@ -1000,6 +1040,9 @@ export class MainService {
     }
     if (zipurl === 'https://zipprocessing.azurewebsites.net') {
       this.memStream = '/api/GetMemoryStream?code=8ua2iLhT0vQ1qf1dffuQ51Ll9d33QflFhQ/UaOUl7YqAPs3KBaK8EA==';
+    }
+    if (zipurl === 'https://sscfunctionsdevpro.azurewebsites.net') {
+      this.memStream = '/api/GetMemoryStream?code=/BamHiYnOfARzLFZtS9adWCDjC90Pwmf5JXYtabZnXtIG5EFETJGwA==';
     }
     return this.http.post<any>(`${environment.zipUrl}${this.memStream}`,
       { "fileurl": url })
@@ -1166,13 +1209,13 @@ export class MainService {
   }
 
   StagingToProd(Crudtype: any, Projectname: any, Device: any, Subdevice: any, Brand: any, Model: any, Region: any, country: any, cecpresent: any,
-    cecenabled: any, vendorid: any, osd: any, ediddata: any, codeset: any, recordid: any, dbpath: any): Promise<any> {
+    cecenabled: any, vendorid: any, osd: any, ediddata: any, codeset: any, recordid: any, dbpath: any, id: any, statusflag: any): Promise<any> {
 
     return this.http.post<any>(`${environment.apiUrl}/api/Detection/StagingToProd`,
       {
         "crudtype": Crudtype, "Projectname": Projectname, "device": Device, "subdevice": Subdevice, "brand": Brand, "model": Model,
         "region": Region, "country": country, "iscecpresent": cecpresent, "iscecenabled": cecenabled, "vendorid": vendorid,
-        "osd": osd, "edid": ediddata, "codeset": codeset, "recordid": recordid, "dbinstance": dbpath
+        "osd": osd, "edid": ediddata, "codeset": codeset, "recordid": recordid, "dbinstance": dbpath, "stagingid": id, "statusflag": statusflag
       })
       .pipe(
         retry(1),

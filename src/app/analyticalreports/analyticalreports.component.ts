@@ -16,6 +16,7 @@ declare let alasql;
 var lodash = require('lodash');
 import { NgbCarouselConfig } from "@ng-bootstrap/ng-bootstrap";
 import { ChartComponent } from "ng-apexcharts";
+import mainscroll from '../model/Scroll';
 
 // export type ChartOptions = {
 //   series: ApexAxisChartSeries;
@@ -315,7 +316,7 @@ export class AnalyticalreportsComponent implements OnInit {
       });
     }
 
-
+    mainscroll();
   }
 
   dashboard() {

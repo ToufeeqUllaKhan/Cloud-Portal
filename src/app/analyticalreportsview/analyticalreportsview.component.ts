@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-analyticalreportsview',
@@ -12,6 +13,7 @@ export class AnalyticalreportsviewComponent implements OnInit {
 
   ngOnInit() {
     localStorage.removeItem('previousUrl');
+    mainscroll();
   }
 
   AnalyticalreportsView() {

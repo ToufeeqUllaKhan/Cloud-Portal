@@ -6,6 +6,7 @@ import { MainService } from '../services/main-service';
 import { ToastrService } from 'ngx-toastr';
 import * as alertify from 'alertify.js';
 import { Title } from '@angular/platform-browser';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-create-new-project',
@@ -84,7 +85,7 @@ export class CreateNewProjectComponent implements OnInit {
       newDBInstance: ['', Validators.required]
     });
 
-
+    mainscroll();
   }
 
   get o() { return this.newclientForm.controls; }

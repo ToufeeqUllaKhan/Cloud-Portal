@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import mainscroll from '../model/Scroll';
 declare var $: any;
 
 
@@ -94,6 +95,7 @@ export class EditApiComponent implements OnInit {
     this.editAddressData = this.fb.group({
       updatedAddress: ['', Validators.required]
     });
+    mainscroll();
   }
 
   /** Space Validation for Inputs */

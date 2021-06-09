@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -29,6 +30,7 @@ export class AdminDashboardComponent implements OnInit {
   ngOnInit() {
     localStorage.removeItem('TicketSelected');
     localStorage.setItem('moduleselected', 'admin-dashboard')
+    mainscroll();
   }
 
 

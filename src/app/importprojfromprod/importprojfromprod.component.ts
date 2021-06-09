@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MainService } from '../services/main-service';
 import { NgxSpinnerService } from 'ngx-spinner';
+import mainscroll from '../model/Scroll';
 
 declare var $: any;
 
@@ -66,7 +67,7 @@ export class ImportprojfromprodComponent implements OnInit {
     this.newdbInstanceForm = this.fb.group({
       newDBInstance: ['', Validators.required]
     });
-
+    mainscroll();
   }
 
 

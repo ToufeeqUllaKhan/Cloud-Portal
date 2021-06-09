@@ -18,7 +18,7 @@
   </div>
 
   <div class="row">
-    <div class="col-lg-10 col-xlg-10 col-md-10">
+    <div class="col-lg-8 col-xlg-8 col-md-8">
       <div class="card">
         <div class="card-block">
           <ng-multiselect-dropdown name="projects" [(ngModel)]="projectNames" [placeholder]="'Select Projects'"
@@ -32,19 +32,33 @@
       <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
           aria-hidden="true"></i></button>
     </div>
+    &nbsp;&nbsp;
     <div>
       <button class="btn btn-info float-right" title="Download based on filtered data" id="single_download">
-        <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>&nbsp;&nbsp;
+        <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
     </div>
+    &nbsp;&nbsp;
+    <div>
+      <select [(ngModel)]="status" class="form form-control selectDrop" style="width:auto;" (change)="onChangeStatus()">
+        <option [value]=null hidden>Status </option>
+        <option value='null'>All</option>
+        <option value='1'>Valid Records</option>
+        <option value='0'>Invalid Records</option>
+      </select>
+    </div>
+    &nbsp;&nbsp;
     <!-- <div class="col-xl-1 col-md-1 hideData">
         <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh" aria-hidden="true"></i></button>
       </div> -->
+    <button id="showeditbutton" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
+      data-toggle="modal" data-target="#edidprod_cec_edid_dataModal" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u>
+    </button>
   </div>
   <br />
   <div class="tab tabView" role="tabpanel">
     <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
       <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}"
-        class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab"
+        class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab" title={{tabs}}
         aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
     </div>
     <div class="tab-content">
@@ -92,16 +106,16 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title h5-color" id="edidDataModalLabel" *ngIf="edidDataView">Edid View</h5>
+          <h5 class="modal-title h5-color" id="edidDataModalLabel">Edid View</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
         </div>
         <div class="modal-body">
           <div class="col-sm-12">
             <table class="table table-bordered" cellspacing="0">
-              <tbody *ngIf="edidDataView">
+              <tbody>
                 <tr>
                   <td>{{EdidData}}</td>
-                  <td style="vertical-align: middle;">
+                  <td style="vertical-align: middle;" *ngIf="edidDataView">
                     <button type="button" (click)="decodeedid()"
                       style="vertical-align: middle;cursor: pointer;background:none;border:none;" data-toggle="modal"
                       data-target="#DecodeedidDataModal" class="btn btn-primary">Decode
@@ -138,6 +152,47 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="edidprod_cec_edid_dataModal" tabindex="-1" role="dialog"
+    aria-labelledby="edidprod_cec_edid_dataModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title h5-color" id="edidprod_cec_edid_dataModalLabel">Edit CEC-EDID data</h5>
+          <button type="button" class="close" (click)="modalClose()" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="col-sm-12">
+            <form [formGroup]="saveEditProdData" (ngSubmit)="StagingToProdValidate()">
+              <br />
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="form-group form-inline">
+                    <label class="labelsubSpan col-sm-5 col-form-label">Codeset<span class="color-red">*</span></label>
+                    <input type="text" (keypress)="keyPressHandler($event)" formControlName="Codeset"
+                      [(ngModel)]="editedCodeset" class="form-control form-control-line col-sm-7"
+                      [ngClass]="{ 'is-invalid': ProdDatasubmitted && m.Codeset.errors }" required />
+                    <div *ngIf="ProdDatasubmitted && m.Codeset.errors" class="invalid-feedback">
+                      <div *ngIf="m.Codeset.errors.required" class="error-defined text-right">Codeset is required</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row text-right" style="margin-top: 10px;">
+                <div class="col-sm-12">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                    (click)="modalClose()">Close</button>&nbsp;
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       </div>

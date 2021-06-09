@@ -7,6 +7,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { UUID } from 'angular2-uuid';
 import { Logintoken } from '../model/logintoken';
 import { User } from '../model/user';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-api-db-test',
@@ -307,7 +308,7 @@ export class ApiDbTestComponent implements OnInit {
       Output: ['', null],
       Result: ['', null]
     });
-
+    mainscroll();
   }
   /** List of devices based on project selection */
   getDevices() {

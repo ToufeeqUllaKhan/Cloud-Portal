@@ -32,8 +32,8 @@
 .row {
   display: flex;
   flex-wrap: wrap;
-  margin-right: 0px;
-  margin-left: 0px;
+  margin-right: 10px;
+  margin-left: 5px;
 }
 
 .float-right {
@@ -344,6 +344,6 @@ table.dataTable th {
 
 .card {
   padding: 1rem;
-  padding-bottom: 0rem;
-  height: 155px;
+  padding-bottom: 1rem;
+  height: auto;
 }

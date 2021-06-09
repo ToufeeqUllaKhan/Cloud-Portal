@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MainService } from './services/main-service';
 import { User } from '../app/model/user';
 import { environment } from '../environments/environment';
+import mainscroll from './model/Scroll';
 declare var $: any;
 @Component({
   selector: 'app-root',
@@ -187,6 +188,7 @@ export class AppComponent {
       localStorage.removeItem('StagingStatus')
     }
 
+    var self=this;
     $(document).ready(function () {
       $("#menu-toggle").click(function (e) {
         e.preventDefault();
@@ -197,27 +199,7 @@ export class AppComponent {
       $(document).ready(function () {
 
         $(window).resize(function () {
-          var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
-          if (browserZoomLevel == 90) {
-            $('#wrapper').css('margin', '0 auto');
-            $('#wrapper').css('max-width', '1500px');
-            $('.main-scroll').css('height', '650px');
-          }
-          if (browserZoomLevel == 80) {
-            $('.main-scroll').css('height', '700px');
-          }
-          if (browserZoomLevel == 75) {
-            $('.main-scroll').css('height', '750px');
-          }
-          if (browserZoomLevel == 67) {
-            $('.main-scroll').css('height', '850px');
-          }
-          if (browserZoomLevel < 67) {
-            $('.main-scroll').css('height', '1050px');
-          }
-          if (browserZoomLevel == 100) {
-            $('.main-scroll').css('height', '600px');
-          }
+          self.zoomFunction();
         });
       });
 
@@ -247,41 +229,8 @@ export class AppComponent {
       $('#page-content-wrapper').on("click", function () {
         $('.dropdown-container').css('display', 'none');
       });
-      var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
-      if (browserZoomLevel >= 110) {
-        $('body').css('overflow-y', 'auto');
-      } else {
-        $('body').css('overflow-y', 'hidden');
-      }
-      if (browserZoomLevel == 150) {
-        $('.navbar').css('padding', '.3rem 1rem');
-      }
-      if (browserZoomLevel == 175) {
-        $('.navbar').css('padding', '.5rem 1rem');
-      }
-      if (browserZoomLevel == 125) {
-        $('.navbar').css('padding', '.56rem 1rem');
-      }
-
       $(window).resize(function () {
-        var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
-        if (browserZoomLevel >= 110) {
-          $('body').css('overflow-y', 'auto');
-        } else {
-          $('body').css('overflow-y', 'hidden');
-        }
-        if (browserZoomLevel == 150) {
-          $('.navbar').css('padding', '.3rem 1rem');
-        }
-        if (browserZoomLevel == 175) {
-          $('.navbar').css('padding', '.5rem 1rem');
-        }
-        if (browserZoomLevel == 100) {
-          $('.navbar').css('padding', '.56rem 1rem');
-        }
-        if (browserZoomLevel == 125) {
-          $('.navbar').css('padding', '.56rem 1rem');
-        }
+        self.zoomFunction();
       });
     });
 
@@ -292,27 +241,11 @@ export class AppComponent {
     if (browserZoomLevel == 90) {
       $('#wrapper').css('margin', '0 auto');
       $('#wrapper').css('max-width', '1500px');
-      $('.main-scroll').css('height', '650px');
     }
     if (browserZoomLevel < 90) {
       $('#wrapper').css('margin', '0 auto');
       $('#wrapper').css('max-width', '1500px');
     }
-    if (browserZoomLevel == 80) {
-      $('.main-scroll').css('height', '700px');
-    }
-    if (browserZoomLevel == 75) {
-      $('.main-scroll').css('height', '750px');
-    }
-    if (browserZoomLevel == 67) {
-      $('.main-scroll').css('height', '850px');
-    }
-    if (browserZoomLevel < 67) {
-      $('.main-scroll').css('height', '1050px');
-    }
-    if (browserZoomLevel == 100) {
-      $('.main-scroll').css('height', '600px');
-    }
     if (browserZoomLevel >= 110) {
       $('body').css('overflow-y', 'auto');
     } else {
@@ -327,23 +260,7 @@ export class AppComponent {
     if (browserZoomLevel == 125) {
       $('.navbar').css('padding', '.56rem 1rem');
     }
-    if (browserZoomLevel >= 110) {
-      $('body').css('overflow-y', 'auto');
-    } else {
-      $('body').css('overflow-y', 'hidden');
-    }
-    if (browserZoomLevel == 150) {
-      $('.navbar').css('padding', '.3rem 1rem');
-    }
-    if (browserZoomLevel == 175) {
-      $('.navbar').css('padding', '.5rem 1rem');
-    }
-    if (browserZoomLevel == 100) {
-      $('.navbar').css('padding', '.56rem 1rem');
-    }
-    if (browserZoomLevel == 125) {
-      $('.navbar').css('padding', '.56rem 1rem');
-    }
+    mainscroll();
   }
 
   checkUrl() {

@@ -17,89 +17,103 @@
     <div class="col-md-12">
       <div class="card">
         <div class="card-block">
-          <div class="row" id="direct">
-            <div class="col-sm-4">
-              <label class="colorBlue">Import to Staging<span class="color-red">*</span></label>
-              <input id="file-upload" class="form-control" type="file" accept=".xls,.xlsx,.csv"
-                (change)="onFileChange($event)" style="overflow: hidden;" />
+          <div class="row">
+            <div class="col-sm-3">
+              <label class="colorBlue">Project Name<span class="color-red">*</span></label>
+              <select id="projectname" [(ngModel)]="projectNames" class="form-control selectDrop"
+                (change)="changeProjectname()">
+                <option [value]=null>Select</option>
+                <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
+              </select>
+              <br />
             </div>
-            <div style="margin-top: auto">
-              <button class="btn btn-primary" id="transfer" (click)=directtostaging()>Import to Staging</button>
-            </div>&nbsp;&nbsp;&nbsp;
-            <div style="margin-top: auto">
-              <button class="btn btn-info float-right" title="Download Template for Import to Staging" id="t_download">
-                <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Template</button>
+            <div>
+              <label class="colorBlue">Record Status<span class="color-red">*</span></label>
+              <select [(ngModel)]="recordstatus" class="form-control selectDrop" (change)="changeRecordstatus()">
+                <option [value]=null>All</option>
+                <option value="Present">Exported to Prod</option>
+                <option value="Not Present">Not Exported to Prod</option>
+              </select>
+              <br />
             </div>
-            <div style="width:auto;margin-left: auto;margin-top: auto">
+            <div style="margin-left: auto;margin-top: 29px">
               <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
                   aria-hidden="true"></i></button>
-            </div>&nbsp;&nbsp;
+            </div>
+            <div style="margin-top: 29px;">
+              <button class="btn btn-info float-right" title="Download based on filtered data" id="single_download">
+                <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>&nbsp;&nbsp;
+            </div>
+          </div>
+          <div class="row">
+            <div id="direct">
+              <div class="row">
+                <div>
+                  <label class="colorBlue">Import to Staging<span class="color-red">*</span></label>
+                  <input id="file-upload" class="form-control" type="file" accept=".xls,.xlsx,.csv"
+                    (change)="onFileChange($event)" style="overflow: hidden;" />
+                </div>&nbsp;&nbsp;&nbsp;
+                <div style="margin-top: auto">
+                  <button class="btn btn-primary" id="transfer" (click)=directtostaging()>Import to Staging</button>
+                </div>&nbsp;&nbsp;&nbsp;
+                <div style="margin-top: auto">
+                  <button class="btn btn-info float-right" title="Download Template for Import to Staging"
+                    id="t_download">
+                    <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Template</button>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 28px;margin-left: auto;">
+              <!-- <button class="btn btn-primary" id="uploadxml" > Upload </button>&nbsp;&nbsp;&nbsp; -->
+              <button id="ExporttoProd" class="btn btn-primary float-right" (click)="changeProject()">
+                Export to Production
+              </button>
+            </div>&nbsp;&nbsp;&nbsp;&nbsp;
             <button class="btn btn-primary float-right newBtn" data-toggle="modal" data-target="#StagingModal_1"
               data-backdrop="static" data-keyboard="false" style="margin-top: auto">
               <i class="fa fa-plus" aria-hidden="true"></i>
               New
             </button>
-            &nbsp;&nbsp;
-          </div>
-          <div class="row">
-            <div style="margin-top: 28px;margin-left: auto;">
-              <!-- <button class="btn btn-primary" id="uploadxml" > Upload </button>&nbsp;&nbsp;&nbsp; -->
-              <button class="btn btn-primary float-right" data-toggle="modal" data-target="#codesetincludeModal"
-                data-backdrop="static" data-keyboard="false">
-                <i class="fa fa-file-export"></i>
-                Export to Production
-              </button>&nbsp;&nbsp;&nbsp;&nbsp;
-            </div>
-            <div style="margin-top: 28px;">
-              <button class="btn btn-info float-right" title="Download based on filtered data" id="single_download">
-                <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>&nbsp;&nbsp;
-            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div id="download">
-    <button class="btn btn-info float-right" title="Download based on filtered data" id="s_download">
-      <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
-  </div>
   <br />
+  <button id="showeditUIDbutton" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
+    data-toggle="modal" data-target="#edidStagingModal" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u>
+  </button>
+  <button id="showeditbutton" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
+    data-toggle="modal" data-target="#edidStagingModal_1" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u>
+  </button>
+  <button id="unlink" type="button" style="cursor:pointer;background:none;border:none;" data-toggle="modal"
+    data-target="#deleteconfirmation_1" class="unlink" hidden>&nbsp;&nbsp;<u><strong>Unlink</strong></u>
+  </button>
+  <button id="Export" type="button" class="btn btn-primary float-right" data-toggle="modal"
+    data-target="#codesetincludeModal" data-backdrop="static" data-keyboard="false" hidden>Export</button>
   <div class="row">
     <div class="col-md-12">&nbsp;</div>
-    <button id="showeditUIDbutton" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
-      data-toggle="modal" data-target="#edidStagingModal" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u>
-    </button>
-    <button id="showeditbutton" type="button" style="cursor:pointer;background:none;border:none;" class="dataVal"
-      data-toggle="modal" data-target="#edidStagingModal_1" hidden>&nbsp;&nbsp;<u><strong>Edit</strong></u>
-    </button>
-    <button id="unlink" type="button" style="cursor:pointer;background:none;border:none;" data-toggle="modal"
-      data-target="#deleteconfirmation_1" class="unlink" hidden>&nbsp;&nbsp;<u><strong>Unlink</strong></u>
-    </button>
-
-    <div class="row">
-      <div class="example-header">
-        <label>Show
-          <select (change)="onPageSizeChanged()" id="page-size">
-            <option value="10">10</option>
-            <option value="100">100</option>
-            <option value="500">500</option>
-            <option value="1000">1000</option>
-          </select>
-          entries</label>
-      </div>
-      <div style="margin-left: auto;">
-        <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue" />
-        </label>
-      </div>
-      <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
-        style="width: 1075px; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
-        [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
-        [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents"
-        [rowSelection]="rowSelection" [suppressRowClickSelection]="true" [rowMultiSelectWithClick]="true"
-        (click)="onRowClicked()">
-      </ag-grid-angular>
-
+    <div class="example-header">
+      <label>Show
+        <select (change)="onPageSizeChanged()" id="page-size">
+          <option value="10">10</option>
+          <option value="100">100</option>
+          <option value="500">500</option>
+          <option value="1000">1000</option>
+        </select>
+        entries</label>
     </div>
+    <div style="margin-left: auto;">
+      <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue" />
+      </label>
+    </div>
+    <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+      style="width: 100%; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+      [pagination]="true" [paginationPageSize]="paginationPageSize" [context]="context"
+      [paginationNumberFormatter]="paginationNumberFormatter" [frameworkComponents]="frameworkComponents"
+      [rowSelection]="rowSelection" [suppressRowClickSelection]="true" [rowMultiSelectWithClick]="true"
+      (click)="onRowClicked()">
+    </ag-grid-angular>
     <button type="button" style="cursor:pointer;background:none;border:none;margin-left: auto;" data-toggle="modal"
       data-target="#deleteconfirmation" class="multiple_unlink ">&nbsp;&nbsp;<u><strong>Unlink</strong></u></button>
     &nbsp;
@@ -809,15 +823,14 @@
         </div>
         <div class="modal-body">
           <div class="row">
-            <div class="col-sm-7" id="Projectname">
+            <!-- <div class="col-sm-7" id="Projectname">
               <label class="colorBlue">Project Name<span class="color-red">*</span></label>
-              <select id="projectname" [(ngModel)]="projectNames" class="form-control selectDrop"
-                (change)="changeProject()">
+              <select [(ngModel)]="projectNames" class="form-control selectDrop" disabled>
                 <option [value]=null>Select</option>
                 <option *ngFor="let list of projects" value={{list}}>{{list}}</option>
               </select>
               <br />
-            </div>
+            </div> -->
             <div class="col-sm-9" id='Codesetinclude'>
               <label class="colorBlue">Upload Codesetinclude.xml<span class="color-red">*</span></label>
               <input id="upload" class="form-control" type="file" accept=".xml" (change)="Upload($event)"
@@ -874,7 +887,7 @@
                   <!-- <tr *ngFor="let client of clientDetails;let i=index;"> -->
                   <!-- <td class="align-center">{{i+1}}</td> -->
 
-                  <tr *ngFor="let client of singlecodesetassigned;let i=index;">
+                  <tr *ngFor="let client of allcodesetassigned;let i=index;">
                     <td>{{client.device}}</td>
                     <td>{{client.subdevice}}</td>
                     <td>{{client.brand}}</td>
@@ -905,9 +918,10 @@
               {{message}}
             </p>
           </div>
-          <button type="button" style="cursor:pointer;background:none;border:none;" *ngIf="multiplecodeset"
-            class="multiple_codeset float-right" title="Download Complete report"
-            (click)=SingleexcelDownload()>&nbsp;&nbsp;<u><strong>Download</strong></u></button>
+          <button type="button" style="cursor:pointer;margin-top: -5px;" *ngIf="multiplecodeset"
+            class="multiple_codeset btn btn-info float-right" title="Download Complete report"
+            (click)=SingleexcelDownload()><i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download
+            Report</button>
         </div>
       </div>
     </div>

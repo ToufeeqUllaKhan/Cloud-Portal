@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-accessible-modules',
@@ -12,6 +13,7 @@ export class AccessibleModulesComponent implements OnInit {
 
   ngOnInit() {
     localStorage.removeItem('previousUrl');
+    mainscroll();
   }
 
   usersView() {

@@ -13,6 +13,7 @@ import { BtnCellRenderer } from './btn-cell-renderer.component';
 import { EdidviewCellRenderer } from '../brand-library/edidview-cell-renderer.component';
 import { RemarksViewCellRenderer } from './remarksview-cell-renderer.component ';
 import { SupportedRegionsViewCellRenderer } from './supportedregionsview-cell-renderer.component';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-rawdata',
@@ -127,7 +128,7 @@ export class RawdataComponent implements OnInit {
         if (e.which === 32 && !this.value.length)
           e.preventDefault();
       });
-
+      mainscroll();
 
     });
     var self = this;
@@ -201,11 +202,11 @@ export class RawdataComponent implements OnInit {
   }
 
   edid(setEdid) {
-    this.viewEdidData(setEdid);
+    this.viewEdidData(setEdid['Edid']);
   };
 
   Remarks(setRemarks) {
-    var ret = setRemarks.split(",")
+    var ret = setRemarks['Remarks'].split(",")
     var str1 = ret[0];
     var str2 = ret[1];
     var str3 = ret[2];
@@ -213,14 +214,14 @@ export class RawdataComponent implements OnInit {
     this.viewRemarks(str1, str2, str3, str4);
   };
 
-  supportedregions(setEdid) {
-    this.viewSupportedregions(setEdid);
+  supportedregions(setregions) {
+    this.viewSupportedregions(setregions['Supportedregions']);
   };
 
 
   RawdataView(ret) {
-    let removespacetovendor = ret[14].split(" ");
-    let removespacetoosd = ret[17].split(" ");
+    let removespacetovendor = ret['Vendoridhex'].split(" ");
+    let removespacetoosd = ret['Osdhex'].split(" ");
     let vendor = ''; let osd = '';
 
     for (let i = 0; i < removespacetovendor.length; i++) {
@@ -229,30 +230,30 @@ export class RawdataComponent implements OnInit {
     for (let i = 0; i < removespacetoosd.length; i++) {
       osd += removespacetoosd[i]
     }
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
-    var str5 = ret[5];
-    var str6 = ret[6];
-    var str7 = ret[7];
-    var str8 = ret[8];
-    var str9 = ret[9];
-    var str10 = ret[10];
-    var str11 = ret[11];
-    var str12 = ret[12];
-    var str13 = ret[13];
+    var str = ret['Detectionid'];
+    var str1 = ret['Device'];
+    var str2 = ret['Subdevice'];
+    var str3 = ret['Brand'];
+    var str4 = ret['Targetmodel'];
+    var str5 = ret['TargetRegion'];
+    var str6 = ret['TargetCountry'];
+    var str7 = ret['Year'];
+    var str8 = ret['Remotemodel'];
+    var str9 = ret['Regionofcapture'];
+    var str10 = ret['Countryofcapture'];
+    var str11 = ret['CECDevice'];
+    var str12 = ret['Cecpresent'];
+    var str13 = ret['Cecenabled'];
     var str14 = vendor;
-    var str15 = ret[15];
-    var str16 = ret[16];
+    var str15 = ret['Vendoridstring'];
+    var str16 = ret['Osdstring'];
     var str17 = osd;
-    var str18 = ret[18];
-    var str19 = ret[19];
-    var str20 = ret[20];
-    var str21 = ret[21];
-    var str22 = ret[22];
-    var str23 = ret[23];
+    var str18 = ret['Edid'];
+    var str19 = ret['Sourcename'];
+    var str20 = ret['Sourcetype'];
+    var str21 = ret['Supportedregions'];
+    var str22 = ret['Remarks'];
+    var str23 = ret['Status'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -862,7 +863,7 @@ export class RawdataComponent implements OnInit {
   viewdata() {
     this.searchValue = null
     this.defaultColDef = {
-      minWidth: 100,
+      width: 100
     };
     this.columnDefs = [
       { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
@@ -888,7 +889,7 @@ export class RawdataComponent implements OnInit {
       { headerName: "Supportedregions", field: "Supportedregions", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "regionsviewCellRenderer" },
       { headerName: "Remarks", field: "Remarks", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "remarksviewCellRenderer" },
       { headerName: "Status", field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { headerName: "Select All", field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
+      { headerName: "Select All", field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130, headerCheckboxSelectionFilteredOnly: true },
       { headerName: "Action", field: "Status", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
     ];
     this.rowData = this.rawdatacapture;
@@ -1080,24 +1081,20 @@ export class RawdataComponent implements OnInit {
   }
 
   methodFromParent(cell) {
-    let values = Object.values(cell);
-    this.RawdataView(values)
+    this.RawdataView(cell)
     $('#editRawdata').click();
   }
 
   methodFromParent_viewSupportedRegion(cell) {
-    let values = Object.values(cell);
-    this.supportedregions(values[21])
+    this.supportedregions(cell)
   }
 
   methodFromParent_viewRemarks(cell) {
-    let values = Object.values(cell);
-    this.Remarks(values[22]);
+    this.Remarks(cell);
   }
 
   methodFromParent_viewEdid(cell) {
-    let values = Object.values(cell);
-    this.edid(values[18]);
+    this.edid(cell);
   }
 
   onBtnExport() {

@@ -3,6 +3,7 @@ import { MainService } from '../services/main-service';
 import { Router, NavigationStart } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-role-module-view',
@@ -38,6 +39,7 @@ export class RoleModuleViewComponent implements OnInit {
         this.modulesList = uniqueModules;
         this.spinnerService.hide();
       });
+      mainscroll();
   }
 
   /** To set the url for add role page */

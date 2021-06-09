@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MainService } from '../services/main-service';
 import { ToastrService } from 'ngx-toastr';
+import mainscroll from '../model/Scroll';
 declare var $: any;
 
 @Component({
@@ -18,6 +19,7 @@ export class DecodeEdidComponent implements OnInit {
   constructor(private mainService: MainService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
+    mainscroll();
   }
 
   decodeedid() {

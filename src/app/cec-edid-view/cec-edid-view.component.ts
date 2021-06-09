@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-cec-edid-view',
@@ -12,6 +13,7 @@ export class CecEdidViewComponent implements OnInit {
 
   ngOnInit(): void {
     localStorage.removeItem('TicketSelected')
+    mainscroll();
   }
 
   viewrawcapture() {

@@ -5,6 +5,7 @@ import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 declare var $: any;
 import 'datatables.net';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-user-library',
@@ -35,6 +36,7 @@ export class UserLibraryComponent implements OnInit {
       });
 
     localStorage.removeItem('editUser');
+    mainscroll();
   }
 
   userConfig(name: any) {

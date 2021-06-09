@@ -14,6 +14,7 @@ import * as xml2js from 'xml2js';
 import { BtnCellRenderer } from './btn-cell-renderer.component';
 import { EdidviewCellRenderer } from '../brand-library/edidview-cell-renderer.component';
 import { SupportedRegionsViewCellRenderer } from '../rawdata/supportedregionsview-cell-renderer.component';
+import mainscroll from '../model/Scroll';
 var lodash = require('lodash');
 declare let alasql;
 @Component({
@@ -97,13 +98,15 @@ export class StagingdataComponent implements OnInit {
   show: boolean = false;
   role: string;
   module: string;
+  allcodesetassigned: any = [];
+  recordstatus: any = null;
   constructor(private mainService: MainService, private router: Router, private toastr: ToastrService, private spinnerService: NgxSpinnerService, private fb: FormBuilder, private http: HttpClient) {
     localStorage.removeItem('RawStatus')
     this.usersName = localStorage.getItem('userName');
     this.loginid = JSON.parse(localStorage.getItem('currentUser'));
     this.role = localStorage.getItem('AccessRole');
     this.module = localStorage.getItem('moduleselected');
-    this.status = null; this.device = null; this.subdevice = null;
+    this.status = null; this.recordstatus = null; this.projectNames = null;
     this.paginationPageSize = 10;
     this.rowSelection = 'multiple';
     this.frameworkComponents = {
@@ -123,9 +126,19 @@ export class StagingdataComponent implements OnInit {
     // var self=this;
     let dataType = 6;
     let statusflag = this.status;
-    let device = this.device;
-    let subdevice = this.subdevice;
-    this.stagingdata(dataType, device, subdevice, statusflag);
+    let recordstatus = this.recordstatus;
+    let projectName = this.projectNames;
+    this.mainService.getProjectNames(null, null, null, null, null, 1)
+      .subscribe(value => {
+        this.filterProjects = value.data;
+        this.filterProjects.forEach(element => {
+          element['projectname'] = element['dbinstance'] + '_' + element['projectname']
+        })
+        const uniqueProjects = [...new Set(this.filterProjects.map(item => item.projectname))];
+        this.projects = uniqueProjects;
+        this.stagingdata(dataType, projectName, recordstatus, statusflag);
+      });
+
     $(document).ready(function () {
       $(".pop-menu").click(function () {
         $(this).toggleClass("transition");
@@ -269,11 +282,12 @@ export class StagingdataComponent implements OnInit {
     $('#t_download').click(function () {
       self.ontExport();
     })
+    mainscroll();
   }
 
   unlink(setStagingdata) {
-    var setStagingdata0 = setStagingdata[0];
-    var setStagingdata1 = setStagingdata[16];
+    var setStagingdata0 = setStagingdata['Id'];
+    var setStagingdata1 = setStagingdata['Status'];
     if (setStagingdata1 === 'Imported from Raw') {
       setStagingdata1 = 1;
     }
@@ -286,16 +300,16 @@ export class StagingdataComponent implements OnInit {
   };
 
   edid(setEdid) {
-    this.viewEdidData(setEdid);
+    this.viewEdidData(setEdid['Edid']);
   };
 
-  supportedregions(setEdid) {
-    this.viewSupportedregions(setEdid);
+  supportedregions(setregions) {
+    this.viewSupportedregions(setregions['Supportedregions']);
   };
 
   StagingdataView(ret) {
-    let removespacetovendor = ret[11].split(" ");
-    let removespacetoosd = ret[14].split(" ");
+    let removespacetovendor = ret['Vendoridhex'].split(" ");
+    let removespacetoosd = ret['Osdhex'].split(" ");
     let vendor = ''; let osd = '';
 
     for (let i = 0; i < removespacetovendor.length; i++) {
@@ -304,23 +318,23 @@ export class StagingdataComponent implements OnInit {
     for (let i = 0; i < removespacetoosd.length; i++) {
       osd += removespacetoosd[i]
     }
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
-    var str5 = ret[5];
-    var str6 = ret[6];
-    var str7 = ret[7];
-    var str8 = ret[8];
-    var str9 = ret[9];
-    var str10 = ret[10];
+    var str = ret['Id'];
+    var str1 = ret['Detectionid'];
+    var str2 = ret['Device'];
+    var str3 = ret['Subdevice'];
+    var str4 = ret['Brand'];
+    var str5 = ret['Model'];
+    var str6 = ret['Supportedregions'];
+    var str7 = ret['UID'];
+    var str8 = ret['Year'];
+    var str9 = ret['Cecpresent'];
+    var str10 = ret['Cecenabled'];
     var str11 = vendor;
-    var str12 = ret[12];
-    var str13 = ret[13];
+    var str12 = ret['Vendoridstring'];
+    var str13 = ret['Osdstring'];
     var str14 = osd;
-    var str15 = ret[15];
-    var str16 = ret[16];
+    var str15 = ret['Edid'];
+    var str16 = ret['Status'];
     if (str == 'null') {
       str = ''
     }
@@ -420,7 +434,6 @@ export class StagingdataComponent implements OnInit {
     this.editedUid = value7;
     this.editedStatus = value16;
     this.recordId = value;
-    console.log(value, value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14, value15, value16)
     let RCM = this.editedSupportedRegion;
     let rcm1 = RCM.split(';');
     let rcm2 = []; let rcm3 = []; let models = []
@@ -444,10 +457,9 @@ export class StagingdataComponent implements OnInit {
 
   }
 
-  getTabResponseData(device, subdevice, statusflag) {
-
+  getTabResponseData(project, recordstatus, statusflag) {
     let dataType = 6;
-    this.stagingdata(dataType, device, subdevice, statusflag);
+    this.stagingdata(dataType, project, recordstatus, statusflag);
 
   }
 
@@ -473,44 +485,18 @@ export class StagingdataComponent implements OnInit {
     this.saveUpdateStagingData.reset();
     this.vendorError = false;
     this.edidError = false;
-    this.projectNames = "null";
     this.xmlDataResult = [];
   }
 
-  onchangestatus() {
-    let statusflag = this.status;
-    let device = this.device;
-    let subdevice = this.subdevice;
-    if (statusflag == null || statusflag == 'null') {
-      statusflag = null;
-    }
-    else {
-      statusflag = parseInt(this.status);
-    }
-    if (device == null || device == 'null') {
-      device = null;
-    }
-    else {
-      device = this.device;
-    }
-    if (subdevice == null || subdevice == 'null') {
-      subdevice = null;
-    }
-    else {
-      subdevice = this.subdevice;
-    }
-    this.getTabResponseData(device, subdevice, statusflag);
-  }
-
-  onchangedevice() {
-    let statusflag = this.status;
-    let device = this.device;
-    this.getTabResponseData(device, null, statusflag);
-  }
-
   refreshScreen() {
-    this.status = null; this.device = null; this.subdevice = null;
-    this.getTabResponseData(this.device, this.subdevice, this.status);
+    if (this.projectNames == null || this.projectNames == "null" || this.projectNames == undefined) {
+      this.projectNames = null
+      this.recordstatus = null;
+    } else {
+      this.recordstatus = "Not Present";
+    }
+    this.status = null;
+    this.getTabResponseData(this.projectNames, this.recordstatus, this.status);
     this.UpdatedcecPresent = 1;
     this.UpdatedcecEnabled = 1;
   }
@@ -532,87 +518,60 @@ export class StagingdataComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
-  stagingdata(dataType, Device, Subdevice, statusflag) {
-    this.mainService.RawToStaging(dataType, null, null, statusflag)
+  async stagingdata(dataType, projectName, Recordstatus, statusflag) {
+    this.spinnerService.show();
+    await this.mainService.RawToStaging(dataType, null, null, statusflag)
       .then(value => {
         let arr = [];
         if (value.data.length > 0 && value.data != '0' && value.data != null) {
           for (let i = 0; i < value.data.length; i++) {
-            if (value.data[i]['cecPresent'] === 1) {
-              value.data[i]['cecPresent'] = 'Yes'
+            if (value.data[i]['cecpresent'] === 1) {
+              value.data[i]['cecpresent'] = 'Yes'
             }
-            if (value.data[i]['cecPresent'] === 0) {
-              value.data[i]['cecPresent'] = 'No'
+            if (value.data[i]['cecpresent'] === 0) {
+              value.data[i]['cecpresent'] = 'No'
             }
-            if (value.data[i]['cecEnabled'] === 1) {
-              value.data[i]['cecEnabled'] = 'Yes'
+            if (value.data[i]['cecenabled'] === 1) {
+              value.data[i]['cecenabled'] = 'Yes'
             }
-            if (value.data[i]['cecEnabled'] === 0) {
-              value.data[i]['cecEnabled'] = 'No'
+            if (value.data[i]['cecenabled'] === 0) {
+              value.data[i]['cecenabled'] = 'No'
             }
-            if (value.data[i]['statusFlag'] === 1 || value.data[i]['statusFlag'] === '1') {
-              value.data[i]['statusFlag'] = 'Imported from Raw'
+            if (value.data[i]['statusflag'] === 1 || value.data[i]['statusflag'] === '1') {
+              value.data[i]['statusflag'] = 'Imported from Raw'
             }
-            if (value.data[i]['statusFlag'] === 2 || value.data[i]['statusFlag'] === '2') {
-              value.data[i]['statusFlag'] = 'Imported from Excel'
+            if (value.data[i]['statusflag'] === 2 || value.data[i]['statusflag'] === '2') {
+              value.data[i]['statusflag'] = 'Imported from Excel'
             }
             arr.push({
-              Id: value.data[i]['stagingId'], Detectionid: value.data[i]['fK_DetectionId'], Device: value.data[i]['device'].toUpperCase(),
+              Id: value.data[i]['stagingid'], Detectionid: value.data[i]['detectionid'], Device: value.data[i]['device'].toUpperCase(),
               Subdevice: value.data[i]['subdevice'], Brand: value.data[i]['brand'], Model: value.data[i]['model'],
-              Supportedregions: value.data[i]['supportedRegionCountry'], UID: value.data[i]['uid'],
-              Year: value.data[i]['year'], Cecpresent: value.data[i]['cecPresent'], Cecenabled: value.data[i]['cecEnabled'],
-              Vendoridhex: value.data[i]['vendorIdHex'], Vendoridstring: value.data[i]['vendorIdString'],
-              Osdstring: value.data[i]['osdString'], Osdhex: value.data[i]['osdHex'], Edid: value.data[i]['edidData'],
-              Status: value.data[i]['statusFlag']
+              Supportedregions: value.data[i]['regioncountry'], UID: value.data[i]['uid'],
+              Year: value.data[i]['year'], Cecpresent: value.data[i]['cecpresent'], Cecenabled: value.data[i]['cecenabled'],
+              Vendoridhex: value.data[i]['vendoridhex'], Vendoridstring: value.data[i]['vendoridstring'],
+              Osdstring: value.data[i]['osdstring'], Osdhex: value.data[i]['osdhex'], Edid: value.data[i]['edid'],
+              Status: value.data[i]['statusflag'], Project: value.data[i]['dbinstance'] + '_' + value.data[i]['projectname'], Recordstatus: value.data[i]['recordstatus']
             });
 
           }
-          let uidsize = [];
-          // arr.forEach(element => {
-          //   if (element['UID'].includes(';')) {
-          //     uidsize = element['UID'].split(';').filter(u => u != '')
-          //     if (uidsize.length > 1) {
-          //       element['UID'] = '';
-          //     }
-          //     else {
-          //       element['UID'] = element['UID']
-          //     }
-          //   }
-          // });
-          let device = []; let subdevice = []; let Status = [];
-          for (let i = 0; i < arr.length; i++) {
-            device.push(arr[i]['Device']);
-          }
-          for (let i = 0; i < arr.length; i++) {
-            Status.push(arr[i]['Status']);
-          }
-          this.filter_Status = Status.filter((v, i, a) => a.indexOf(v) === i);
-          this.filter_Device = device.filter((v, i, a) => a.indexOf(v) === i);
-          subdevice = arr.filter(u => u.Device === Device)
-          let subdevicefilter = [];
-          for (let i = 0; i < subdevice.length; i++) {
-            subdevicefilter.push(subdevice[i]['Subdevice']);
-          }
-          this.filter_Subdevice = subdevicefilter.filter((v, i, a) => a.indexOf(v) === i);
         }
-        if (Device === null && Subdevice === null) {
-          this.stagingdatacapture = arr;
+        if ((this.projectNames === null) && ((this.recordstatus === null) || (this.recordstatus != null))) {
+          this.stagingdatacapture = arr.filter(u => u.Project == "_" && u.Recordstatus == "");
+          this.spinnerService.hide();
         }
-        else if (Device === null && Subdevice != null) {
-          this.stagingdatacapture = arr.filter(u => u.Subdevice === Subdevice);
+        else if ((this.projectNames != null) && (this.recordstatus === null)) {
+          this.stagingdatacapture = arr.filter(u => u.Project == "_" && u.Recordstatus == "");
+          this.spinnerService.hide();
         }
-        else if (Device != null && Subdevice === null) {
-          this.stagingdatacapture = arr.filter(u => u.Device === Device);
-        }
-        else if (Device != null && Subdevice != null) {
-          this.stagingdatacapture = arr.filter(u => u.Device === Device && u.Subdevice === Subdevice);
+        else if ((this.projectNames != null) && (this.recordstatus != null)) {
+          this.stagingdatacapture = arr.filter(u => u.Project == this.projectNames && u.Recordstatus == this.recordstatus);
+          this.spinnerService.hide();
         }
         this.viewdata();
       });
 
     $('.multiple_unlink').css('display', 'none');
     this.multiplecodeset = false;
-
   }
 
 
@@ -656,6 +615,18 @@ export class StagingdataComponent implements OnInit {
         }
         if (element['cecpresent'] === undefined) {
           element['cecpresent'] = ''
+        }
+        if ((element['cecenabled'] === 'Yes') || (element['cecenabled'] === 'Y')) {
+          element['cecenabled'] = 1
+        }
+        if ((element['cecenabled'] === 'No') || (element['cecenabled'] === 'N')) {
+          element['cecenabled'] = 0
+        }
+        if ((element['cecpresent'] === 'Yes') || (element['cecpresent'] === 'Y')) {
+          element['cecpresent'] = 1
+        }
+        if ((element['cecpresent'] === 'No') || (element['cecpresent'] === 'N')) {
+          element['cecpresent'] = 0
         }
         if (element['device'] === undefined) {
           element['device'] = ''
@@ -1548,7 +1519,8 @@ export class StagingdataComponent implements OnInit {
   viewdata() {
     this.searchValue = null;
     this.defaultColDef = {
-      minWidth: 100,
+      // minWidth: 100,
+      width: 140,
     };
     this.columnDefs = [
       { headerName: "Device", field: "Device", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
@@ -1565,9 +1537,9 @@ export class StagingdataComponent implements OnInit {
       { headerName: "Osdstring", field: "Osdstring", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
       { headerName: "Osdhex", field: "Osdhex", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
       { headerName: "Edid", field: "Edid", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "edidviewCellRenderer" },
-      { headerName: "Status", field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
-      { headerName: "Select All", field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130 },
-      { headerName: "Action", field: "Status", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 130 }
+      { headerName: "Status", field: "Status", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, minWidth: 170 },
+      { headerName: "Select All", field: "Select All", resizable: true, sortable: true, checkboxSelection: true, headerCheckboxSelection: true, minWidth: 130, headerCheckboxSelectionFilteredOnly: true },
+      { headerName: "Action", field: "Status", resizable: true, cellRenderer: "btnCellRenderer", minWidth: 170 }
     ];
     this.rowData = this.stagingdatacapture;
     if (this.rowData.length < 8) {
@@ -1597,67 +1569,32 @@ export class StagingdataComponent implements OnInit {
         if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0) ||
           (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0)) {
           this.columnDefs = this.columnDefs.filter(u => u.field != 'Select All' && u.headerName != 'Action');
-          $('.card').hide();
-          $('#download').hide();
+          $('.newBtn').hide();
+          $('#direct').hide();
+          $('#ExporttoProd').hide();
+          $('#single_download').hide();
         }
         if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
           (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0)) {
           this.columnDefs = this.columnDefs.filter(u => u.field != 'Select All' && u.headerName != 'Action');
-          $('.card').hide();
-          $('#download').show();
+          $('.newBtn').hide();
+          $('#direct').hide();
+          $('#ExporttoProd').hide();
+          $('#single_download').show();
         }
         if ((permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1) ||
           (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
           (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
           (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1)) {
           this.columnDefs = this.columnDefs;
-          this.mainService.getProjectNames(null, null, null, null, null, 1)
-            .subscribe(value => {
-              this.spinnerService.show();
-              this.filterProjects = value.data;
-              this.filterProjects.forEach(element => {
-                element['projectname'] = element['dbinstance'] + '_' + element['projectname']
-              })
-              const uniqueProjects = [...new Set(this.filterProjects.map(item => item.projectname))];
-              this.projects = uniqueProjects;
-              this.projectNames = null;
-              // let ProjectName = this.projectNames.split('_');
-              // this.projectNames = filterProject[0]['projectname'];
-              // let formData = new FormData();
-              // formData.append("filepath", this.fileselected);
-              // formData.append("crudtype", "2");
-              // formData.append("projectname", ProjectName[1]);
-              // formData.append("statusflag", "1");
-              // formData.append("recordid", "");
-              // formData.append("dbinstance", ProjectName[0]);
-              // this.http.post<any>(`${environment.apiUrl}/api/Detection/UpdateCodesetIncludes`, formData)
-              //   .subscribe(val => {
-              //     if (val.data != '0' && val.data != 0) {
-              //       let fileselected = val.data[0]['filePath'].toString();
-              //       this.fileselected = fileselected.replace(';', '');
-              //       const docFile = new XMLHttpRequest();
-              //       docFile.open('GET', this.fileselected, true);
-              //       docFile.send();
-              //       docFile.onreadystatechange = () => {
-              //         if (docFile.readyState === 4 && docFile.status === 200) {
-              //           this.convertxml(docFile.response);
-              //         }
-              //       };
-              //     }
-              //     else {
-              this.spinnerService.hide();
-              //       this.toastr.error('', 'Earlier No Codesetinclude.xml file uploaded to the selected project', { timeOut: 3000 })
-              //     }
-              //   })
-            });
-          $('#Projectname').show();
-          $('#Codesetinclude').show();
-          $('#button').show();
+          // $('#Projectname').show();
+          // $('#Codesetinclude').show();
+          // $('#button').show();
+          $('.newBtn').show();
+          $('#ExporttoProd').show();
           $('#single_download').show();
           $('#direct').show();
-          $('#download').hide();
         }
-        console.log(permission)
       })
   }
 
@@ -1666,30 +1603,25 @@ export class StagingdataComponent implements OnInit {
   }
 
   methodFromParent_edituid(cell) {
-    let values = Object.values(cell);
-    this.StagingdataView(values)
+    this.StagingdataView(cell)
     $('#showeditUIDbutton').click();
   }
 
   methodFromParent_edit(cell) {
-    let values = Object.values(cell);
-    this.StagingdataView(values)
+    this.StagingdataView(cell)
     $('#showeditbutton').click();
   }
 
   methodFromParent_unlink(cell) {
-    let values = Object.values(cell);
-    this.unlink(values)
+    this.unlink(cell)
   }
 
   methodFromParent_viewSupportedRegion(cell) {
-    let values = Object.values(cell);
-    this.supportedregions(values[6])
+    this.supportedregions(cell)
   }
 
   methodFromParent_viewEdid(cell) {
-    let values = Object.values(cell);
-    this.edid(values[15]);
+    this.edid(cell);
   }
 
 
@@ -1698,14 +1630,19 @@ export class StagingdataComponent implements OnInit {
     this.spinnerService.show();
     if (this.projectNames == null || this.projectNames == "null" || this.projectNames == undefined) {
       this.spinnerService.hide();
-      this.toastr.warning('', 'Please Select the Project');
+      this.toastr.error('', 'Please Select the Project');
       $('#upload').css('display', 'none');
+      $('#Codesetinclude').hide();
+      $('#button').hide();
     } else {
+      $('#Export').click();
       let filterProject: any = this.filterProjects.filter(u =>
         u.projectname == this.projectNames);
       this.projectNames = filterProject[0]['projectname'];
       let ProjectName = this.projectNames.split('_');
       $('#upload').css('display', 'block');
+      $('#Codesetinclude').show();
+      $('#button').show();
       this.xmlDataResult = [];
       let formData = new FormData();
       formData.append("filepath", this.fileselected);
@@ -1735,6 +1672,27 @@ export class StagingdataComponent implements OnInit {
         }
 
       })
+    }
+  }
+
+  changeProjectname() {
+    if (this.projectNames == null || this.projectNames == "null" || this.projectNames == undefined) {
+      this.recordstatus = null;
+    } else {
+      this.recordstatus = "Not Present";
+    }
+
+    this.getTabResponseData(this.projectNames, this.recordstatus, null);
+  }
+
+  changeRecordstatus() {
+    if ((this.recordstatus === null) || (this.recordstatus === "null") || (this.recordstatus === undefined)) {
+      this.recordstatus = null;
+      this.getTabResponseData(this.projectNames, null, null);
+    }
+    else {
+      let projectName = this.projectNames; let recordstatus = "Present";
+      this.getTabResponseData(projectName, recordstatus, null);
     }
   }
 
@@ -1882,30 +1840,30 @@ export class StagingdataComponent implements OnInit {
     console.log(this.xmlDataResult)
   }
 
-  assigncodesettouid() {
+  async assigncodesettouid() {
     this.spinnerService.show();
-    for (let i = 0; i < this.singlecodesetassigned.length; i++) {
-      if (this.singlecodesetassigned[i]['iscecpresent'] === 'Yes') {
-        this.singlecodesetassigned[i]['iscecpresent'] = 1
+    for (let i = 0; i < this.allcodesetassigned.length; i++) {
+      if (this.allcodesetassigned[i]['iscecpresent'] === 'Yes') {
+        this.allcodesetassigned[i]['iscecpresent'] = 1
       }
-      if (this.singlecodesetassigned[i]['iscecpresent'] === 'No') {
-        this.singlecodesetassigned[i]['iscecpresent'] = 0
+      if (this.allcodesetassigned[i]['iscecpresent'] === 'No') {
+        this.allcodesetassigned[i]['iscecpresent'] = 0
       }
-      if (this.singlecodesetassigned[i]['iscecenabled'] === 'Yes') {
-        this.singlecodesetassigned[i]['iscecenabled'] = 1
+      if (this.allcodesetassigned[i]['iscecenabled'] === 'Yes') {
+        this.allcodesetassigned[i]['iscecenabled'] = 1
       }
-      if (this.singlecodesetassigned[i]['iscecenabled'] === 'No') {
-        this.singlecodesetassigned[i]['iscecenabled'] = 0
+      if (this.allcodesetassigned[i]['iscecenabled'] === 'No') {
+        this.allcodesetassigned[i]['iscecenabled'] = 0
       }
       let projectname = this.projectNames.split('_');
       let Projectname = projectname[1].trim();
       let instance = projectname[0].trim();
       let crudtype = 1;
-      this.mainService.StagingToProd(crudtype, Projectname, this.singlecodesetassigned[i]['device'],
-        this.singlecodesetassigned[i]['subdevice'], this.singlecodesetassigned[i]['brand'], this.singlecodesetassigned[i]['model'],
-        this.singlecodesetassigned[i]['region'], this.singlecodesetassigned[i]['country'],
-        this.singlecodesetassigned[i]['iscecpresent'], this.singlecodesetassigned[i]['iscecenabled'], this.singlecodesetassigned[i]['vendorid'],
-        this.singlecodesetassigned[i]['osd'], this.singlecodesetassigned[i]['edid'], this.singlecodesetassigned[i]['codeset'], null, instance)
+      await this.mainService.StagingToProd(crudtype, Projectname, this.allcodesetassigned[i]['device'],
+        this.allcodesetassigned[i]['subdevice'], this.allcodesetassigned[i]['brand'], this.allcodesetassigned[i]['model'],
+        this.allcodesetassigned[i]['region'], this.allcodesetassigned[i]['country'],
+        this.allcodesetassigned[i]['iscecpresent'], this.allcodesetassigned[i]['iscecenabled'], this.allcodesetassigned[i]['vendorid'],
+        this.allcodesetassigned[i]['osd'], this.allcodesetassigned[i]['edid'], this.allcodesetassigned[i]['codeset'], null, instance, this.allcodesetassigned[i]['stagingid'], this.allcodesetassigned[i]['statusflag'])
         .then(value => {
           if (value.data != '' && value.data != '0') {
             if (value.message === 'SUCCESS' && (value.data[0]['status'] == '1' || value.data[0]['status'] == 1)) {
@@ -1919,7 +1877,7 @@ export class StagingdataComponent implements OnInit {
             this.failedupdate++;
           }
 
-          if (i + 1 == this.singlecodesetassigned.length) {
+          if (i + 1 == this.allcodesetassigned.length) {
             this.spinnerService.hide();
             if (this.successinsert != 0) {
               this.toastr.success('', ' ' + 'Records inserted/updated successfully', { timeOut: 4000 });
@@ -1983,7 +1941,7 @@ export class StagingdataComponent implements OnInit {
       "Cecpresent": "",
       "Cecenabled": "",
       "Vendoridhex": "",
-      "Vendoridstring": "",
+      "Osdstring": "",
       "Osdhex": "",
       "Edid": "",
       "Year": "",
@@ -1995,7 +1953,7 @@ export class StagingdataComponent implements OnInit {
       [opts, [data1]]);
   }
 
-  exporttoProd(datacapture) {
+  async exporttoProd(datacapture) {
     this.singlecodesetassigned = [];
     this.multiplecodesetassigned = [];
     this.nocodesetassigned = [];
@@ -2026,11 +1984,10 @@ export class StagingdataComponent implements OnInit {
     }
     else {
       this.spinnerService.show();
-      let RegioncountryModel; let proddata = []; let Singlecodesetassigned: any = [];
-      let Multiplecodesetassigned: any = []; let nocodesetassigned: any = [];
-      let rcm2 = []; let Regions = []; let Supportedregions = []; let reg = []; let arr2 = []; let StagingID = [];
+      let proddata = []; let Singlecodesetassigned: any = [];
+      let Multiplecodesetassigned: any = []; let nocodesetassigned: any = []; let Allcodesetassigned: any = [];
+      let rcm2 = []; let Regions = []; let Supportedregions = []; let reg = []; let arr2 = [];
       for (let i = 0; i < datacapture.length; i++) {
-        RegioncountryModel = '';
         let r = datacapture[i]["Supportedregions"];
         let r1 = r.split(';').filter(u => (u.trim() != " " && u.trim() != ""));
 
@@ -2039,39 +1996,23 @@ export class StagingdataComponent implements OnInit {
         }
         else {
           for (let j = 0; j < r1.length; j++) {
-            rcm2.push(r1[j].split(':'), datacapture[i]['Id']);
+            rcm2.push(r1[j].split(':'), datacapture[i]['Id'], datacapture[i]['Detectionid'], datacapture[i]['Device'].toUpperCase(), datacapture[i]['Subdevice'], datacapture[i]['Brand'], datacapture[i]['UID'], datacapture[i]['Year'], datacapture[i]['Cecpresent'], datacapture[i]['Cecenabled'], datacapture[i]['Vendoridhex'], datacapture[i]['Osdhex'], datacapture[i]['Edid'], datacapture[i]['Status']);
           }
         }
       }
-
-      for (let j = 1; j < rcm2.length; j = j + 2) {
-        StagingID.push(rcm2[j])
-      }
-      for (let i = 0; i < rcm2.length; i = i + 2) {
-        reg.push({ Region: rcm2[i][0], Country: rcm2[i][1], Models: rcm2[i][2].trim().split(',').filter((v, i, a) => a.indexOf(v) === i) })
+      for (let i = 0; i < rcm2.length; i = i + 14) {
+        reg.push({ Region: rcm2[i][0], Country: rcm2[i][1], Models: rcm2[i][2].trim().split(',').filter((v, i, a) => a.indexOf(v) === i), ID: rcm2[i + 1], Detectionid: rcm2[i + 2], Device: rcm2[i + 3], Subdevice: rcm2[i + 4], Brand: rcm2[i + 5], Uid: rcm2[i + 6], Year: rcm2[i + 7], Cecpresent: rcm2[i + 8], Cecenabled: rcm2[i + 9], Vendorid: rcm2[i + 10], Osd: rcm2[i + 11], Edid: rcm2[i + 12], Status: rcm2[i + 13] })
       }
       for (let i = 0; i < reg.length; i++) {
         for (let j = 0; j < reg[i]['Models'].length; j++) {
-          Regions.push({ Region: reg[i]['Region'], Country: reg[i]['Country'], Models: reg[i]['Models'][j], Id: StagingID[i] })
+          Regions.push({ Id: reg[i]['ID'], Detectionid: reg[i]['Detectionid'], Device: reg[i]['Device'], Subdevice: reg[i]['Subdevice'], Brand: reg[i]['Brand'], Model: reg[i]['Models'][j], Region: reg[i]['Region'], Country: reg[i]['Country'], Uid: reg[i]['Uid'], Year: reg[i]['Year'], Cecpresent: reg[i]['Cecpresent'], Cecenabled: reg[i]['Cecenabled'], Vendorid: reg[i]['Vendorid'], Osd: reg[i]['Osd'], Edid: reg[i]['Edid'], Status: reg[i]['Status'] })
         }
       }
-      let Ids = StagingID.filter((v, i, a) => a.indexOf(v) === i);
-      for (let i = 0; i < datacapture.length; i++) {
-        let Region = Regions.filter(u => u.Id === Ids[i])
-        for (let j = 0; j < Region.length; j++) {
-          arr2.push({
-            Id: Region[j]['Id'], Device: datacapture[i]['Device'].toUpperCase(), Subdevice: datacapture[i]['Subdevice'], Brand: datacapture[i]['Brand'],
-            Model: Region[j]['Models'], Region: Region[j]['Region'], Country: Region[j]['Country'], Uid: datacapture[i]['UID'],
-            Year: datacapture[i]['Year'], Cecpresent: datacapture[i]['Cecpresent'], Cecenabled: datacapture[i]['Cecenabled'],
-            Vendorid: datacapture[i]['Vendoridhex'], Osd: datacapture[i]['Osdhex'], Edid: datacapture[i]['Edid']
-          });
-        }
-      }
+      arr2 = Regions;
       arr2 = lodash.uniqWith(arr2, lodash.isEqual);
       arr2.forEach(element => {
         proddata.push(element)
       });
-      let uidsize = [];
       proddata.forEach(element => {
         let removespacetovendor = element['Vendorid'].split(" ");
         let removespacetoosd = element['Osd'].split(" ");
@@ -2096,19 +2037,10 @@ export class StagingdataComponent implements OnInit {
           addspacetoosd += element['Osd'].substr(i, 2) + " "
         }
         element['Osd'] = addspacetoosd.trim();
-
-        if (element['Uid'].includes(';')) {
-          uidsize = element['Uid'].split(';').filter(u => u != '')
-          if (uidsize.length > 1) {
-            element['Uid'] = element['Uid'];
-          }
-          else {
-            element['Uid'] = uidsize[0]
-          }
-        }
+        element['Uid'] = element['Uid'].slice(0, -1);
       });
       for (let i = 0; i < proddata.length; i++) {
-        this.mainService.getRemoteUID(proddata[i]['Brand'], proddata[i]['Model'].toString(), proddata[i]['Device'])
+        await this.mainService.getRemoteUID(proddata[i]['Brand'], proddata[i]['Model'].toString(), proddata[i]['Device'])
           .subscribe(value => {
             let UpdatedUID = []; let UpdatedUIDs = '';
             if (value.data != [] || value.data != '[]') {
@@ -2118,32 +2050,30 @@ export class StagingdataComponent implements OnInit {
                 UpdatedUID.push({ RemoteModel: element.remoteModel, UID: element.UID })
               });
               UpdatedUID = UpdatedUID.filter((v, i, a) => a.indexOf(v) === i);
-              if (UpdatedUID.length > 1 || UpdatedUID.length < 1) {
-                for (let n = 0; n < UpdatedUID.length; n++) {
-                  UpdatedUIDs += UpdatedUID[n]['UID'] + ';'
-                }
-                this.Uid = UpdatedUIDs.slice(0, -1)
-              }
-              else {
-                if (proddata[i]['Uid'].length > 0) {
-                  this.Uid = proddata[i]['Uid']
-                }
-                else {
-                  this.Uid = UpdatedUID[0]['UID'].toString();
-                }
-              }
+
             }
+            for (let n = 0; n < UpdatedUID.length; n++) {
+              UpdatedUIDs += UpdatedUID[n]['UID'] + ';'
+            }
+            UpdatedUIDs = UpdatedUIDs.slice(0, -1)
+            if (proddata[i]['Uid'].length > 0) {
+              this.Uid = proddata[i]['Uid']
+            }
+            else {
+              this.Uid = UpdatedUIDs;
+            }
+
             let codesets = this.xmlDataResult.filter(u => (u.uid === this.Uid) && (u.device === proddata[i]['Device']))
+            let UpdatedCodesets = '';
+            codesets.forEach(element => {
+              UpdatedCodesets += element['codeset'] + ';'
+            });
+            UpdatedCodesets = UpdatedCodesets.slice(0, -1);
             if (codesets.length > 1) {
-              let UpdatedCodesets = ''
-              this.Uid = UpdatedUIDs.slice(0, -1)
-              codesets.forEach(element => {
-                UpdatedCodesets += element['codeset'] + ';'
-              });
               Multiplecodesetassigned.push({
-                Device: proddata[i]['Device'], Subdevice: proddata[i]['Subdevice'], Brand: proddata[i]['Brand'],
+                Serial: null, Device: proddata[i]['Device'], Subdevice: proddata[i]['Subdevice'], Brand: proddata[i]['Brand'],
                 Model: proddata[i]['Model'], Region: proddata[i]['Region'], Country: proddata[i]['Country'],
-                Cecpresent: proddata[i]['Cecpresent'], Cecenabled: proddata[i]['Cecenabled'], Vendorid: proddata[i]['Vendorid'], Osd: proddata[i]['Osd'], Edid: proddata[i]['Edid'], UID: this.Uid, codeset: UpdatedCodesets
+                Cecpresent: proddata[i]['Cecpresent'], Cecenabled: proddata[i]['Cecenabled'], Vendorid: proddata[i]['Vendorid'], Osd: proddata[i]['Osd'], Edid: proddata[i]['Edid'], UID: this.Uid, codeset: UpdatedCodesets, Remarks: ''
               })
             }
             if (codesets.length === 1) {
@@ -2151,19 +2081,43 @@ export class StagingdataComponent implements OnInit {
                 device: proddata[i]['Device'], subdevice: proddata[i]['Subdevice'], brand: proddata[i]['Brand'],
                 model: proddata[i]['Model'], region: proddata[i]['Region'].trim(), country: proddata[i]['Country'].trim(),
                 iscecpresent: proddata[i]['Cecpresent'], iscecenabled: proddata[i]['Cecenabled'], vendorid: proddata[i]['Vendorid'], osd: proddata[i]['Osd'], edid: proddata[i]['Edid'],
-                uid: this.Uid, codeset: codesets[0]['codeset']
+                uid: this.Uid, codeset: UpdatedCodesets
               })
             }
             if (codesets.length < 1) {
               nocodesetassigned.push({
-                Device: proddata[i]['Device'], Subdevice: proddata[i]['Subdevice'], Brand: proddata[i]['Brand'],
+                Serial: null, Device: proddata[i]['Device'], Subdevice: proddata[i]['Subdevice'], Brand: proddata[i]['Brand'],
                 Model: proddata[i]['Model'], Region: proddata[i]['Region'], Country: proddata[i]['Country'],
-                Cecpresent: proddata[i]['Cecpresent'], Cecenabled: proddata[i]['Cecenabled'], Vendorid: proddata[i]['Vendorid'], Osd: proddata[i]['Osd'], Edid: proddata[i]['Edid'], UID: this.Uid, codeset: ''
+                Cecpresent: proddata[i]['Cecpresent'], Cecenabled: proddata[i]['Cecenabled'], Vendorid: proddata[i]['Vendorid'], Osd: proddata[i]['Osd'], Edid: proddata[i]['Edid'], UID: this.Uid, codeset: UpdatedCodesets, Remarks: ''
               })
             }
+            Allcodesetassigned.push({
+              device: proddata[i]['Device'], subdevice: proddata[i]['Subdevice'], brand: proddata[i]['Brand'],
+              model: proddata[i]['Model'], region: proddata[i]['Region'].trim(), country: proddata[i]['Country'].trim(),
+              iscecpresent: proddata[i]['Cecpresent'], iscecenabled: proddata[i]['Cecenabled'], vendorid: proddata[i]['Vendorid'], osd: proddata[i]['Osd'], edid: proddata[i]['Edid'],
+              uid: this.Uid, codeset: UpdatedCodesets, stagingid: proddata[i]['Id'], statusflag: proddata[i]['Status']
+            })
+            Allcodesetassigned.forEach(element => {
+              if (element['statusflag'] === 'Imported from Raw') {
+                element['statusflag'] = 1
+              }
+              if (element['statusflag'] === 'Imported from Excel') {
+                element['statusflag'] = 2
+              }
+            });
             this.singlecodesetassigned = Singlecodesetassigned;
             this.multiplecodesetassigned = Multiplecodesetassigned;
             this.nocodesetassigned = nocodesetassigned;
+            this.allcodesetassigned = Allcodesetassigned;
+            let mc = 0; let nc = 0;
+            this.multiplecodesetassigned.forEach(element => {
+              element['Serial'] = mc;
+              mc++;
+            });
+            this.nocodesetassigned.forEach(element => {
+              element['Serial'] = nc;
+              nc++;
+            });
             this.message = '';
             // $('.multiple_unlink').css('display', 'Block');
             if ((this.multiplecodesetassigned.length > 0 && this.nocodesetassigned.length > 0) || (this.multiplecodesetassigned.length > 0 && this.nocodesetassigned.length == 0)) {
@@ -2184,21 +2138,104 @@ export class StagingdataComponent implements OnInit {
               this.message = 'No codesets assigned to selected records';
               this.show = false;
             }
-
-            console.log(this.singlecodesetassigned);
-            console.log(this.multiplecodesetassigned);
-            console.log(this.nocodesetassigned);
-            if (this.singlecodesetassigned.length > 0) {
+            if (this.nocodesetassigned.length >= 0 && this.multiplecodesetassigned.length > 0 && this.singlecodesetassigned.length < 1) {
+              $('#table').css('display', 'none');
+              this.multiplecodeset = true;
+              this.message = 'Multiple codesets assigned to selected records';
+              this.show = false;
+            }
+            if (this.allcodesetassigned.length > 0) {
               $('#table').css('display', 'block');
               this.show = true;
+              this.multiplecodeset = true;
+              this.message = '';
             }
             else {
               $('#table').css('display', 'none');
               this.show = false;
+              this.multiplecodeset = true;
             }
             let count = this.singlecodesetassigned.length + this.multiplecodesetassigned.length + this.nocodesetassigned.length;
             if (proddata.length === count) {
-              this.spinnerService.hide();
+              let ProjectName = this.projectNames.split('_');
+              let temp = []; let temp_1 = []; let temp1 = []; let temp1_1 = []; let temp2 = []; let temp2_1 = []; let nocodeset_alreadyassigned = []; let nocodeset_notassigned = []; let multiplecodeset_alreadyassigned = []; let multiplecodeset_notassigned = [];
+              this.mainService.StagingToProd(2, ProjectName[1], null, null, null, null, null, null, null, null, null, null, null, null, null, ProjectName[0], null, null)
+                .then(value => {
+                  if ((value.data.length > 0 && value.data[0]['status'] === 0) || value.data === "0") {
+                    this.spinnerService.hide();
+                  }
+                  else if (value.data != "0") {
+                    let prdata = value.data.filter(u => ((u.codeset != '') && (!u.codeset.includes(';'))));
+                    for (let j = 0; j < prdata.length; j++) {
+                      if ((prdata[j]['isCecPresent'] === 1)) {
+                        prdata[j]['isCecPresent'] = 'Yes'
+                      }
+                      if ((prdata[j]['isCecPresent'] === 0)) {
+                        prdata[j]['isCecPresent'] = 'No'
+                      }
+                      if ((prdata[j]['isCecEnabled'] === 1)) {
+                        prdata[j]['isCecEnabled'] = 'Yes'
+                      }
+                      if ((prdata[j]['isCecEnabled'] === 0)) {
+                        prdata[j]['isCecEnabled'] = 'No'
+                      }
+                      temp.push(this.nocodesetassigned.filter(u => ((u.Device.trim() === prdata[j]['device'].trim()) && (u.Subdevice.trim() === prdata[j]['subdevice'].trim()) && (u.Brand.trim() === prdata[j]['brand'].trim()) && (u.Model.trim() === prdata[j]['model'].trim()) && (u.Region.trim() === prdata[j]['region'].trim()) && (u.Country.trim() === prdata[j]['country'].trim()) && (u.Cecpresent.trim() === prdata[j]['isCecPresent'].trim()) && (u.Cecenabled.trim() === prdata[j]['isCecEnabled'].trim()) && (u.Vendorid.trim() === prdata[j]['vendorId'].trim()) && (u.Osd.trim() === prdata[j]['osd'].trim()) && (u.Edid.trim() === prdata[j]['edid'].trim()))));
+                      temp_1.push(this.multiplecodesetassigned.filter(u => (u.Device.trim() === prdata[j]['device'].trim() && u.Subdevice.trim() === prdata[j]['subdevice'].trim() && u.Brand.trim() === prdata[j]['brand'].trim() && u.Model.trim() === prdata[j]['model'].trim() && u.Region.trim() === prdata[j]['region'].trim() && u.Country.trim() === prdata[j]['country'].trim() && u.Cecpresent.trim() === prdata[j]['isCecPresent'].trim() && u.Cecenabled.trim() === prdata[j]['isCecEnabled'].trim() && u.Vendorid.trim() === prdata[j]['vendorId'].trim() && u.Osd.trim() === prdata[j]['osd'].trim() && u.Edid.trim() === prdata[j]['edid'].trim())));
+                    }
+                    for (let i = 0; i < temp.length; i++) {
+                      if (temp[i].length > 0) {
+                        for (let j = 0; j < temp[i].length; j++) {
+                          temp1.push(temp[i][j]);
+                          this.nocodesetassigned = this.nocodesetassigned.filter(u => (u.Serial !== temp[i][j]['Serial']));
+                        }
+                      }
+                    }
+
+                    for (let i = 0; i < temp_1.length; i++) {
+                      if (temp_1[i].length > 0) {
+                        for (let j = 0; j < temp_1[i].length; j++) {
+                          temp1_1.push(temp_1[i][j]);
+                          this.multiplecodesetassigned = this.multiplecodesetassigned.filter(u => (u.Serial !== temp_1[i][j]['Serial']));
+                        }
+                      }
+                    }
+                    temp1.forEach(element => {
+                      element['Remarks'] = "Single Codeset is already assigned in Prod"
+                    })
+                    temp1_1.forEach(element => {
+                      element['Remarks'] = "Single Codeset is already assigned in Prod"
+                    })
+                    nocodeset_alreadyassigned = lodash.uniqWith(temp1, lodash.isEqual);
+                    nocodeset_alreadyassigned = lodash.sortBy(nocodeset_alreadyassigned, 'Serial')
+                    nocodeset_notassigned = this.nocodesetassigned;
+                    this.nocodesetassigned = [];
+                    nocodeset_alreadyassigned.forEach(element => {
+                      temp2.push(element)
+                    })
+                    nocodeset_notassigned.forEach(element => {
+                      temp2.push(element)
+                    })
+                    this.nocodesetassigned = lodash.sortBy(temp2, 'Serial');
+                    multiplecodeset_alreadyassigned = lodash.uniqWith(temp1_1, lodash.isEqual);
+                    multiplecodeset_alreadyassigned = lodash.sortBy(multiplecodeset_alreadyassigned, 'Serial')
+                    multiplecodeset_notassigned = this.multiplecodesetassigned;
+                    this.multiplecodesetassigned = [];
+                    multiplecodeset_alreadyassigned.forEach(element => {
+                      temp2_1.push(element)
+                    })
+                    multiplecodeset_notassigned.forEach(element => {
+                      temp2_1.push(element)
+                    })
+                    this.multiplecodesetassigned = lodash.sortBy(temp2_1, 'Serial');
+                    if (proddata.length === count) {
+                      this.spinnerService.hide();
+                    }
+                  }
+                  else {
+                    this.spinnerService.hide();
+                  }
+
+                })
             }
           })
 

@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ResizedEvent } from 'angular-resize-event';
 import { UUID } from 'angular2-uuid';
 import { NgxSpinnerService } from 'ngx-spinner';
+import mainscroll from '../model/Scroll';
 declare var $: any;
 
 @Component({
@@ -236,41 +237,11 @@ export class CloudApiModulesComponent implements OnInit {
     if (browserZoomLevel == 90) {
       $('#wrapper').css('margin', '0 auto');
       $('#wrapper').css('max-width', '1500px');
-      $('.main-scroll').css('height', '650px');
     }
     if (browserZoomLevel < 90) {
       $('#wrapper').css('margin', '0 auto');
       $('#wrapper').css('max-width', '1500px');
     }
-    if (browserZoomLevel == 80) {
-      $('.main-scroll').css('height', '700px');
-    }
-    if (browserZoomLevel == 75) {
-      $('.main-scroll').css('height', '750px');
-    }
-    if (browserZoomLevel == 67) {
-      $('.main-scroll').css('height', '850px');
-    }
-    if (browserZoomLevel < 67) {
-      $('.main-scroll').css('height', '1050px');
-    }
-    if (browserZoomLevel == 100) {
-      $('.main-scroll').css('height', '600px');
-    }
-    if (browserZoomLevel >= 110) {
-      $('body').css('overflow-y', 'auto');
-    } else {
-      $('body').css('overflow-y', 'hidden');
-    }
-    if (browserZoomLevel == 150) {
-      $('.navbar').css('padding', '.3rem 1rem');
-    }
-    if (browserZoomLevel == 175) {
-      $('.navbar').css('padding', '.5rem 1rem');
-    }
-    if (browserZoomLevel == 125) {
-      $('.navbar').css('padding', '.56rem 1rem');
-    }
     if (browserZoomLevel >= 110) {
       $('body').css('overflow-y', 'auto');
     } else {
@@ -288,6 +259,7 @@ export class CloudApiModulesComponent implements OnInit {
     if (browserZoomLevel == 125) {
       $('.navbar').css('padding', '.56rem 1rem');
     }
+    mainscroll();
   }
   /** Multiselect dropdown functions start */
   onInstanceSelect(item: any) {

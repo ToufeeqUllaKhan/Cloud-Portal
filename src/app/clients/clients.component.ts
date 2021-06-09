@@ -6,6 +6,7 @@ import { Title } from '@angular/platform-browser';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { ResizedEvent } from 'angular-resize-event';
+import mainscroll from '../model/Scroll';
 
 
 @Component({
@@ -201,7 +202,7 @@ export class ClientsComponent implements OnInit {
           this.mainService.getRoleModule(8, null, null, userName, null)
             .then(value => {
               for (var m = 0; m < value.data.length; m++) {
-                this.RolelevelProjects.push(value.data[m]['name']);
+                this.RolelevelProjects.push(value.data[m]['dbPath'] + '_' + value.data[m]['name']);
               }
               let filterProjects = [];
               for (var i = 0; i < value.data.length; i++) {
@@ -322,41 +323,11 @@ export class ClientsComponent implements OnInit {
     if (browserZoomLevel == 90) {
       $('#wrapper').css('margin', '0 auto');
       $('#wrapper').css('max-width', '1500px');
-      $('.main-scroll').css('height', '650px');
     }
     if (browserZoomLevel < 90) {
       $('#wrapper').css('margin', '0 auto');
       $('#wrapper').css('max-width', '1500px');
     }
-    if (browserZoomLevel == 80) {
-      $('.main-scroll').css('height', '700px');
-    }
-    if (browserZoomLevel == 75) {
-      $('.main-scroll').css('height', '750px');
-    }
-    if (browserZoomLevel == 67) {
-      $('.main-scroll').css('height', '850px');
-    }
-    if (browserZoomLevel < 67) {
-      $('.main-scroll').css('height', '1050px');
-    }
-    if (browserZoomLevel == 100) {
-      $('.main-scroll').css('height', '600px');
-    }
-    if (browserZoomLevel >= 110) {
-      $('body').css('overflow-y', 'auto');
-    } else {
-      $('body').css('overflow-y', 'hidden');
-    }
-    if (browserZoomLevel == 150) {
-      $('.navbar').css('padding', '.3rem 1rem');
-    }
-    if (browserZoomLevel == 175) {
-      $('.navbar').css('padding', '.5rem 1rem');
-    }
-    if (browserZoomLevel == 125) {
-      $('.navbar').css('padding', '.56rem 1rem');
-    }
     if (browserZoomLevel >= 110) {
       $('body').css('overflow-y', 'auto');
     } else {
@@ -374,6 +345,7 @@ export class ClientsComponent implements OnInit {
     if (browserZoomLevel == 125) {
       $('.navbar').css('padding', '.56rem 1rem');
     }
+    mainscroll();
   }
 
   /** sorting cards in alphabetical order  */
@@ -522,16 +494,18 @@ export class ClientsComponent implements OnInit {
         })
         let RoleLevel = localStorage.getItem('AccessRole');
         if (RoleLevel != 'Admin') {
-          let projectArr = [];
+          let projectArr = []; let diffArr = [];
           let filterProject: any = this.finalArr;
           for (var j = 0; j < filterProject.length; j++) {
             projectArr.push(filterProject[j]['projectname']);
             var uniqueProjects = projectArr.filter((v, i, a) => a.indexOf(v) === i);
             // this.projects = uniqueProjects.reverse();
-            let diffArr = uniqueProjects.filter(x => this.RolelevelProjects.includes(x));
-            this.projects = diffArr;
-            this.checkedItems.push(this.projects[0]);
           }
+          this.RolelevelProjects.forEach(element => {
+            diffArr.push(uniqueProjects.filter(x => x === element)[0]);
+          })
+          this.projects = diffArr.filter(u => u != undefined);
+          this.checkedItems.push(this.projects[0]);
         } else {
           let projectArr = [];
           let filterProject: any = this.finalArr;

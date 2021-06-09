@@ -39,13 +39,23 @@
         </div>
       </div>
     </div>
-    <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
-        aria-hidden="true"></i></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <button class="btn btn-info float-right" title="Download based on current selection of Ticket" id="single_download">
-      <i class="fa fa-download" aria-hidden="true"> </i>&nbsp;
-      &nbsp;Download</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <button class="btn btn-primary float-right" id="all_download" (click)="download()"><i class="fa fa-download"
-        aria-hidden="true"> </i> &nbsp; &nbsp;DownloadAll</button>
+    <div>
+      <button class="btn btn-primary float-right" (click)="refreshScreen()"><i class="fa fa-refresh"
+          aria-hidden="true"></i></button>
+    </div>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div>
+      <button class="btn btn-info float-right" title="Download based on current selection of Ticket"
+        id="single_download">
+        <i class="fa fa-download" aria-hidden="true"> </i>&nbsp;
+        &nbsp;Download</button>
+    </div>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div>
+      <button class="btn btn-primary float-right" id="all_download" (click)="download()"><i class="fa fa-download"
+          aria-hidden="true"> </i> &nbsp; &nbsp;DownloadAll</button>
+    </div>
+
   </div>
 
   <br />
@@ -107,7 +117,7 @@
       <div class="tab tabView" role="tabpanel">
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
           <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}"
-            class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab"
+            class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab" title="{{tabs}}"
             aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
           <button class="btn btn-info" *ngIf="portal"
             style="margin-left:auto;width: auto;padding: 9px;margin-right: 22px;">Portal_ &nbsp;&nbsp;
@@ -161,6 +171,8 @@
           </div>
 
 
+          <br />
+          <br />
 
 
         </div>

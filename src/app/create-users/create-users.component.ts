@@ -4,6 +4,7 @@ import { Router, NavigationStart } from '@angular/router';
 import { User } from '../model/user';
 import { FormGroup, FormBuilder, Validators, FormGroupDirective } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-create-users',
@@ -76,6 +77,7 @@ export class CreateUsersComponent implements OnInit {
       itemsShowLimit: 3,
       allowSearchFilter: this.ShowFilter
     };
+    mainscroll();
   }
 
   onInstanceSelect(item: any) {

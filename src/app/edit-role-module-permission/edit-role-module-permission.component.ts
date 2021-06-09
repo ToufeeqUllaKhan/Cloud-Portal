@@ -3,6 +3,7 @@ import { MainService } from '../services/main-service';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-edit-role-module-permission',
@@ -81,6 +82,7 @@ export class EditRoleModulePermissionComponent implements OnInit {
     let getPrevUrl = localStorage.getItem('prevEditUrl');
 
     this.urlMap = "" + getPrevUrl + "";
+    mainscroll();
   }
 
   /** Checked List to map module to the particular role */

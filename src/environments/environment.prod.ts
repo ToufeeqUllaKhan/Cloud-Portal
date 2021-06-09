@@ -3,6 +3,7 @@ export const environment = {
   production: true,
   /** for dev i.e sscportaldev.azurewebsites.net portal **/
   apiUrl: 'https://ssportalservicesdev.azurewebsites.net',
+  // zipUrl: 'https://sscazurefunctionsdev.azurewebsites.net',
   zipUrl: 'https://sscazurefunctionsdev.azurewebsites.net',
   
   /** For prod  i.e sscloudportal.azurewebsites.net portal  **/

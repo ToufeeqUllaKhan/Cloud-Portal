@@ -609,9 +609,11 @@
       <div class="tab tabView" role="tabpanel">
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
           <a *ngFor="let tabs of tabslist;let i=index;" (click)="getTabName(tabs)" [ngClass]="{'active': i == 0}"
-            class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" role="tab"
+            class="nav-item nav-link" id="nav-home-tab{{i}}" data-toggle="tab" href="'#'{{tabs}}" title={{tabs}} role="tab"
             aria-controls="nav-home" aria-selected="true">{{tabs}}</a>
         </div>
+        <div class="col-sm-12"></div>
+        <div class="col-sm-12"></div>
         <div class="tab-content" *ngIf="isTabDataVisible">
           <div class="col-md-12">
             <br />

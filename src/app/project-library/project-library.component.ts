@@ -7,6 +7,7 @@ import 'datatables.net';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { BtnCellRenderer } from './btn-cell-renderer.component';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-project-library',
@@ -102,7 +103,7 @@ export class ProjectLibraryComponent implements OnInit {
     this.editSignatureData = this.fb.group({
       editSignatureKey: ['', Validators.required]
     })
-
+    mainscroll();
   }
 
   get f() { return this.editSignatureData.controls; }
@@ -113,16 +114,18 @@ export class ProjectLibraryComponent implements OnInit {
 
   /** Popup trigger if edit is clicked in Client Library screen and appending the signature key and allow download status of its available Information */
 
-  editSignatureKey(details, allowDownload) {
+  editSignatureKey(details) {
     this.editSignatureData.reset();
-    this.editedSignature = details[6];
+    var allowDownload = details['allowDownload']
+    this.editedSignature = details['signatureKey'];
     if (allowDownload == 1) {
       $("#allow_download").prop('checked', true);
     } else {
       $("#allow_download").prop('checked', false);
     }
     this.signatureDetails = [];
-    this.signatureDetails.push(details);
+    this.signatureDetails = details;
+    console.log(this.signatureDetails)
   }
   /** Resetting the popup data if close is triggered */
   modalClose() {
@@ -144,10 +147,10 @@ export class ProjectLibraryComponent implements OnInit {
     } else {
       allowDownload = 0;
     }
-    let project = this.signatureDetails[0][4];
-    let Dbname = this.signatureDetails[0][5]; let Client = this.signatureDetails[0][3];
-    let Region = this.signatureDetails[0][2]; let Projectname = project.replace(Dbname + "_", '');
-    let Signaturekey = this.editedSignature; let Dbpath = this.signatureDetails[0][5]; let Statusflag = this.signatureDetails[0][10]; let Flagtype = 2;
+    let project = this.signatureDetails['projectName'];
+    let Dbname = this.signatureDetails['dbPath']; let Client = this.signatureDetails['client'];
+    let Region = this.signatureDetails['region']; let Projectname = project.replace(Dbname + "_", '');
+    let Signaturekey = this.editedSignature; let Dbpath = this.signatureDetails['dbPath']; let Statusflag = this.signatureDetails['statusFlag']; let Flagtype = 2;
     this.mainService.createNewProjectDef(Dbname, Client, Region, Projectname, Signaturekey, Dbpath, Statusflag, Flagtype, allowDownload)
       .subscribe(value => {
         $("#editDataModal .close").click();
@@ -247,14 +250,12 @@ export class ProjectLibraryComponent implements OnInit {
   }
 
   methodFromParent_edit(cell) {
-    let values = Object.values(cell);
-    this.editSignatureKey(values, values[7]);
+    this.editSignatureKey(cell);
     $('#showeditbutton').click();
   }
 
   methodFromParent_unlink(cell) {
-    let values = Object.values(cell);
-    let rowid = values[1];
+    let rowid = cell['projectId'];
     let Filterrow: any = this.clientDetails.filter(u => (u.projectId === rowid))
     if (Filterrow.length === 1) {
       this.projectName = Filterrow[0]['projectName'];

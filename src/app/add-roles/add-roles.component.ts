@@ -3,6 +3,7 @@ import { MainService } from '../services/main-service';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import mainscroll from '../model/Scroll';
 declare var $: any;
 
 @Component({
@@ -66,6 +67,7 @@ export class AddRolesComponent implements OnInit {
         if (e.which === 32 && !this.value.length)
           e.preventDefault();
       });
+      mainscroll();
     });
   }
 

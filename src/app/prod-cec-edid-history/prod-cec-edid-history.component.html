@@ -29,29 +29,37 @@
         <i class="fa fa-download" aria-hidden="true"> </i>&nbsp; &nbsp;Download</button>
     </div>
 
-    <div class="row" style="margin-top: 20px;">
-      <div class="example-header">
-        <label>Show
-          <select (change)="onPageSizeChanged()" id="page-size">
-            <option value="10">10</option>
-            <option value="100">100</option>
-            <option value="500">500</option>
-            <option value="1000">1000</option>
-          </select>
-          entries</label>
-      </div>
-      <div style="margin-left: auto;">
-        <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue" />
-        </label>
-      </div>
-      <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
-        style="width: 1075px; height: 380px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
-        [pagination]="true" [paginationPageSize]="paginationPageSize"
-        [paginationNumberFormatter]="paginationNumberFormatter">
-      </ag-grid-angular>
-
-    </div>
   </div>
+  <div class="row" style="margin-top: 20px;">
+    <div class="col-xl-9 col-md-9 col-sm-9 example-header" style="display: flex;">
+      <label>Show
+        <select (change)="onPageSizeChanged()" id="page-size" style="height: 34px;">
+          <option value="10">10</option>
+          <option value="100">100</option>
+          <option value="500">500</option>
+          <option value="1000">1000</option>
+        </select>
+        entries</label>
+    </div>
+    <div style="margin-left: auto;">
+      <label>Search: <input type="text" placeholder="Search..." (keyup)="search()" [(ngModel)]="searchValue"
+          style="height: 34px;" />
+      </label>
+    </div>
+
+  </div>
+  <div class="col-sm-12">
+    <ag-grid-angular #agGrid id="myGrid" [defaultColDef]="defaultColDef" (gridReady)="onGridReady($event)"
+      style="width: 100%; height: 500px;" class="ag-theme-alpine" [rowData]="rowData" [columnDefs]="columnDefs"
+      [pagination]="true" [paginationPageSize]="paginationPageSize"
+      [paginationNumberFormatter]="paginationNumberFormatter">
+    </ag-grid-angular>
+  </div>
+  <div class="col-sm-12"></div>
+  <br />
+    <br />
+    <br />
+    <br />
 
   <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="ball-spin-clockwise-fade-rotating"
     [fullScreen]="true">

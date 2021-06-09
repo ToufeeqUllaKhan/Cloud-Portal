@@ -17,9 +17,10 @@ import "ag-grid-community/dist/styles/ag-theme-balham.css";
 import { BtnCellRenderer } from "./btn-cell-renderer.component";
 import { CodesetDownloadCellRenderer } from "./codesetdownload-cell-renderer.component";
 import { EdidviewCellRenderer } from "./edidview-cell-renderer.component";
+import mainscroll from '../model/Scroll';
 var BrandListData = [];
 var lodash = require('lodash');
-
+import { CheckBoxCellRenderer } from "./checkbox-cell-renderer.component"
 @Component({
   selector: 'app-brand-library',
   templateUrl: './brand-library.component.html',
@@ -127,6 +128,14 @@ export class BrandLibraryComponent implements OnInit {
   UpdateosdHeader: any;
   EditosdHeader: any; osdstring: any; osdhex: any
   checked: boolean;
+  editedBindata: any;
+  editedchecksum: any;
+  rows_selected: any;
+  rowId: any;
+  rowSelection: any;
+  codesetWS1: any[];
+  codesetWS2: any[];
+  codesetWS: any[];
 
 
   constructor(private fb: FormBuilder, private router: Router, private mainService: MainService, private titleService: Title, private toastr: ToastrService, private spinnerService: NgxSpinnerService, private data: Data) {
@@ -137,7 +146,8 @@ export class BrandLibraryComponent implements OnInit {
     this.frameworkComponents = {
       btnCellRenderer: BtnCellRenderer,
       codesetDownloadCellRenderer: CodesetDownloadCellRenderer,
-      edidviewCellRenderer: EdidviewCellRenderer
+      edidviewCellRenderer: EdidviewCellRenderer,
+      checkBoxCellRenderer: CheckBoxCellRenderer
 
     };
     this.paginationPageSize = 10;
@@ -145,6 +155,7 @@ export class BrandLibraryComponent implements OnInit {
       return '[' + params.value.toLocaleString() + ']';
     };
     this.context = { componentParent: this };
+    this.rowSelection = 'multiple'
   }
 
   ngOnInit() {
@@ -296,10 +307,10 @@ export class BrandLibraryComponent implements OnInit {
         }
         var uniqueVersions = this.versionArr.filter((v, i, a) => a.indexOf(v) === i);
         this.versions = uniqueVersions;
-
         var versionSelected = localStorage.getItem('versionSelects');
         if (this.version_list == null && versionSelected == null) {
-          this.version_list = this.versionArr[0];
+          let length = this.versionArr.length - 1;
+          this.version_list = this.versionArr[length];
         }
         if (versionSelected != null) {
           this.version_list = versionSelected;
@@ -581,18 +592,14 @@ export class BrandLibraryComponent implements OnInit {
       EdidonlyEdid: ['', Validators.required],
       EdidonlyCodeset: ['', Validators.required],
     });
-    if (this.projectNames[0].startsWith('Import_')) {
-      this.tabValue = this.projectNames[0].replace('Import_', '')
-    }
-    else {
-      this.tabValue = this.projectNames[0];
-    }
+    this.tabValue = this.projectNames[0];
     /** number restrictions validations **/
     $(document).ready(function () {
       $("input").on("keypress", function (e) {
         if (e.which === 32 && !this.value.length)
           e.preventDefault();
       });
+      mainscroll();
     });
 
     $('#column_visible').click(function (e) {
@@ -605,9 +612,9 @@ export class BrandLibraryComponent implements OnInit {
 
 
   BrandView(ret) {
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
+    var str = ret['ID'];
+    var str1 = ret['BrandName'];
+    var str2 = ret['BrandCode'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -618,11 +625,11 @@ export class BrandLibraryComponent implements OnInit {
   };
 
   CecView(ret) {
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
+    var str = ret['ID'];
+    var str1 = ret['Device'];
+    var str2 = ret['BrandName'];
+    var str3 = ret['BrandCode'];
+    var str4 = ret['Vendorid'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -639,11 +646,11 @@ export class BrandLibraryComponent implements OnInit {
   };
 
   EdidView(ret) {
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
+    var str = ret['ID'];
+    var str1 = ret['Device'];
+    var str2 = ret['BrandName'];
+    var str3 = ret['BrandCode'];
+    var str4 = ret['EdidBrand'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -660,12 +667,12 @@ export class BrandLibraryComponent implements OnInit {
   };
 
   componentDataView(ret) {
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
-    var str5 = ret[6];
+    var str = ret['ID'];
+    var str1 = ret['Device'];
+    var str2 = ret['BrandName'];
+    var str3 = ret['Model'];
+    var str4 = ret['Codeset'];
+    var str5 = ret['Country'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -682,12 +689,12 @@ export class BrandLibraryComponent implements OnInit {
   };
 
   crossReferenceBrandsView(ret) {
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
-    var str5 = ret[5];
+    var str = ret['ID'];
+    var str1 = ret['Device'];
+    var str2 = ret['BrandName'];
+    var str3 = ret['BrandCode'];
+    var str4 = ret['Codeset'];
+    var str5 = ret['Rank'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -707,11 +714,11 @@ export class BrandLibraryComponent implements OnInit {
   };
 
   regionView(ret) {
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
+    var str = ret['ID'];
+    var str1 = ret['Region'];
+    var str2 = ret['RegionCode'];
+    var str3 = ret['Country'];
+    var str4 = ret['CountryCode'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -728,15 +735,15 @@ export class BrandLibraryComponent implements OnInit {
   };
 
   cecOnlyDataView(ret) {
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
-    var str5 = ret[5];
-    var str6 = ret[6];
-    var str7 = ret[7];
-    var str8 = ret[8];
+    var str = ret['ID'];
+    var str1 = ret['Device'];
+    var str2 = ret['Brand'];
+    var str3 = ret['Region'];
+    var str4 = ret['Country'];
+    var str5 = ret['Model'];
+    var str6 = ret['VendorId'];
+    var str7 = ret['OSDString'];
+    var str8 = ret['Codeset'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -765,15 +772,15 @@ export class BrandLibraryComponent implements OnInit {
   };
 
   edidOnlyDataView(ret) {
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
-    var str5 = ret[5];
-    var str6 = ret[6];
-    var str7 = ret[7];
-    var str8 = ret[8];
+    var str = ret['ID'];
+    var str1 = ret['Device'];
+    var str2 = ret['Brand'];
+    var str3 = ret['Region'];
+    var str4 = ret['Country'];
+    var str5 = ret['Model'];
+    var str6 = ret['Edid128'];
+    var str7 = ret['EdidBrand'];
+    var str8 = ret['Codeset'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -802,18 +809,18 @@ export class BrandLibraryComponent implements OnInit {
   };
 
   cecedidDataView(ret) {
-    var str = ret[0];
-    var str1 = ret[1];
-    var str2 = ret[2];
-    var str3 = ret[3];
-    var str4 = ret[4];
-    var str5 = ret[5];
-    var str6 = ret[6];
-    var str7 = ret[7];
-    var str8 = ret[8];
-    var str9 = ret[9];
-    var str10 = ret[10];
-    var str11 = ret[11];
+    var str = ret['Device'];
+    var str1 = ret['Brand'];
+    var str2 = ret['Region'];
+    var str3 = ret['Country'];
+    var str4 = ret['Model'];
+    var str5 = ret['VendorId'];
+    var str6 = ret['OSDString'];
+    var str7 = ret['Edid128'];
+    var str8 = ret['EdidBrand'];
+    var str9 = ret['Codeset'];
+    var str10 = ret['CecRecordId'];
+    var str11 = ret['EdidRecordId'];
     if (str1 == 'null') {
       str1 = ''
     }
@@ -851,21 +858,23 @@ export class BrandLibraryComponent implements OnInit {
   };
 
   codesetdownload(binData) {
-    this.downloadBin(binData[2], binData[1]);
+    this.downloadBin(binData['Bindata'], binData['Codeset']);
   }
 
   codeSetsView(ret) {
-    var str1 = ret[1];
-    var str2 = ret[0];
-    this.viewcodesetData(str1, str2);
+    var str1 = ret['Codeset'];
+    var str2 = ret['ID'];
+    var str3 = ret['Bindata'];
+    var str4 = ret['Checksum'];
+    this.viewcodesetData(str2, str1, str3, str4);
   }
 
   ViewEdid(setEdid) {
-    this.viewEdidData(setEdid[7]);
+    this.viewEdidData(setEdid['Edid128']);
   };
 
   ViewEdid128(setEdid) {
-    this.viewEdid128Data(setEdid[6]);
+    this.viewEdid128Data(setEdid['Edid128']);
   };
 
   /** Download Bin Function  **/
@@ -893,9 +902,11 @@ export class BrandLibraryComponent implements OnInit {
   }
 
   /** Edit Codeset record id to update codeset **/
-  viewcodesetData(value1, value2) {
+  viewcodesetData(value, value1, value2, value3) {
     this.editedCodeset = value1;
-    this.recordId = value2;
+    this.editedBindata = value2;
+    this.editedchecksum = value3;
+    this.recordId = value;
   }
 
   viewBrandData(value, value1, value2) {
@@ -1160,7 +1171,8 @@ export class BrandLibraryComponent implements OnInit {
           }
           var uniqueVersions = this.versionArr.filter((v, i, a) => a.indexOf(v) === i);
           this.versions = uniqueVersions;
-          this.version_list = this.versionArr[0];
+          let length = this.versionArr.length - 1;
+          this.version_list = this.versionArr[length];
         });
     }
   }
@@ -1566,7 +1578,8 @@ export class BrandLibraryComponent implements OnInit {
           if (value.data.length != 0) {
             versionArr.push(value.data[0]['version']);
             this.versions = versionArr;
-            this.version_list = versionArr[0];
+            let length = versionArr.length - 1;
+            this.version_list = versionArr[length];
           }
           if (this.version_list != null) {
             this.mainService.getDevicesList(dbInstance, this.user, projectName, this.version_list)
@@ -1635,7 +1648,8 @@ export class BrandLibraryComponent implements OnInit {
             if (value.data.length != 0) {
               versionArr.push(value.data[0]['version']);
               this.versions = versionArr;
-              this.version_list = versionArr[0];
+              let length = versionArr.length - 1;
+              this.version_list = versionArr[length];
             }
             this.mainService.getProjectNames(Client, Region, projectName, this.version_list, dbInstance, dataType)
               .subscribe(value => {
@@ -1677,7 +1691,8 @@ export class BrandLibraryComponent implements OnInit {
       let versionArray: any = this.mainArr.filter(u =>
         u.projectname == name);
       if (versionArray.length != 0) {
-        this.version_list = versionArray[0]['embeddedDbVersion'];
+        let length = versionArray.length - 1;
+        this.version_list = versionArray[length]['embeddedDbVersion'];
       }
       let filterVersion: any = this.mainArr.filter(u =>
         u.projectname == name && u.embeddedDbVersion == this.version_list);
@@ -1824,7 +1839,8 @@ export class BrandLibraryComponent implements OnInit {
     //this.spinnerService.show();
     if (this.tabsProject != undefined) {
       let searchVersion: any = this.mainArr.filter(u => u.projectname == this.tabsProject);
-      this.version_list = searchVersion[0]['embeddedDbVersion'];
+      let length = searchVersion.length - 1;
+      this.version_list = searchVersion[length]['embeddedDbVersion'];
       let resultFetchArrTabs: any = this.mainArr.filter(u =>
         u.projectname == this.tabsProject && u.embeddedDbVersion == this.version_list);
       this.resultProjArr = resultFetchArrTabs;
@@ -1833,7 +1849,8 @@ export class BrandLibraryComponent implements OnInit {
       if (this.projectNames[0] != null || this.projectNames[0] != undefined) {
         let resultFetchArr: any = this.mainArr.filter(u =>
           u.projectname == this.projectNames[0]['item_text']);
-        this.version_list = resultFetchArr[0]['embeddedDbVersion'];
+        let length = resultFetchArr.length - 1;
+        this.version_list = resultFetchArr[length]['embeddedDbVersion'];
         this.resultProjArr = resultFetchArr;
       }
     }
@@ -1910,7 +1927,8 @@ export class BrandLibraryComponent implements OnInit {
     //this.spinnerService.show();
     if (this.tabsProject != undefined) {
       let searchVersion: any = this.mainArr.filter(u => u.projectname == this.tabsProject);
-      this.version_list = searchVersion[0]['embeddedDbVersion'];
+      let length = searchVersion.length - 1;
+      this.version_list = searchVersion[length]['embeddedDbVersion'];
       let resultFetchArrTabs: any = this.mainArr.filter(u =>
         u.projectname == this.tabsProject && u.embeddedDbVersion == this.version_list);
       this.resultProjArr = resultFetchArrTabs;
@@ -1919,7 +1937,8 @@ export class BrandLibraryComponent implements OnInit {
       if (this.projectNames[0] != null || this.projectNames[0] != undefined) {
         let resultFetchArr: any = this.mainArr.filter(u =>
           u.projectname == this.projectNames[0]['item_text']);
-        this.version_list = resultFetchArr[0]['embeddedDbVersion'];
+        let length = resultFetchArr.length - 1;
+        this.version_list = resultFetchArr[length]['embeddedDbVersion'];
         this.resultProjArr = resultFetchArr;
       }
     }
@@ -1996,7 +2015,8 @@ export class BrandLibraryComponent implements OnInit {
     //this.spinnerService.show();
     if (this.tabsProject != undefined) {
       let searchVersion: any = this.mainArr.filter(u => u.projectname == this.tabsProject);
-      this.version_list = searchVersion[0]['embeddedDbVersion'];
+      let length = searchVersion.length - 1;
+      this.version_list = searchVersion[length]['embeddedDbVersion'];
       let resultFetchArrTabs: any = this.mainArr.filter(u =>
         u.projectname == this.tabsProject && u.embeddedDbVersion == this.version_list);
       this.resultProjArr = resultFetchArrTabs;
@@ -2005,7 +2025,8 @@ export class BrandLibraryComponent implements OnInit {
       if (this.projectNames[0] != null || this.projectNames[0] != undefined) {
         let resultFetchArr: any = this.mainArr.filter(u =>
           u.projectname == this.projectNames[0]['item_text']);
-        this.version_list = resultFetchArr[0]['embeddedDbVersion'];
+        let length = resultFetchArr.length - 1;
+        this.version_list = resultFetchArr[length]['embeddedDbVersion'];
         this.resultProjArr = resultFetchArr;
       }
     }
@@ -3244,8 +3265,8 @@ export class BrandLibraryComponent implements OnInit {
       let Dbversion = this.version_list;
       let codeset = this.editedCodeset; let codesetData = this.codesetDataValue; let cschecksum = this.codesetChecksum;
       let recordid = this.recordId;
-      this.mainService.getSaveEditBrandDetailsInfo(Dbname, Projectname, Dbversion, null, null, null, null, null, codeset, codesetData,
-        cschecksum, null, null, null, null, null, null, null, null, 4, 3, recordid)
+      this.mainService.getSaveEditCodeset(Dbname, Projectname, Dbversion, null, null, null, null, null, codeset, codesetData,
+        cschecksum, null, null, null, null, null, null, null, null, 4, 3, recordid, 2)
         .subscribe(value => {
           $("#edidCodesetModal .close").click()
           this.EditcodesetFileName = null;
@@ -3271,6 +3292,38 @@ export class BrandLibraryComponent implements OnInit {
   }
   /** Edit Codeset functionality to update the codeset using Edit Option end **/
 
+  /** Edit Codeset functionality to update the codeset using Edit Option start **/
+  onsaveEditCodesetStatusSubmit() {
+    let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
+
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
+    let codeset = this.editedCodeset; let codesetData = this.editedBindata; let cschecksum = this.editedchecksum;
+    let recordid = this.recordId;
+    this.mainService.getSaveEditCodeset(Dbname, Projectname, Dbversion, null, null, null, null, null, codeset, codesetData,
+      cschecksum, null, null, null, null, null, null, null, null, 4, 3, recordid, 1)
+      .subscribe(value => {
+        $("#edidCodesetStatusModal .close").click()
+        if (value.data === '1') {
+          let userName = localStorage.getItem('userName'); let Datasection = 'Codesets';
+          let recordCount = 1;
+          let Updateadddescription = '' + codeset + ',' + codesetData + ',' + cschecksum + ',' + recordid + ', 1';
+          let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
+          this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
+            .subscribe(value => {
+
+            });
+          this.getTabResponseData();
+          this.toastr.success(value.message, '');
+        } else {
+          this.toastr.warning(value.message, '');
+        }
+      });
+  }
+  /** Edit Codeset functionality to update the codeset using Edit Option end **/
 
   /** Save functionality to save the Cross Reference by Brands Using New Option start **/
 
@@ -4467,11 +4520,6 @@ export class BrandLibraryComponent implements OnInit {
   /** Save Functionality for Region/country if new Region/Country is added using New Option End  **/
 
 
-  onRowClicked(event: any) {
-    // alert(`Selected Nodes:\n${JSON.stringify(event.data)}`)
-    console.log(event.data);
-  }
-
   onPageSizeChanged() {
     var value = (<HTMLInputElement>document.getElementById('page-size')).value;
     // this.paginationPageSize = Number(value);
@@ -4485,67 +4533,66 @@ export class BrandLibraryComponent implements OnInit {
   }
 
   methodFromParent(cell) {
-    let values = Object.values(cell);
-    // alert('Parent Component Method from ' + cell + '!');
-    console.log(values)
     if (this.brand_list === 'Brand') {
-      this.BrandView(values)
+      this.BrandView(cell)
       $('#editBrand').click();
     }
     if (this.brand_list === 'Brand Info CEC') {
-      this.CecView(values);
+      this.CecView(cell);
       $('#editBrandInfo').click();
     }
     if (this.brand_list === 'Brand Info EDID') {
-      this.EdidView(values);
+      this.EdidView(cell);
       $('#editBrandInfo').click();
     }
     if (this.brand_list === 'Component Data') {
-      this.componentDataView(values);
+      this.componentDataView(cell);
       $('#editModel').click();
     }
     if (this.brand_list === 'Cross Reference By Brands') {
-      this.crossReferenceBrandsView(values);
+      this.crossReferenceBrandsView(cell);
       $('#editXrefbybrands').click();
     }
     if (this.brand_list === 'Codesets') {
-      this.codeSetsView(values);
+      this.codeSetsView(cell);
       $('#editCodeset').click();
     }
     if (this.brand_list == 'CEC Only') {
-      this.cecOnlyDataView(values);
+      this.cecOnlyDataView(cell);
       $('#editCecOnly').click();
     }
     if (this.brand_list == 'EDID Only') {
-      this.edidOnlyDataView(values);
+      this.edidOnlyDataView(cell);
       $('#editEdidOnly').click();
     }
     if (this.brand_list == 'Region Country Code') {
-      this.regionView(values);
+      this.regionView(cell);
       $('#editRegion').click();
     }
     if (this.brand_list === 'CEC-EDID Data') {
-      this.cecedidDataView(values);
+      this.cecedidDataView(cell);
       $('#editcecedidData').click();
     }
   }
 
   methodFromParent_downloadcodeset(cell) {
-    let values = Object.values(cell);
     if (this.brand_list === 'Codesets') {
-      this.codesetdownload(values);
+      this.codesetdownload(cell);
     }
   }
 
   methodFromParent_viewEdid(cell) {
-    let values = Object.values(cell);
-    console.log(values)
     if (this.brand_list === 'CEC-EDID Data') {
-      this.ViewEdid(values);
+      this.ViewEdid(cell);
     }
     if (this.brand_list === 'EDID Only') {
-      this.ViewEdid128(values);
+      this.ViewEdid128(cell);
     }
+  }
+
+  methodFromParent_status_codeset(cell) {
+    this.codeSetsView(cell);
+    $('#editCodesetStatus').click();
   }
 
   onBtnExport() {
@@ -4642,15 +4689,18 @@ export class BrandLibraryComponent implements OnInit {
     }
     if (this.brand_list === 'Codesets') {
       this.columnDef = [
-        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        { headerName: 'Codeset', field: "Codeset", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, checkboxSelection: true, headerCheckboxSelection: true, headerCheckboxSelectionFilteredOnly: true },
         { headerName: 'Binfile', field: "Bindata", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "codesetDownloadCellRenderer" },
         { headerName: 'Checksum', field: "Checksum", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true },
+        {
+          headerName: 'Status', field: "statusFlag", resizable: true, sortable: true, filter: 'agTextColumnFilter', floatingFilter: true, cellRenderer: "checkBoxCellRenderer",
+        },
         {
           headerName: 'Action', field: "Action", resizable: true,
           cellRenderer: "btnCellRenderer"
         }
       ];
-      this.gridColumnApi.moveColumns(['Codeset', 'Bindata', 'Checksum'], 0)
+      this.gridColumnApi.moveColumns(['Codeset', 'Bindata', 'Checksum', 'statusFlag'], 0)
     }
     if (this.brand_list === 'CEC-EDID Data') {
       this.columnDef = [
@@ -4744,6 +4794,86 @@ export class BrandLibraryComponent implements OnInit {
   }
 
 
+  onRowClicked() {
+    let selectedNodes = this.gridApi.getSelectedNodes();
+    let selectedData = selectedNodes.map(node => node.data);
+    let selectedId = []; let CodesetWS1 = []; let CodesetWS2 = []; let CodesetWS = [];
+    this.rows_selected = selectedData;
+    for (let i = 0; i < selectedData.length; i++) {
+      if (selectedData[i]['statusFlag'] === 'Download Flag ON') {
+        selectedData[i]['statusFlag'] = 2;
+      }
+      if (selectedData[i]['statusFlag'] === 'Download Flag OFF') {
+        selectedData[i]['statusFlag'] = 1;
+      }
+      selectedId.push({ Codeset: selectedData[i]['Codeset'], Status: selectedData[i]['statusFlag'] })
+    }
+    this.rowId = selectedId;
+    selectedId.forEach(element => {
+      if (element['Status'] === 1) {
+        CodesetWS1.push(element['Codeset'])
+      }
+      if (element['Status'] === 2) {
+        CodesetWS2.push(element['Codeset'])
+      }
+      CodesetWS.push(element['Codeset'])
+    })
+    this.codesetWS1 = CodesetWS1;
+    this.codesetWS2 = CodesetWS2;
+    this.codesetWS = CodesetWS;
+  }
+
+  updateCodeset(statusid) {
+    let searchDbName: any = this.finalArray.filter(u => u.projectname == this.tabValue && u.embeddedDbVersion == this.version_list);
+    let Dbname = searchDbName[0]['dbinstance']; let Projectname = this.tabValue;
+    if (Projectname.startsWith(Dbname + '_')) {
+      Projectname = Projectname.replace(Dbname + '_', '')
+    }
+    let Dbversion = this.version_list;
+    if ((this.codesetWS === undefined || this.codesetWS.length <= 0)) {
+      this.toastr.error('', 'Please select the Codesets', { timeOut: 3000 })
+    }
+    else {
+      if (this.codesetWS.length > 0) {
+        let codesetlist = this.codesetWS;
+        let cws = ''
+        codesetlist.forEach(element => {
+          cws += element + ','
+        });
+        cws = cws.slice(0, -1);
+
+        this.mainService.getSaveEditCodesetStatus(Dbname, Projectname, Dbversion, cws, 10, 3, statusid)
+          .subscribe(async value => {
+            if (value.data === '1') {
+              let userName = localStorage.getItem('userName'); let Datasection = 'Codesets';
+              let recordCount = 1;
+              let Updateadddescription = 'codesetlist : ' + cws + ' ' + 'changed the status to ' + statusid + '';
+              let Updatestatus = 1; let Operation = "Update"; let ipaddress = this.ipAddress;
+              await this.mainService.DBUpdates(userName, Projectname, Dbversion, Datasection, recordCount, Updateadddescription, Operation, ipaddress, Updatestatus, Dbname)
+                .subscribe(value => {
+
+                });
+              this.getTabResponseData();
+              this.toastr.success(value.message, '');
+              this.codesetWS = [];
+            } else {
+              this.toastr.warning(value.message, '');
+            }
+          })
+      }
+    }
+  }
+
+  selectAllCodeset() {
+    let statusid = 2;
+    this.updateCodeset(statusid);
+  }
+
+  codesetStatusUpdate() {
+    let statusid = 1;
+    this.updateCodeset(statusid);
+  }
+
   columnvisiblity() {
     let column = this.columns;
     this.report_visiblity = lodash.sortBy(this.report_visiblity, 'item_id');
@@ -4795,21 +4925,35 @@ export class BrandLibraryComponent implements OnInit {
           (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 0)) {
           this.columnDefs = this.columnDefs.filter(u => u.field != 'Action');
           $('#single_download').hide();
-          $('.newBtn').hide();
+          $('.show').hide();
         }
         if ((permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0) ||
           (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 0)) {
           this.columnDefs = this.columnDefs.filter(u => u.field != 'Action');
           $('#single_download').show();
-          $('.newBtn').hide();
+          $('.show').hide();
         }
         if ((permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1) ||
           (permission[0]['readPermission'] === 1 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
           (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 1 && permission[0]['writePermission'] === 1) ||
           (permission[0]['readPermission'] === 0 && permission[0]['downloadPermission'] === 0 && permission[0]['writePermission'] === 1)) {
           this.columnDefs = this.columnDefs;
+
+          if (this.brand_list === 'CEC Only' || this.brand_list === 'EDID Only') {
+            $('.newBtn').css('display', 'none');
+            $('.show').hide();
+          }
+          else {
+            $('.newBtn').css('display', 'block');
+            $('.show').show();
+          }
+          if (this.brand_list === 'Codesets') {
+            $('.newcode').css('display', 'block');
+          }
+          else {
+            $('.newcode').css('display', 'none');
+          }
           $('#single_download').show();
-          $('.newBtn').show();
         }
         if (this.brand_list === 'CEC Only' || this.brand_list === 'EDID Only') {
           $('.newBtn').css('display', 'none');
@@ -4895,7 +5039,13 @@ export class BrandLibraryComponent implements OnInit {
           if (brandName === 'Codesets') {
             if (newArray.length > 0) {
               for (let i = 0; i < newArray.length; i++) {
-                pushData.push({ ID: newArray[i][0], Codeset: newArray[i][1], Bindata: newArray[i][2], Checksum: newArray[i][3] })
+                if (newArray[i][4] === 1) {
+                  newArray[i][4] = "Download Flag OFF"
+                }
+                if (newArray[i][4] === 2) {
+                  newArray[i][4] = "Download Flag ON"
+                }
+                pushData.push({ ID: newArray[i][0], Codeset: newArray[i][1], Bindata: newArray[i][2], Checksum: newArray[i][3], statusFlag: newArray[i][4] })
                 // pushData.push({Codeset:newArray[i][1]})
                 temp = pushData;
               }

@@ -1,6 +1,6 @@
 {
   "name": "ssc-app-ver1",
-  "version": "0.1.95",
+  "version": "0.2.18",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

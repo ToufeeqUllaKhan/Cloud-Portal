@@ -5,6 +5,7 @@ import { User } from '../../app/model/user';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
+import mainscroll from '../model/Scroll';
 
 
 @Component({
@@ -79,6 +80,7 @@ export class ProfileComponent implements OnInit {
         fasterPreview(this);
       });
     });
+    mainscroll();
   }
 
   /** Validation of Image Size to restrict the file size of an image */

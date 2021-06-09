@@ -4,6 +4,7 @@ import { Title } from '@angular/platform-browser';
 import { MainService } from '../services/main-service';
 import { User } from '../../app/model/user';
 import { NgxSpinnerService } from 'ngx-spinner';
+import mainscroll from '../model/Scroll';
 
 @Component({
   selector: 'app-dashboard',
@@ -84,7 +85,7 @@ export class DashboardComponent implements OnInit {
     localStorage.removeItem('CloudApi');
     localStorage.removeItem('moduleselected')
     this.spinnerService.hide();
-
+    mainscroll();
   }
 
   /** for routing to clients when data management is clicked  **/
